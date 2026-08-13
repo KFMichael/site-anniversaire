@@ -35,7 +35,6 @@ export const activites = {
   ],
   calme_passif: [
     'Spa / sauna',
-    'Brunch',
     'Restaurant (dont étoilé)',
     'Cinéma',
     'Dégustation (vin, chocolat, whisky)',
@@ -43,6 +42,7 @@ export const activites = {
     'Croisière fluviale',
     'Planétarium',
     'Exposition / musée',
+    'Brunch',
   ],
 }
 
@@ -66,8 +66,12 @@ export const questions = [
   },
 ]
 
-// Combine les 2 réponses pour retrouver la bonne case de la grille
-export function getActivitesSuggerees(reponseAxe1, reponseAxe2) {
+// Combine les 2 réponses pour retrouver la bonne case de la grille,
+// puis tire une seule activité au hasard dans cette case
+export function getActiviteSuggeree(reponseAxe1, reponseAxe2) {
   const cle = `${reponseAxe1}_${reponseAxe2}`
-  return activites[cle] || []
+  const liste = activites[cle] || []
+  if (liste.length === 0) return null
+  const index = Math.floor(Math.random() * liste.length)
+  return liste[index]
 }

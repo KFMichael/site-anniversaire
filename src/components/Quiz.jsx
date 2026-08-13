@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { questions, getActivitesSuggerees } from '../data/activites'
+import { questions, getActiviteSuggeree } from '../data/activites'
 
 export default function Quiz() {
   const [reponses, setReponses] = useState({})
   const [etape, setEtape] = useState(0)
+  const [activite, setActivite] = useState(null)
 
   const questionActuelle = questions[etape]
   const termine = etape >= questions.length
@@ -11,17 +12,26 @@ export default function Quiz() {
   function repondre(valeur) {
     const nouvellesReponses = { ...reponses, [questionActuelle.id]: valeur }
     setReponses(nouvellesReponses)
-    setEtape(etape + 1)
+
+    const prochaineEtape = etape + 1
+    setEtape(prochaineEtape)
+
+    if (prochaineEtape >= questions.length) {
+      setActivite(
+        getActiviteSuggeree(nouvellesReponses.axe1, nouvellesReponses.axe2)
+      )
+    }
+  }
+
+  function retirer() {
+    setActivite(getActiviteSuggeree(reponses.axe1, reponses.axe2))
   }
 
   function recommencer() {
     setReponses({})
     setEtape(0)
+    setActivite(null)
   }
-
-  const activitesSuggerees = termine
-    ? getActivitesSuggerees(reponses.axe1, reponses.axe2)
-    : []
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
@@ -49,19 +59,23 @@ export default function Quiz() {
           <p className="text-sm uppercase tracking-widest text-neutral-400">
             Notre suggestion
           </p>
-          <ul className="space-y-2">
-            {activitesSuggerees.map((a) => (
-              <li key={a} className="text-xl font-light text-neutral-900">
-                {a}
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={recommencer}
-            className="mt-8 text-sm text-neutral-400 hover:text-neutral-700 underline"
-          >
-            Recommencer
-          </button>
+          <p className="text-2xl md:text-3xl font-light text-neutral-900">
+            {activite}
+          </p>
+          <div className="flex flex-col items-center gap-3 pt-4">
+            <button
+              onClick={retirer}
+              className="text-sm text-neutral-400 hover:text-neutral-700 underline"
+            >
+              Tirer une autre idée
+            </button>
+            <button
+              onClick={recommencer}
+              className="text-sm text-neutral-400 hover:text-neutral-700 underline"
+            >
+              Recommencer le quiz
+            </button>
+          </div>
         </div>
       )}
     </section>

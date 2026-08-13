@@ -6,11 +6,13 @@ import MurMessages from './components/MurMessages'
 import CarnetActivites from './components/CarnetActivites'
 
 const SECTIONS = [
-  { id: 'quiz', label: 'Activité surprise', Composant: Quiz },
-  { id: 'carte', label: 'Nos voyages', Composant: CarteVoyages },
-  { id: 'messages', label: 'Ils pensent à toi', Composant: MurMessages },
-  { id: 'carnet', label: 'Notre carnet', Composant: CarnetActivites },
+  { id: 'quiz', label: 'Activité surprise', Composant: Quiz, actif: true },
+  { id: 'carte', label: 'Nos voyages', Composant: CarteVoyages, actif: false },
+  { id: 'messages', label: 'Ils pensent à toi', Composant: MurMessages, actif: false },
+  { id: 'carnet', label: 'Notre carnet', Composant: CarnetActivites, actif: true },
 ]
+
+const SECTIONS_VISIBLES = SECTIONS.filter((s) => s.actif)
 
 function App() {
   const [entree, setEntree] = useState(false)
@@ -20,13 +22,13 @@ function App() {
     return <Accueil onEntrer={() => setEntree(true)} />
   }
 
-  const SectionActuelle = SECTIONS.find((s) => s.id === sectionActive)?.Composant
+  const SectionActuelle = SECTIONS_VISIBLES.find((s) => s.id === sectionActive)?.Composant
 
   return (
     <div className="min-h-screen bg-white">
       <nav className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-neutral-200">
         <ul className="flex flex-wrap justify-center gap-2 md:gap-6 py-4 px-4 text-sm">
-          {SECTIONS.map((s) => (
+          {SECTIONS_VISIBLES.map((s) => (
             <li key={s.id}>
               <button
                 onClick={() => setSectionActive(s.id)}
