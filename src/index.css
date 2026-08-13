@@ -1,7 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Fraunces', serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --color-bg-base: #0A0A0B;
+  --color-bg-elevated: #16161A;
+  --color-gradient-orange: #FF6B35;
+  --color-gradient-rose: #F72585;
+  --color-gradient-violet: #7209B7;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A3A3AD;
+  --color-text-muted: #6B6B76;
 }
 
 html {
@@ -11,4 +22,26 @@ html {
 body {
   margin: 0;
   font-family: var(--font-sans);
+  background-color: var(--color-bg-base);
+}
+
+.gradient-sunset {
+  background: linear-gradient(
+    135deg,
+    var(--color-gradient-violet) 0%,
+    var(--color-gradient-rose) 50%,
+    var(--color-gradient-orange) 100%
+  );
+}
+
+.gradient-sunset-text {
+  background: linear-gradient(
+    135deg,
+    var(--color-gradient-violet) 0%,
+    var(--color-gradient-rose) 50%,
+    var(--color-gradient-orange) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
