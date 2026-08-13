@@ -66,15 +66,15 @@ export default function CarnetActivites() {
   }
 
   return (
-    <section className="min-h-screen px-6 py-16">
-      <h2 className="text-2xl font-light text-center text-neutral-900 mb-8">
+    <section className="min-h-screen px-6 py-16 bg-bg-base">
+      <h2 className="font-display text-3xl font-semibold text-center text-text-primary mb-8">
         Notre carnet d'activités
       </h2>
 
       <div className="max-w-2xl mx-auto mb-8 text-center">
         <button
           onClick={() => setFormOuvert(!formOuvert)}
-          className="px-6 py-3 rounded-full border border-neutral-300 text-neutral-700 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-colors"
+          className="font-sans px-6 py-3 rounded-full border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary transition-all"
         >
           {formOuvert ? 'Annuler' : '+ Ajouter une activité'}
         </button>
@@ -83,7 +83,7 @@ export default function CarnetActivites() {
       {formOuvert && (
         <form
           onSubmit={ajouterActivite}
-          className="max-w-md mx-auto mb-12 space-y-4 p-6 rounded-xl border border-neutral-200"
+          className="max-w-md mx-auto mb-12 space-y-4 p-6 rounded-xl border border-white/10 bg-bg-elevated"
         >
           <input
             type="text"
@@ -91,36 +91,36 @@ export default function CarnetActivites() {
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             required
-            className="w-full px-4 py-2 rounded-lg border border-neutral-300"
+            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
           />
           <div>
-            <label className="text-sm text-neutral-500">Note : {note}/10</label>
+            <label className="font-sans text-sm text-text-muted">Note : {note}/10</label>
             <input
               type="range"
               min="0"
               max="10"
               value={note}
               onChange={(e) => setNote(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-gradient-rose"
             />
           </div>
           <textarea
             placeholder="Un souvenir de cette activité..."
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-neutral-300"
+            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
             rows={3}
           />
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setPhoto(e.target.files[0])}
-            className="w-full text-sm"
+            className="font-sans w-full text-sm text-text-muted file:mr-3 file:px-4 file:py-1.5 file:rounded-full file:border file:border-white/20 file:bg-transparent file:text-text-secondary file:cursor-pointer"
           />
           <button
             type="submit"
             disabled={envoiEnCours}
-            className="w-full px-6 py-3 rounded-full bg-neutral-900 text-white hover:bg-neutral-700 transition-colors disabled:opacity-50"
+            className="font-sans w-full px-6 py-3 rounded-full gradient-sunset text-white hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {envoiEnCours ? 'Envoi…' : 'Enregistrer'}
           </button>
@@ -128,11 +128,11 @@ export default function CarnetActivites() {
       )}
 
       {chargement && (
-        <p className="text-center text-neutral-400 text-sm">Chargement…</p>
+        <p className="font-sans text-center text-text-muted text-sm">Chargement…</p>
       )}
 
       {!chargement && activites.length === 0 && (
-        <p className="text-center text-neutral-400 text-sm">
+        <p className="font-sans text-center text-text-muted text-sm">
           Aucune activité enregistrée pour le moment. (Table
           `activites_carnet` et bucket `photos-carnet` à créer dans
           Supabase.)
@@ -143,7 +143,7 @@ export default function CarnetActivites() {
         {activites.map((a) => (
           <div
             key={a.id}
-            className="p-5 rounded-xl border border-neutral-200 bg-neutral-50"
+            className="p-5 rounded-xl border border-white/10 bg-bg-elevated"
           >
             {a.photo_url && (
               <img
@@ -153,11 +153,11 @@ export default function CarnetActivites() {
               />
             )}
             <div className="flex items-center justify-between">
-              <h3 className="text-lg text-neutral-900">{a.nom_activite}</h3>
-              <span className="text-sm text-neutral-400">{a.note}/10</span>
+              <h3 className="font-display text-lg text-text-primary">{a.nom_activite}</h3>
+              <span className="font-sans text-sm text-text-muted">{a.note}/10</span>
             </div>
             {a.commentaire && (
-              <p className="text-neutral-600 mt-2">{a.commentaire}</p>
+              <p className="font-sans text-text-secondary mt-2">{a.commentaire}</p>
             )}
           </div>
         ))}

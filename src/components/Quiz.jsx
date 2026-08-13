@@ -34,10 +34,10 @@ export default function Quiz() {
   }
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-6 py-16">
+    <section className="min-h-screen flex flex-col items-center justify-center px-6 py-16 bg-bg-base">
       {!termine && (
         <div className="max-w-md w-full text-center space-y-10">
-          <p className="text-2xl md:text-3xl font-light text-neutral-900 leading-snug">
+          <p className="font-display text-2xl md:text-3xl font-semibold text-text-primary leading-snug">
             {questionActuelle.texte}
           </p>
           <div className="flex flex-col gap-4">
@@ -45,7 +45,7 @@ export default function Quiz() {
               <button
                 key={r.valeur}
                 onClick={() => repondre(r.valeur)}
-                className="px-6 py-4 rounded-xl border border-neutral-300 text-neutral-700 hover:bg-neutral-900 hover:text-white hover:border-neutral-900 transition-colors"
+                className="font-sans px-6 py-4 rounded-xl border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary hover:border-white/30 transition-all"
               >
                 {r.label}
               </button>
@@ -56,22 +56,22 @@ export default function Quiz() {
 
       {termine && (
         <div className="max-w-md w-full text-center space-y-6">
-          <p className="text-sm uppercase tracking-widest text-neutral-400">
+          <p className="font-sans text-sm uppercase tracking-widest text-text-muted">
             Notre suggestion
           </p>
-          <p className="text-2xl md:text-3xl font-light text-neutral-900">
+          <p className="font-display text-3xl md:text-4xl font-semibold gradient-sunset-text">
             {activite}
           </p>
           <div className="flex flex-col items-center gap-3 pt-4">
             <button
               onClick={retirer}
-              className="text-sm text-neutral-400 hover:text-neutral-700 underline"
+              className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors"
             >
               Tirer une autre idée
             </button>
             <button
               onClick={recommencer}
-              className="text-sm text-neutral-400 hover:text-neutral-700 underline"
+              className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors"
             >
               Recommencer le quiz
             </button>

@@ -25,17 +25,17 @@ function App() {
   const SectionActuelle = SECTIONS_VISIBLES.find((s) => s.id === sectionActive)?.Composant
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-neutral-200">
-        <ul className="flex flex-wrap justify-center gap-2 md:gap-6 py-4 px-4 text-sm">
+    <div className="min-h-screen bg-bg-base">
+      <nav className="sticky top-0 z-10 bg-bg-base/90 backdrop-blur border-b border-white/10">
+        <ul className="flex flex-wrap justify-center gap-2 md:gap-6 py-4 px-4 text-sm font-sans">
           {SECTIONS_VISIBLES.map((s) => (
             <li key={s.id}>
               <button
                 onClick={() => setSectionActive(s.id)}
-                className={`px-3 py-1.5 rounded-full transition-colors ${
+                className={`px-4 py-1.5 rounded-full transition-all ${
                   sectionActive === s.id
-                    ? 'bg-neutral-900 text-white'
-                    : 'text-neutral-500 hover:text-neutral-900'
+                    ? 'gradient-sunset text-white'
+                    : 'text-text-muted hover:text-text-primary'
                 }`}
               >
                 {s.label}
