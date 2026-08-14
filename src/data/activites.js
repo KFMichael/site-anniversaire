@@ -32,9 +32,12 @@ export const activites = {
     'Atelier photo',
     'DIY (bougies, parfum)',
     'Jardinage',
+    'Soirée jeux de société en duo',
+    'Cours de cuisine à deux (à la maison)',
   ],
   calme_passif: [
     'Spa / sauna',
+    'Brunch',
     'Restaurant (dont étoilé)',
     'Cinéma',
     'Dégustation (vin, chocolat, whisky)',
@@ -42,7 +45,10 @@ export const activites = {
     'Croisière fluviale',
     'Planétarium',
     'Exposition / musée',
-    'Brunch',
+    "Dîner aux chandelles à la maison",
+    "Nuit d'hôtel (staycation)",
+    'Petit-déjeuner au lit',
+    'Séance ciné privée à la maison',
   ],
 }
 

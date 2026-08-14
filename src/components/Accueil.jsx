@@ -91,6 +91,14 @@ function EcranAimesTu({ onOui }) {
     setAEssaye(true)
   }
 
+  // L'esquive est un gag pensé pour la souris (survol). Un clic déclenché
+  // au clavier (Entrée/Espace) a event.detail === 0 : on ne fait alors rien,
+  // pour que le bouton reste normalement atteignable et activable au clavier.
+  function surClicNon(e) {
+    if (e.detail === 0) return
+    esquiver()
+  }
+
   return (
     <div
       className={`flex flex-col items-center gap-6 text-center transition-opacity duration-1000 ${
@@ -117,7 +125,7 @@ function EcranAimesTu({ onOui }) {
         <button
           ref={boutonNonRef}
           onMouseEnter={esquiver}
-          onClick={esquiver}
+          onClick={surClicNon}
           style={{
             transform: `translate(${posNon.x}px, ${posNon.y}px)`,
             transition: 'transform 0.25s ease-out',

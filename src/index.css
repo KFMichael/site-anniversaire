@@ -12,7 +12,7 @@
   --color-gradient-violet: #7209B7;
   --color-text-primary: #FFFFFF;
   --color-text-secondary: #A3A3AD;
-  --color-text-muted: #6B6B76;
+  --color-text-muted: #8F8F99;
 }
 
 html {
@@ -25,6 +25,20 @@ body {
   background-color: var(--color-bg-base);
 }
 
+/* Focus clavier cohérent avec l'identité visuelle, sur tous les éléments
+   interactifs natifs (boutons, liens, champs). N'apparaît qu'en navigation
+   clavier grâce à :focus-visible (pas de ring parasite au clic souris). */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-bg-base),
+    0 0 0 4px var(--color-gradient-rose);
+}
+
 .gradient-sunset {
   background: linear-gradient(
     135deg,
@@ -32,6 +46,11 @@ body {
     var(--color-gradient-rose) 50%,
     var(--color-gradient-orange) 100%
   );
+}
+
+input[type='date'],
+input[type='time'] {
+  color-scheme: dark;
 }
 
 .gradient-sunset-text {

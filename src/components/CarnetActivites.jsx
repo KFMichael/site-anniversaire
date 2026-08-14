@@ -74,7 +74,7 @@ export default function CarnetActivites() {
       <div className="max-w-2xl mx-auto mb-8 text-center">
         <button
           onClick={() => setFormOuvert(!formOuvert)}
-          className="font-sans px-6 py-3 rounded-full border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary transition-all"
+          className="font-sans px-6 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
         >
           {formOuvert ? 'Annuler' : '+ Ajouter une activité'}
         </button>
