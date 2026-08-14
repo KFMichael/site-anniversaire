@@ -11,13 +11,31 @@ const DUREES = [
 
 const DESCRIPTION_EVENEMENT = 'Généré depuis notre site anniversaire'
 
-// Indice d'ambiance affiché avant le nom complet de l'activité, déduit
-// des 2 réponses (mêmes clés que la grille de src/data/activites.js)
-const INDICES_AMBIANCE = {
-  actif_creatif: "Quelque chose d'actif et créatif…",
-  actif_passif: 'Quelque chose de rythmé, à vivre à fond…',
-  calme_creatif: 'Quelque chose de calme et créatif…',
-  calme_passif: 'Quelque chose de calme, à savourer…',
+// Indice d'ambiance affiché avant le nom complet de l'activité, composé
+// à partir des axes actif/créatif du profil de réponses (5 axes au total,
+// on n'en retient que 2 pour garder une phrase courte et lisible)
+function indiceAmbiance(reponses) {
+  const energie = reponses.actif === 1 ? 'plutôt actif' : 'plutôt calme'
+  const posture =
+    reponses.creatif === 1 ? 'où tu crées de tes mains' : 'où tu te laisses porter'
+  return `Quelque chose ${energie}, ${posture}…`
+}
+
+// Exclut du tirage les activités des 5 dernières entrées du carnet
+// (tous statuts confondus), pour ne pas répéter une activité récente.
+// Ne bloque jamais : en cas d'erreur réseau, on tire sans exclusion.
+async function recupererExclusionsRecentes() {
+  try {
+    const { data, error } = await supabase
+      .from('activites_carnet')
+      .select('nom_activite')
+      .order('date', { ascending: false })
+      .limit(5)
+    if (!error && data) return data.map((entree) => entree.nom_activite)
+  } catch {
+    // on ignore, le tirage se fait alors sans exclusion
+  }
+  return []
 }
 
 function pad(n) {
@@ -91,9 +109,10 @@ function ajourdhuiISO() {
 }
 
 // Durées (ms) de l'écran teasing puis de l'indice, avant le nom complet.
-// Cumul volontairement court (~2.8s) pour ne pas ralentir le jeu.
-const DUREE_TEASING = 1600
-const DUREE_INDICE = 1200
+// Cumul volontairement court (~2.4s), resserré depuis le passage à 5
+// questions pour que le parcours ne traîne pas en longueur.
+const DUREE_TEASING = 1400
+const DUREE_INDICE = 1000
 
 export default function Quiz({ mood }) {
   const [reponses, setReponses] = useState({})
@@ -124,11 +143,8 @@ export default function Quiz({ mood }) {
     setEtape(prochaineEtape)
 
     if (prochaineEtape >= questions.length) {
-      const suggestion = await getActiviteSuggeree(
-        nouvellesReponses.axe1,
-        nouvellesReponses.axe2
-      )
-      setActivite(suggestion)
+      const exclusions = await recupererExclusionsRecentes()
+      setActivite(getActiviteSuggeree(nouvellesReponses, exclusions))
     }
   }
 
@@ -136,8 +152,8 @@ export default function Quiz({ mood }) {
     setValide(false)
     setAjouteAuCarnet(false)
     setCarnetEnregistre(false)
-    const suggestion = await getActiviteSuggeree(reponses.axe1, reponses.axe2)
-    setActivite(suggestion)
+    const exclusions = await recupererExclusionsRecentes()
+    setActivite(getActiviteSuggeree(reponses, exclusions))
   }
 
   function recommencer() {
@@ -258,7 +274,7 @@ export default function Quiz({ mood }) {
 
           <div
             key={etape}
-            className={`w-full text-center space-y-10 transition-all duration-500 ease-out ${
+            className={`w-full text-center space-y-10 transition-all duration-300 ease-out ${
               carteVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'
             }`}
           >
@@ -307,7 +323,7 @@ export default function Quiz({ mood }) {
             On y est presque
           </p>
           <p className="font-display text-2xl md:text-3xl font-medium text-text-secondary">
-            {INDICES_AMBIANCE[`${reponses.axe1}_${reponses.axe2}`]}
+            {indiceAmbiance(reponses)}
           </p>
         </div>
       )}
