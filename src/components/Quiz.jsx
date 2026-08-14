@@ -10,6 +10,15 @@ const DUREES = [
 
 const DESCRIPTION_EVENEMENT = 'Généré depuis notre site anniversaire'
 
+// Indice d'ambiance affiché avant le nom complet de l'activité, déduit
+// des 2 réponses (mêmes clés que la grille de src/data/activites.js)
+const INDICES_AMBIANCE = {
+  actif_creatif: "Quelque chose d'actif et créatif…",
+  actif_passif: 'Quelque chose de rythmé, à vivre à fond…',
+  calme_creatif: 'Quelque chose de calme et créatif…',
+  calme_passif: 'Quelque chose de calme, à savourer…',
+}
+
 function pad(n) {
   return String(n).padStart(2, '0')
 }
@@ -80,11 +89,21 @@ function ajourdhuiISO() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+// Durées (ms) de l'écran teasing puis de l'indice, avant le nom complet.
+// Cumul volontairement court (~2.8s) pour ne pas ralentir le jeu.
+const DUREE_TEASING = 1600
+const DUREE_INDICE = 1200
+
 export default function Quiz() {
   const [reponses, setReponses] = useState({})
   const [etape, setEtape] = useState(0)
   const [activite, setActivite] = useState(null)
-  const [revele, setRevele] = useState(false)
+
+  // 'teasing' -> 'indice' -> 'resultat', séquence de révélation en couches
+  const [etapeResultat, setEtapeResultat] = useState('teasing')
+  // Fondu d'entrée générique, rejoué à chaque changement de phase/question
+  const [phaseVisible, setPhaseVisible] = useState(false)
+  const [carteVisible, setCarteVisible] = useState(false)
 
   const [valide, setValide] = useState(false)
   const [dateChoisie, setDateChoisie] = useState('')
@@ -109,7 +128,7 @@ export default function Quiz() {
   }
 
   function retirer() {
-    setRevele(false)
+    setValide(false)
     setActivite(getActiviteSuggeree(reponses.axe1, reponses.axe2))
   }
 
@@ -117,20 +136,42 @@ export default function Quiz() {
     setReponses({})
     setEtape(0)
     setActivite(null)
-    setRevele(false)
+    setEtapeResultat('teasing')
     setValide(false)
     setDateChoisie('')
     setHeureChoisie('')
     setDureeMinutes(null)
   }
 
-  // Petit temps de suspense avant que le résultat n'apparaisse
+  // Glissement/fondu léger à chaque nouvelle question
+  useEffect(() => {
+    if (termine) return
+    setCarteVisible(false)
+    const t = setTimeout(() => setCarteVisible(true), 20)
+    return () => clearTimeout(t)
+  }, [etape, termine])
+
+  // Séquence "je réfléchis…" -> indice d'ambiance -> nom complet
   useEffect(() => {
     if (!activite) return
-    setRevele(false)
-    const t = setTimeout(() => setRevele(true), 400)
-    return () => clearTimeout(t)
+    setEtapeResultat('teasing')
+    const t1 = setTimeout(() => setEtapeResultat('indice'), DUREE_TEASING)
+    const t2 = setTimeout(
+      () => setEtapeResultat('resultat'),
+      DUREE_TEASING + DUREE_INDICE
+    )
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
   }, [activite])
+
+  // Petit fondu d'entrée rejoué à chaque changement de phase du résultat
+  useEffect(() => {
+    setPhaseVisible(false)
+    const t = setTimeout(() => setPhaseVisible(true), 30)
+    return () => clearTimeout(t)
+  }, [etapeResultat])
 
   const dtDebut =
     valide && dateChoisie && heureChoisie
@@ -140,12 +181,14 @@ export default function Quiz() {
     dtDebut && dureeMinutes ? new Date(dtDebut.getTime() + dureeMinutes * 60000) : null
   const planComplet = Boolean(dtDebut && dtFin)
 
+  const enRevelation = termine && etapeResultat === 'resultat'
+
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center px-6 py-16 bg-bg-base overflow-hidden">
       {termine && (
         <div
           className={`absolute inset-0 blur-3xl gradient-sunset transition-opacity duration-1000 ${
-            revele ? 'opacity-30' : 'opacity-0'
+            enRevelation && phaseVisible ? 'opacity-30' : 'opacity-10'
           }`}
           style={{ maskImage: 'radial-gradient(circle at center, black, transparent 70%)' }}
           aria-hidden="true"
@@ -153,36 +196,87 @@ export default function Quiz() {
       )}
 
       {!termine && (
-        <div className="max-w-md w-full text-center space-y-10">
-          <p className="font-display text-2xl md:text-3xl font-semibold text-text-primary leading-snug">
-            {questionActuelle.texte}
-          </p>
-          <div className="flex flex-col gap-4">
-            {questionActuelle.reponses.map((r) => (
-              <button
-                key={r.valeur}
-                onClick={() => repondre(r.valeur)}
-                className="font-sans px-6 py-4 rounded-xl border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary hover:border-white/30 transition-all"
-              >
-                {r.label}
-              </button>
-            ))}
+        <div className="max-w-md w-full flex flex-col items-center gap-8">
+          <div className="w-full">
+            <p className="font-sans text-xs uppercase tracking-widest text-text-muted mb-2 text-center">
+              Question {etape + 1} / {questions.length}
+            </p>
+            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full gradient-sunset rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${(etape / questions.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div
+            key={etape}
+            className={`w-full text-center space-y-10 transition-all duration-500 ease-out ${
+              carteVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'
+            }`}
+          >
+            <p className="font-display text-2xl md:text-3xl font-semibold text-text-primary leading-snug">
+              {questionActuelle.texte}
+            </p>
+            <div className="flex flex-col gap-4">
+              {questionActuelle.reponses.map((r) => (
+                <button
+                  key={r.valeur}
+                  onClick={() => repondre(r.valeur)}
+                  className="font-sans px-6 py-4 rounded-xl border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary hover:border-white/30 transition-all"
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {termine && (
+      {termine && etapeResultat === 'teasing' && (
+        <div
+          className={`relative z-10 flex flex-col items-center gap-2 transition-opacity duration-500 ${
+            phaseVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <p className="font-display text-2xl md:text-3xl italic text-text-secondary">
+            Je réfléchis
+            <span className="dot-pulse inline-flex ml-1 align-baseline">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </span>
+          </p>
+        </div>
+      )}
+
+      {termine && etapeResultat === 'indice' && (
+        <div
+          className={`relative z-10 max-w-md flex flex-col items-center gap-3 text-center transition-all duration-500 ${
+            phaseVisible ? 'opacity-100 blur-none' : 'opacity-0 blur-[2px]'
+          }`}
+        >
+          <p className="font-sans text-xs uppercase tracking-widest text-text-muted">
+            On y est presque
+          </p>
+          <p className="font-display text-2xl md:text-3xl font-medium text-text-secondary">
+            {INDICES_AMBIANCE[`${reponses.axe1}_${reponses.axe2}`]}
+          </p>
+        </div>
+      )}
+
+      {enRevelation && (
         <div className="relative z-10 max-w-md w-full text-center space-y-6">
           <p
             className={`font-sans text-sm uppercase tracking-widest text-text-muted transition-opacity duration-700 ${
-              revele ? 'opacity-100' : 'opacity-0'
+              phaseVisible ? 'opacity-100' : 'opacity-0'
             }`}
           >
             Notre suggestion
           </p>
           <p
             className={`font-display text-4xl md:text-5xl font-bold gradient-sunset-text leading-tight transition-all duration-700 ${
-              revele ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3'
+              phaseVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3'
             }`}
           >
             {activite}
@@ -191,7 +285,7 @@ export default function Quiz() {
           {!valide && (
             <div
               className={`flex flex-col items-center gap-3 pt-4 transition-opacity duration-700 delay-300 ${
-                revele ? 'opacity-100' : 'opacity-0'
+                phaseVisible ? 'opacity-100' : 'opacity-0'
               }`}
             >
               <button

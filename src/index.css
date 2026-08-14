@@ -64,3 +64,27 @@ input[type='time'] {
   background-clip: text;
   color: transparent;
 }
+
+/* Points de suspension qui pulsent l'un après l'autre (écran teasing du quiz) */
+@keyframes dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.dot-pulse span {
+  animation: dot-pulse 1.2s infinite ease-in-out;
+}
+
+.dot-pulse span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dot-pulse span:nth-child(3) {
+  animation-delay: 0.3s;
+}

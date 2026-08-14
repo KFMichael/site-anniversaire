@@ -25,3 +25,4 @@ dist-ssr
 # Variables d'environnement (clés Supabase, etc.)
 .env
 .env.local
+.vercel
