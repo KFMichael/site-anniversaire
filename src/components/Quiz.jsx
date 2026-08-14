@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { questions, getActiviteSuggeree } from '../data/activites'
+import { supabase } from '../lib/supabase'
 
 const DUREES = [
-  { label: '30 min', minutes: 30 },
-  { label: '1h', minutes: 60 },
-  { label: '2h', minutes: 120 },
-  { label: 'Journée', minutes: 480 },
+  { label: '⏱️ 30 min', minutes: 30 },
+  { label: '🕐 1h', minutes: 60 },
+  { label: '🕑 2h', minutes: 120 },
+  { label: '☀️ Journée', minutes: 480 },
 ]
 
 const DESCRIPTION_EVENEMENT = 'Généré depuis notre site anniversaire'
@@ -109,11 +110,12 @@ export default function Quiz() {
   const [dateChoisie, setDateChoisie] = useState('')
   const [heureChoisie, setHeureChoisie] = useState('')
   const [dureeMinutes, setDureeMinutes] = useState(null)
+  const [ajouteAuCarnet, setAjouteAuCarnet] = useState(false)
 
   const questionActuelle = questions[etape]
   const termine = etape >= questions.length
 
-  function repondre(valeur) {
+  async function repondre(valeur) {
     const nouvellesReponses = { ...reponses, [questionActuelle.id]: valeur }
     setReponses(nouvellesReponses)
 
@@ -121,15 +123,19 @@ export default function Quiz() {
     setEtape(prochaineEtape)
 
     if (prochaineEtape >= questions.length) {
-      setActivite(
-        getActiviteSuggeree(nouvellesReponses.axe1, nouvellesReponses.axe2)
+      const suggestion = await getActiviteSuggeree(
+        nouvellesReponses.axe1,
+        nouvellesReponses.axe2
       )
+      setActivite(suggestion)
     }
   }
 
-  function retirer() {
+  async function retirer() {
     setValide(false)
-    setActivite(getActiviteSuggeree(reponses.axe1, reponses.axe2))
+    setAjouteAuCarnet(false)
+    const suggestion = await getActiviteSuggeree(reponses.axe1, reponses.axe2)
+    setActivite(suggestion)
   }
 
   function recommencer() {
@@ -141,6 +147,12 @@ export default function Quiz() {
     setDateChoisie('')
     setHeureChoisie('')
     setDureeMinutes(null)
+    setAjouteAuCarnet(false)
+  }
+
+  function changerActivite() {
+    setValide(false)
+    setAjouteAuCarnet(false)
   }
 
   // Glissement/fondu léger à chaque nouvelle question
@@ -173,13 +185,39 @@ export default function Quiz() {
     return () => clearTimeout(t)
   }, [etapeResultat])
 
-  const dtDebut =
-    valide && dateChoisie && heureChoisie
-      ? new Date(`${dateChoisie}T${heureChoisie}`)
-      : null
-  const dtFin =
-    dtDebut && dureeMinutes ? new Date(dtDebut.getTime() + dureeMinutes * 60000) : null
+  const dtDebut = useMemo(
+    () =>
+      valide && dateChoisie && heureChoisie
+        ? new Date(`${dateChoisie}T${heureChoisie}`)
+        : null,
+    [valide, dateChoisie, heureChoisie]
+  )
+  const dtFin = useMemo(
+    () => (dtDebut && dureeMinutes ? new Date(dtDebut.getTime() + dureeMinutes * 60000) : null),
+    [dtDebut, dureeMinutes]
+  )
   const planComplet = Boolean(dtDebut && dtFin)
+
+  // Dès que date + heure + durée sont confirmées, on enregistre l'activité
+  // dans le carnet (à l'avance, note/photo restent vides jusqu'au vécu).
+  useEffect(() => {
+    if (!planComplet || ajouteAuCarnet) return
+    setAjouteAuCarnet(true)
+
+    supabase
+      .from('activites_carnet')
+      .insert({
+        nom_activite: activite,
+        date_activite: dtDebut.toISOString(),
+        date: new Date().toISOString(),
+        note: null,
+        commentaire: null,
+        photo_url: null,
+      })
+      .then(({ error }) => {
+        if (error) setAjouteAuCarnet(false)
+      })
+  }, [planComplet, ajouteAuCarnet, activite, dtDebut])
 
   const enRevelation = termine && etapeResultat === 'resultat'
 
@@ -292,7 +330,7 @@ export default function Quiz() {
                 onClick={() => setValide(true)}
                 className="font-sans px-8 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
               >
-                Valider cette activité
+                Valider cette activité ✅
               </button>
               <button
                 onClick={retirer}
@@ -369,20 +407,20 @@ export default function Quiz() {
                     rel="noopener noreferrer"
                     className="font-sans text-center px-6 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
                   >
-                    Ajouter à Google Calendar
+                    📅 Ajouter à Google Calendar
                   </a>
                   <button
                     onClick={() => telechargerICS(activite, dtDebut, dtFin)}
                     className="font-sans px-6 py-3 rounded-full border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary transition-all"
                   >
-                    Télécharger le fichier .ics
+                    ⬇️ Télécharger le fichier .ics
                   </button>
                 </div>
               )}
 
               <div className="text-center pt-2">
                 <button
-                  onClick={() => setValide(false)}
+                  onClick={changerActivite}
                   className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors"
                 >
                   ← Changer d'activité

@@ -1,6 +1,8 @@
 // Grille du quiz : axe 1 = actif/calme, axe 2 = créatif/passif
 // Chaque case contient les activités proposées, issues de la session de brainstorming
 
+import { supabase } from '../lib/supabase'
+
 export const activites = {
   actif_creatif: [
     'Poterie (version active)',
@@ -72,12 +74,30 @@ export const questions = [
   },
 ]
 
-// Combine les 2 réponses pour retrouver la bonne case de la grille,
-// puis tire une seule activité au hasard dans cette case
-export function getActiviteSuggeree(reponseAxe1, reponseAxe2) {
+// Combine les 2 réponses pour retrouver la bonne case de la grille, puis
+// tire une activité au hasard dans cette case en évitant si possible les
+// activités des 5 dernières entrées du carnet (tous statuts confondus).
+// Si toute la case a été faite récemment, la contrainte est levée pour ne
+// jamais bloquer le tirage.
+export async function getActiviteSuggeree(reponseAxe1, reponseAxe2) {
   const cle = `${reponseAxe1}_${reponseAxe2}`
   const liste = activites[cle] || []
   if (liste.length === 0) return null
-  const index = Math.floor(Math.random() * liste.length)
-  return liste[index]
+
+  let recentes = []
+  try {
+    const { data, error } = await supabase
+      .from('activites_carnet')
+      .select('nom_activite')
+      .order('date', { ascending: false })
+      .limit(5)
+    if (!error && data) recentes = data.map((entree) => entree.nom_activite)
+  } catch {
+    recentes = []
+  }
+
+  const disponibles = liste.filter((a) => !recentes.includes(a))
+  const pool = disponibles.length > 0 ? disponibles : liste
+  const index = Math.floor(Math.random() * pool.length)
+  return pool[index]
 }
