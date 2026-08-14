@@ -26,6 +26,7 @@ export default function CarnetActivites() {
   const [commentaire, setCommentaire] = useState('')
   const [photo, setPhoto] = useState(null)
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
+  const [photoOuverte, setPhotoOuverte] = useState(null)
 
   useEffect(() => {
     charger()
@@ -190,12 +191,69 @@ export default function CarnetActivites() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {historique.map((a) => (
-              <CarteHistorique key={a.id} activite={a} onEnregistre={charger} />
+              <CarteHistorique
+                key={a.id}
+                activite={a}
+                onEnregistre={charger}
+                onOuvrirPhoto={setPhotoOuverte}
+              />
             ))}
           </div>
         </div>
       )}
+
+      {photoOuverte && (
+        <Lightbox src={photoOuverte} onClose={() => setPhotoOuverte(null)} />
+      )}
     </section>
+  )
+}
+
+function Lightbox({ src, onClose }) {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 10)
+    return () => clearTimeout(t)
+  }, [])
+
+  function fermer() {
+    setVisible(false)
+    setTimeout(onClose, 200)
+  }
+
+  useEffect(() => {
+    function surTouche(e) {
+      if (e.key === 'Escape') fermer()
+    }
+    document.addEventListener('keydown', surTouche)
+    return () => document.removeEventListener('keydown', surTouche)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <div
+      onClick={fermer}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 transition-opacity duration-200 ${
+        visible ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      <button
+        onClick={fermer}
+        aria-label="Fermer"
+        className="absolute top-4 right-4 text-2xl leading-none text-white/80 hover:text-white transition-colors rounded-full w-10 h-10 flex items-center justify-center"
+      >
+        ✕
+      </button>
+      <img
+        src={src}
+        alt=""
+        onClick={(e) => e.stopPropagation()}
+        className={`max-h-[90vh] max-w-[90vw] rounded-lg object-contain transition-transform duration-200 ${
+          visible ? 'scale-100' : 'scale-95'
+        }`}
+      />
+    </div>
   )
 }
 
@@ -215,7 +273,7 @@ function CarteAVenir({ activite }) {
   )
 }
 
-function CarteHistorique({ activite, onEnregistre }) {
+function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
   const [ouvert, setOuvert] = useState(false)
   const [note, setNote] = useState(5)
   const [commentaire, setCommentaire] = useState('')
@@ -258,12 +316,23 @@ function CarteHistorique({ activite, onEnregistre }) {
 
   return (
     <div className="p-5 rounded-xl border border-white/10 bg-bg-elevated">
-      {activite.photo_url && (
-        <img
-          src={activite.photo_url}
-          alt=""
-          className="w-full h-40 object-cover rounded-lg mb-3"
-        />
+      {activite.photo_url ? (
+        <button
+          type="button"
+          onClick={() => onOuvrirPhoto(activite.photo_url)}
+          className="block w-full mb-3 rounded-lg overflow-hidden"
+        >
+          <img
+            src={activite.photo_url}
+            alt=""
+            className="w-full h-40 object-cover hover:opacity-90 transition-opacity"
+          />
+        </button>
+      ) : (
+        <div className="w-full h-40 mb-3 rounded-lg border border-dashed border-white/10 flex flex-col items-center justify-center gap-1">
+          <span className="text-2xl">📸</span>
+          <span className="font-sans text-xs text-text-muted">Toujours pas de photo</span>
+        </div>
       )}
       <div className="flex items-center justify-between gap-2">
         <h3 className="font-display text-lg text-text-primary">{activite.nom_activite}</h3>
