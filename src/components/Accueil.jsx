@@ -1,9 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { HUMEURS } from '../data/humeurs'
+
+const MESSAGES_ERREUR = [
+  'Pas tout à fait... 😏',
+  'Essaie encore.',
+  'Presque. Ou pas du tout.',
+]
 
 // Étapes du parcours d'accueil :
-// 'bienvenue' -> 'aimes-tu' -> 'transition' -> (fin, on passe au quiz)
+// 'mot-de-passe' -> 'bienvenue' -> 'aimes-tu' -> 'transition' -> (fin, on passe au quiz)
 export default function Accueil({ onEntrer }) {
-  const [ecran, setEcran] = useState('bienvenue')
+  const [ecran, setEcran] = useState('mot-de-passe')
+  const [salutation, setSalutation] = useState('U')
+  const [mood, setMood] = useState(null)
 
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center px-6 bg-bg-base overflow-hidden">
@@ -15,21 +25,122 @@ export default function Accueil({ onEntrer }) {
       />
 
       <div className="relative z-10 w-full flex flex-col items-center">
+        {ecran === 'mot-de-passe' && (
+          <EcranMotDePasse
+            mood={mood}
+            onMoodChange={setMood}
+            onValide={(salutationTrouvee) => {
+              setSalutation(salutationTrouvee || 'U')
+              setEcran('bienvenue')
+            }}
+          />
+        )}
         {ecran === 'bienvenue' && (
-          <EcranBienvenue onSuite={() => setEcran('aimes-tu')} />
+          <EcranBienvenue salutation={salutation} onSuite={() => setEcran('aimes-tu')} />
         )}
         {ecran === 'aimes-tu' && (
           <EcranAimesTu onOui={() => setEcran('transition')} />
         )}
-        {ecran === 'transition' && <EcranTransition onSuite={onEntrer} />}
+        {ecran === 'transition' && (
+          <EcranTransition onSuite={() => onEntrer(mood)} />
+        )}
       </div>
     </section>
   )
 }
 
-function EcranBienvenue({ onSuite }) {
+function EcranMotDePasse({ mood, onMoodChange, onValide }) {
+  const [motSaisi, setMotSaisi] = useState('')
+  const [erreur, setErreur] = useState('')
+  const [verification, setVerification] = useState(false)
+
+  async function valider(e) {
+    e.preventDefault()
+    setErreur('')
+
+    if (!mood) {
+      setErreur('Choisis aussi ton humeur du jour.')
+      return
+    }
+
+    setVerification(true)
+    const { data, error } = await supabase
+      .from('mots_passe_accueil')
+      .select('salutation')
+      // ilike sans wildcard = comparaison insensible à la casse ; on
+      // échappe % et _ pour éviter tout effet de motif involontaire
+      .ilike('mot_de_passe', motSaisi.trim().replace(/[%_]/g, '\\$&'))
+      .maybeSingle()
+    setVerification(false)
+
+    if (error || !data) {
+      setErreur(MESSAGES_ERREUR[Math.floor(Math.random() * MESSAGES_ERREUR.length)])
+      return
+    }
+
+    onValide(data.salutation)
+  }
+
+  return (
+    <form
+      onSubmit={valider}
+      className="flex flex-col items-center gap-8 text-center max-w-sm w-full"
+    >
+      <div className="w-full flex flex-col items-center gap-2">
+        <label htmlFor="mot-de-passe" className="font-sans text-sm text-text-muted">
+          Le mot de passe du jour ?
+        </label>
+        <input
+          id="mot-de-passe"
+          type="text"
+          value={motSaisi}
+          onChange={(e) => setMotSaisi(e.target.value)}
+          autoComplete="off"
+          autoFocus
+          className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary text-center focus:outline-none focus:border-white/40"
+        />
+      </div>
+
+      <div className="flex flex-col items-center gap-3">
+        <p className="font-sans text-sm text-text-muted">Comment vas-tu aujourd'hui ?</p>
+        <div className="flex gap-3">
+          {HUMEURS.map((h) => (
+            <button
+              key={h.valeur}
+              type="button"
+              onClick={() => onMoodChange(h.valeur)}
+              aria-label={h.label}
+              aria-pressed={mood === h.valeur}
+              className={`text-2xl w-12 h-12 rounded-full border flex items-center justify-center transition-all ${
+                mood === h.valeur
+                  ? 'gradient-sunset border-transparent scale-110'
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              {h.emoji}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {erreur && (
+        <p className="font-sans text-sm text-text-muted italic">{erreur}</p>
+      )}
+
+      <button
+        type="submit"
+        disabled={verification || motSaisi.trim().length === 0}
+        className="font-sans px-8 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
+      >
+        {verification ? 'Vérification…' : 'Valider'}
+      </button>
+    </form>
+  )
+}
+
+function EcranBienvenue({ salutation, onSuite }) {
   const [etape, setEtape] = useState(0)
-  // 0 = rien, 1 = "Bienvenue" visible, 2 = "U" visible, 3 = bouton visible
+  // 0 = rien, 1 = "Bienvenue" visible, 2 = salutation visible, 3 = bouton visible
 
   useEffect(() => {
     const t1 = setTimeout(() => setEtape(1), 400)
@@ -57,7 +168,7 @@ function EcranBienvenue({ onSuite }) {
             etape >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          U
+          {salutation}
         </h1>
       </div>
 

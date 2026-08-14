@@ -95,7 +95,7 @@ function ajourdhuiISO() {
 const DUREE_TEASING = 1600
 const DUREE_INDICE = 1200
 
-export default function Quiz() {
+export default function Quiz({ mood }) {
   const [reponses, setReponses] = useState({})
   const [etape, setEtape] = useState(0)
   const [activite, setActivite] = useState(null)
@@ -111,6 +111,7 @@ export default function Quiz() {
   const [heureChoisie, setHeureChoisie] = useState('')
   const [dureeMinutes, setDureeMinutes] = useState(null)
   const [ajouteAuCarnet, setAjouteAuCarnet] = useState(false)
+  const [carnetEnregistre, setCarnetEnregistre] = useState(false)
 
   const questionActuelle = questions[etape]
   const termine = etape >= questions.length
@@ -134,6 +135,7 @@ export default function Quiz() {
   async function retirer() {
     setValide(false)
     setAjouteAuCarnet(false)
+    setCarnetEnregistre(false)
     const suggestion = await getActiviteSuggeree(reponses.axe1, reponses.axe2)
     setActivite(suggestion)
   }
@@ -148,11 +150,13 @@ export default function Quiz() {
     setHeureChoisie('')
     setDureeMinutes(null)
     setAjouteAuCarnet(false)
+    setCarnetEnregistre(false)
   }
 
   function changerActivite() {
     setValide(false)
     setAjouteAuCarnet(false)
+    setCarnetEnregistre(false)
   }
 
   // Glissement/fondu léger à chaque nouvelle question
@@ -209,15 +213,20 @@ export default function Quiz() {
       .insert({
         nom_activite: activite,
         date_activite: dtDebut.toISOString(),
+        mood_debut: mood ?? null,
         date: new Date().toISOString(),
         note: null,
         commentaire: null,
         photo_url: null,
       })
       .then(({ error }) => {
-        if (error) setAjouteAuCarnet(false)
+        if (error) {
+          setAjouteAuCarnet(false)
+        } else {
+          setCarnetEnregistre(true)
+        }
       })
-  }, [planComplet, ajouteAuCarnet, activite, dtDebut])
+  }, [planComplet, ajouteAuCarnet, activite, dtDebut, mood])
 
   const enRevelation = termine && etapeResultat === 'resultat'
 
@@ -416,6 +425,12 @@ export default function Quiz() {
                     ⬇️ Télécharger le fichier .ics
                   </button>
                 </div>
+              )}
+
+              {carnetEnregistre && (
+                <p className="font-sans text-sm text-center text-text-secondary italic pt-1">
+                  C'est noté. On se retrouve là-bas.
+                </p>
               )}
 
               <div className="text-center pt-2">

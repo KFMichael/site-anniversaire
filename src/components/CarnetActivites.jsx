@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { HUMEURS, emojiHumeur } from '../data/humeurs'
 
 function formatDateActivite(iso) {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -219,6 +220,7 @@ function CarteHistorique({ activite, onEnregistre }) {
   const [note, setNote] = useState(5)
   const [commentaire, setCommentaire] = useState('')
   const [photo, setPhoto] = useState(null)
+  const [moodFin, setMoodFin] = useState(null)
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
 
   const aUneNote = activite.note !== null && activite.note !== undefined
@@ -244,7 +246,7 @@ function CarteHistorique({ activite, onEnregistre }) {
 
     const { error } = await supabase
       .from('activites_carnet')
-      .update({ note, commentaire, photo_url: photoUrl })
+      .update({ note, commentaire, photo_url: photoUrl, mood_fin: moodFin })
       .eq('id', activite.id)
 
     if (!error) {
@@ -263,11 +265,19 @@ function CarteHistorique({ activite, onEnregistre }) {
           className="w-full h-40 object-cover rounded-lg mb-3"
         />
       )}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h3 className="font-display text-lg text-text-primary">{activite.nom_activite}</h3>
-        {aUneNote && (
-          <span className="font-sans text-sm text-text-muted">{activite.note}/10</span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          {activite.mood_debut && (
+            <span title="Humeur au moment de valider">{emojiHumeur(activite.mood_debut)}</span>
+          )}
+          {activite.mood_fin && (
+            <span title="Humeur après l'activité">{emojiHumeur(activite.mood_fin)}</span>
+          )}
+          {aUneNote && (
+            <span className="font-sans text-sm text-text-muted">{activite.note}/10</span>
+          )}
+        </div>
       </div>
       {activite.date_activite && (
         <p className="font-sans text-xs text-text-muted mt-1">
@@ -307,6 +317,29 @@ function CarteHistorique({ activite, onEnregistre }) {
             className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
             rows={2}
           />
+          <div>
+            <label className="font-sans text-sm text-text-muted block mb-2">
+              Et maintenant, comment tu te sens ?
+            </label>
+            <div className="flex gap-2">
+              {HUMEURS.map((h) => (
+                <button
+                  key={h.valeur}
+                  type="button"
+                  onClick={() => setMoodFin(h.valeur)}
+                  aria-label={h.label}
+                  aria-pressed={moodFin === h.valeur}
+                  className={`text-xl w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
+                    moodFin === h.valeur
+                      ? 'gradient-sunset border-transparent scale-110'
+                      : 'border-white/20 hover:border-white/40'
+                  }`}
+                >
+                  {h.emoji}
+                </button>
+              ))}
+            </div>
+          </div>
           <input
             type="file"
             accept="image/*"

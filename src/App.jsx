@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Accueil from './components/Accueil'
 import Quiz from './components/Quiz'
 import CarteVoyages from './components/CarteVoyages'
 import MurMessages from './components/MurMessages'
 import CarnetActivites from './components/CarnetActivites'
+import AdminMotsPasse from './components/AdminMotsPasse'
 
 const SECTIONS = [
   { id: 'quiz', label: 'Activité surprise', Composant: Quiz, actif: true },
@@ -14,12 +16,22 @@ const SECTIONS = [
 
 const SECTIONS_VISIBLES = SECTIONS.filter((s) => s.actif)
 
-function App() {
+function SiteAnniversaire() {
   const [entree, setEntree] = useState(false)
   const [sectionActive, setSectionActive] = useState('quiz')
+  // Humeur du jour, choisie sur l'écran d'accueil, gardée en mémoire pour
+  // la session (pas encore en base) et utilisée à la validation du quiz.
+  const [mood, setMood] = useState(null)
 
   if (!entree) {
-    return <Accueil onEntrer={() => setEntree(true)} />
+    return (
+      <Accueil
+        onEntrer={(moodChoisi) => {
+          setMood(moodChoisi)
+          setEntree(true)
+        }}
+      />
+    )
   }
 
   const SectionActuelle = SECTIONS_VISIBLES.find((s) => s.id === sectionActive)?.Composant
@@ -44,8 +56,20 @@ function App() {
           ))}
         </ul>
       </nav>
-      {SectionActuelle && <SectionActuelle />}
+      {SectionActuelle && <SectionActuelle mood={mood} />}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Pas de lien visible : page d'admin accessible uniquement en connaissant l'URL */}
+        <Route path="/admin-zMd_uRSay5JaTurR" element={<AdminMotsPasse />} />
+        <Route path="/*" element={<SiteAnniversaire />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
