@@ -60,13 +60,16 @@ npm run dev
 
 ## Identité visuelle
 
-Fond sombre + dégradé coucher de soleil. Classes Tailwind custom :
-- `bg-bg-base` — fond principal
-- `gradient-sunset` — dégradé orange/rose/violet
-- `gradient-sunset-text` — texte dégradé
+Style iOS, thème clair/sombre automatique (suit `prefers-color-scheme`,
+pas de bouton de bascule). Détail complet : `design/DESIGN.md`. Tokens
+Tailwind custom (définis dans `src/index.css`, valeurs différentes par
+thème sauf l'accent) :
+- `bg-bg-base` / `bg-bg-elevated` / `bg-bg-elevated-glass` — fonds
 - `text-text-primary`, `text-text-secondary`, `text-text-muted`
-
-> Note : les sections internes (Quiz, Carnet...) utilisent encore `bg-white` / `text-neutral-*` — pas encore alignées avec l'identité sombre de l'Accueil.
+- `border-separator` — bordures fines
+- `bg-accent` / `text-accent` — bleu iOS unique (`#0071EB`)
+- `shadow-soft`, `shadow-elevated` — ombres douces
+- `ease-spring` — courbe de transition avec léger rebond
 
 ## Avant la mise en ligne
 

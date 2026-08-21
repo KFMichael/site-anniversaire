@@ -20,7 +20,7 @@ export default function MurMessages() {
 
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <h2 className="font-display text-3xl font-semibold text-center text-text-primary mb-8">
+      <h2 className="font-sans text-3xl font-semibold text-center text-text-primary mb-8">
         Ils pensent à toi
       </h2>
 
@@ -39,13 +39,13 @@ export default function MurMessages() {
         {messages.map((m) => (
           <div
             key={m.id}
-            className="p-5 rounded-xl border border-white/10 bg-bg-elevated"
+            className="p-5 rounded-3xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft"
           >
             {m.photo_url && (
               <img
                 src={m.photo_url}
                 alt=""
-                className="w-full h-40 object-cover rounded-lg mb-3"
+                className="w-full h-40 object-cover rounded-2xl mb-3"
               />
             )}
             <p className="font-sans text-text-secondary">{m.message}</p>

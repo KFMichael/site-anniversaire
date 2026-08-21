@@ -7,10 +7,10 @@ export default function CarteVoyages() {
 
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <h2 className="font-display text-3xl font-semibold text-center text-text-primary mb-8">
+      <h2 className="font-sans text-3xl font-semibold text-center text-text-primary mb-8">
         Nos voyages
       </h2>
-      <div className="max-w-4xl mx-auto h-[500px] rounded-xl overflow-hidden border border-white/10">
+      <div className="max-w-4xl mx-auto h-[500px] rounded-3xl overflow-hidden shadow-soft">
         <MapContainer
           center={centreDefaut}
           zoom={4}

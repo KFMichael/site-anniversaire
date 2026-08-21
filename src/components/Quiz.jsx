@@ -248,25 +248,15 @@ export default function Quiz({ mood }) {
 
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center px-6 py-16 bg-bg-base overflow-hidden">
-      {termine && (
-        <div
-          className={`absolute inset-0 blur-3xl gradient-sunset transition-opacity duration-1000 ${
-            enRevelation && phaseVisible ? 'opacity-30' : 'opacity-10'
-          }`}
-          style={{ maskImage: 'radial-gradient(circle at center, black, transparent 70%)' }}
-          aria-hidden="true"
-        />
-      )}
-
       {!termine && (
         <div className="max-w-md w-full flex flex-col items-center gap-8">
           <div className="w-full">
             <p className="font-sans text-xs uppercase tracking-widest text-text-muted mb-2 text-center">
               Question {etape + 1} / {questions.length}
             </p>
-            <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div className="w-full h-1.5 rounded-full bg-separator overflow-hidden">
               <div
-                className="h-full gradient-sunset rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-accent rounded-full transition-all duration-500 ease-spring"
                 style={{ width: `${(etape / questions.length) * 100}%` }}
               />
             </div>
@@ -274,11 +264,11 @@ export default function Quiz({ mood }) {
 
           <div
             key={etape}
-            className={`w-full text-center space-y-10 transition-all duration-300 ease-out ${
+            className={`w-full text-center space-y-10 transition-all duration-300 ease-spring ${
               carteVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'
             }`}
           >
-            <p className="font-display text-2xl md:text-3xl font-semibold text-text-primary leading-snug">
+            <p className="font-sans text-2xl md:text-3xl font-semibold text-text-primary leading-snug">
               {questionActuelle.texte}
             </p>
             <div className="flex flex-col gap-4">
@@ -286,7 +276,7 @@ export default function Quiz({ mood }) {
                 <button
                   key={r.valeur}
                   onClick={() => repondre(r.valeur)}
-                  className="font-sans px-6 py-4 rounded-xl border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary hover:border-white/30 transition-all"
+                  className="font-sans px-6 py-4 rounded-2xl border border-separator text-text-secondary transition-all duration-200 ease-spring active:scale-95 hover:bg-accent/10 hover:text-text-primary hover:border-accent"
                 >
                   {r.label}
                 </button>
@@ -298,11 +288,11 @@ export default function Quiz({ mood }) {
 
       {termine && etapeResultat === 'teasing' && (
         <div
-          className={`relative z-10 flex flex-col items-center gap-2 transition-opacity duration-500 ${
+          className={`relative z-10 flex flex-col items-center gap-2 transition-opacity duration-500 ease-spring ${
             phaseVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <p className="font-display text-2xl md:text-3xl italic text-text-secondary">
+          <p className="font-sans text-2xl md:text-3xl italic text-text-secondary">
             Je réfléchis
             <span className="dot-pulse inline-flex ml-1 align-baseline">
               <span>.</span>
@@ -315,14 +305,14 @@ export default function Quiz({ mood }) {
 
       {termine && etapeResultat === 'indice' && (
         <div
-          className={`relative z-10 max-w-md flex flex-col items-center gap-3 text-center transition-all duration-500 ${
+          className={`relative z-10 max-w-md flex flex-col items-center gap-3 text-center transition-all duration-500 ease-spring ${
             phaseVisible ? 'opacity-100 blur-none' : 'opacity-0 blur-[2px]'
           }`}
         >
           <p className="font-sans text-xs uppercase tracking-widest text-text-muted">
             On y est presque
           </p>
-          <p className="font-display text-2xl md:text-3xl font-medium text-text-secondary">
+          <p className="font-sans text-2xl md:text-3xl font-medium text-text-secondary">
             {indiceAmbiance(reponses)}
           </p>
         </div>
@@ -331,14 +321,14 @@ export default function Quiz({ mood }) {
       {enRevelation && (
         <div className="relative z-10 max-w-md w-full text-center space-y-6">
           <p
-            className={`font-sans text-sm uppercase tracking-widest text-text-muted transition-opacity duration-700 ${
+            className={`font-sans text-sm uppercase tracking-widest text-text-muted transition-opacity duration-700 ease-spring ${
               phaseVisible ? 'opacity-100' : 'opacity-0'
             }`}
           >
             Notre suggestion
           </p>
           <p
-            className={`font-display text-4xl md:text-5xl font-bold gradient-sunset-text leading-tight transition-all duration-700 ${
+            className={`font-sans text-4xl md:text-5xl font-bold text-accent leading-tight transition-all duration-700 ease-spring ${
               phaseVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-3'
             }`}
           >
@@ -347,25 +337,25 @@ export default function Quiz({ mood }) {
 
           {!valide && (
             <div
-              className={`flex flex-col items-center gap-3 pt-4 transition-opacity duration-700 delay-300 ${
+              className={`flex flex-col items-center gap-3 pt-4 transition-opacity duration-700 ease-spring delay-300 ${
                 phaseVisible ? 'opacity-100' : 'opacity-0'
               }`}
             >
               <button
                 onClick={() => setValide(true)}
-                className="font-sans px-8 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
+                className="font-sans px-8 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95"
               >
                 Valider cette activité ✅
               </button>
               <button
                 onClick={retirer}
-                className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors"
+                className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95"
               >
                 Tirer une autre idée
               </button>
               <button
                 onClick={recommencer}
-                className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors"
+                className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95"
               >
                 Recommencer le quiz
               </button>
@@ -378,13 +368,13 @@ export default function Quiz({ mood }) {
                 <label className="font-sans block text-sm text-text-muted mb-1">
                   Date
                 </label>
-                <div className="rounded-lg border border-white/20 bg-bg-base px-4 py-2 focus-within:border-white/40">
+                <div className="rounded-2xl border border-separator bg-bg-elevated px-4 py-2 transition-colors duration-200 ease-spring focus-within:border-accent">
                   <input
                     type="date"
                     min={ajourdhuiISO()}
                     value={dateChoisie}
                     onChange={(e) => setDateChoisie(e.target.value)}
-                    className="font-sans w-full bg-transparent text-text-primary [color-scheme:dark] focus:outline-none"
+                    className="font-sans w-full bg-transparent text-text-primary focus:outline-none"
                   />
                 </div>
               </div>
@@ -393,12 +383,12 @@ export default function Quiz({ mood }) {
                 <label className="font-sans block text-sm text-text-muted mb-1">
                   Heure de début
                 </label>
-                <div className="rounded-lg border border-white/20 bg-bg-base px-4 py-2 focus-within:border-white/40">
+                <div className="rounded-2xl border border-separator bg-bg-elevated px-4 py-2 transition-colors duration-200 ease-spring focus-within:border-accent">
                   <input
                     type="time"
                     value={heureChoisie}
                     onChange={(e) => setHeureChoisie(e.target.value)}
-                    className="font-sans w-full bg-transparent text-text-primary [color-scheme:dark] focus:outline-none"
+                    className="font-sans w-full bg-transparent text-text-primary focus:outline-none"
                   />
                 </div>
               </div>
@@ -412,10 +402,10 @@ export default function Quiz({ mood }) {
                     <button
                       key={d.minutes}
                       onClick={() => setDureeMinutes(d.minutes)}
-                      className={`font-sans text-sm px-2 py-2 rounded-lg border transition-all ${
+                      className={`font-sans text-sm px-2 py-2 rounded-2xl border transition-all duration-200 ease-spring active:scale-95 ${
                         dureeMinutes === d.minutes
-                          ? 'gradient-sunset text-white border-transparent'
-                          : 'border-white/20 text-text-secondary hover:border-white/40'
+                          ? 'bg-accent text-white border-transparent'
+                          : 'border-separator text-text-secondary hover:border-accent'
                       }`}
                     >
                       {d.label}
@@ -430,13 +420,13 @@ export default function Quiz({ mood }) {
                     href={construireLienGoogleCalendar(activite, dtDebut, dtFin)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-sans text-center px-6 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
+                    className="font-sans text-center px-6 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95"
                   >
                     📅 Ajouter à Google Calendar
                   </a>
                   <button
                     onClick={() => telechargerICS(activite, dtDebut, dtFin)}
-                    className="font-sans px-6 py-3 rounded-full border border-white/20 text-text-secondary hover:bg-white/10 hover:text-text-primary transition-all"
+                    className="font-sans px-6 py-3 rounded-full border border-separator text-text-secondary transition-all duration-200 ease-spring active:scale-95 hover:bg-accent/10 hover:text-text-primary hover:border-accent"
                   >
                     ⬇️ Télécharger le fichier .ics
                   </button>
@@ -452,7 +442,7 @@ export default function Quiz({ mood }) {
               <div className="text-center pt-2">
                 <button
                   onClick={changerActivite}
-                  className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors"
+                  className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95"
                 >
                   ← Changer d'activité
                 </button>

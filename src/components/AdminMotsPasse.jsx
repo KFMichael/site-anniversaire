@@ -63,33 +63,33 @@ export default function AdminMotsPasse() {
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
       <div className="max-w-lg mx-auto">
-        <h1 className="font-display text-2xl font-semibold text-text-primary mb-8">
+        <h1 className="font-sans text-2xl font-semibold text-text-primary mb-8">
           Mots de passe &amp; salutations
         </h1>
 
         <form
           onSubmit={ajouter}
-          className="space-y-3 p-5 rounded-xl border border-white/10 bg-bg-elevated mb-8"
+          className="space-y-3 p-5 rounded-3xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft mb-8"
         >
           <input
             type="text"
             placeholder="Mot de passe"
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
-            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
+            className="font-sans w-full px-4 py-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary placeholder:text-text-muted transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
           />
           <input
             type="text"
             placeholder="Salutation associée (ex: mon amour)"
             value={salutation}
             onChange={(e) => setSalutation(e.target.value)}
-            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
+            className="font-sans w-full px-4 py-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary placeholder:text-text-muted transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
           />
           {erreur && <p className="font-sans text-sm text-text-muted">{erreur}</p>}
           <button
             type="submit"
             disabled={envoiEnCours}
-            className="font-sans w-full px-6 py-2 rounded-full gradient-sunset text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="font-sans w-full px-6 py-2 rounded-full bg-accent text-white transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-50"
           >
             {envoiEnCours ? 'Ajout…' : 'Ajouter'}
           </button>
@@ -109,7 +109,7 @@ export default function AdminMotsPasse() {
           {lignes.map((l) => (
             <li
               key={l.id}
-              className="flex items-center justify-between gap-3 p-3 rounded-lg border border-white/10 bg-bg-elevated"
+              className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft"
             >
               <div className="font-sans text-sm text-text-primary truncate">
                 <span className="text-text-secondary">{l.mot_de_passe}</span>
@@ -118,7 +118,7 @@ export default function AdminMotsPasse() {
               </div>
               <button
                 onClick={() => supprimer(l.id)}
-                className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors shrink-0"
+                className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95 shrink-0"
               >
                 Supprimer
               </button>
