@@ -1,18 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-display: 'Fraunces', serif;
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  --color-bg-base: #0A0A0B;
-  --color-bg-elevated: #16161A;
-  --color-gradient-orange: #FF6B35;
-  --color-gradient-rose: #F72585;
-  --color-gradient-violet: #7209B7;
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #A3A3AD;
-  --color-text-muted: #8F8F99;
+  --color-bg-base: #F2F2F7;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-elevated-glass: rgb(255 255 255 / 0.72);
+  --color-text-primary: #000000;
+  --color-text-secondary: #48484A;
+  --color-text-muted: #6B6B70;
+  --color-separator: rgb(60 60 67 / 0.15);
+  --color-accent: #0071EB;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Couleur des ombres : en dehors de @theme volontairement. Tailwind résout
+   les valeurs --shadow-* du namespace theme au moment du build (elles sont
+   figées dans l'utilitaire généré), donc une redéfinition sous la media
+   query dark n'aurait aucun effet à l'exécution. Ces deux variables restent
+   de simples custom properties, lues dynamiquement par .shadow-soft /
+   .shadow-elevated ci-dessous. */
+:root {
+  --shadow-color-soft: rgb(0 0 0 / 0.08);
+  --shadow-color-elevated: rgb(0 0 0 / 0.14);
+}
+
+.shadow-soft {
+  box-shadow: 0 8px 30px var(--shadow-color-soft);
+}
+.shadow-elevated {
+  box-shadow: 0 20px 50px var(--shadow-color-elevated);
+}
+
+/* Thème sombre : suit prefers-color-scheme, pas de bouton de bascule.
+   Les composants n'ont jamais à connaître le thème actif — ils utilisent
+   toujours les mêmes classes (bg-bg-base, text-text-primary...), c'est la
+   valeur de la variable CSS qui change ici. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-base: #000000;
+    --color-bg-elevated: #1C1C1E;
+    --color-bg-elevated-glass: rgb(28 28 30 / 0.72);
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #C7C7CC;
+    --color-text-muted: #98989E;
+    --color-separator: rgb(255 255 255 / 0.15);
+
+    --shadow-color-soft: rgb(0 0 0 / 0.4);
+    --shadow-color-elevated: rgb(0 0 0 / 0.55);
+  }
 }
 
 html {
@@ -36,33 +74,19 @@ select:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px var(--color-bg-base),
-    0 0 0 4px var(--color-gradient-rose);
+    0 0 0 4px var(--color-accent);
 }
 
-.gradient-sunset {
-  background: linear-gradient(
-    135deg,
-    var(--color-gradient-violet) 0%,
-    var(--color-gradient-rose) 50%,
-    var(--color-gradient-orange) 100%
-  );
-}
-
+/* Pickers natifs date/heure : suivent le thème comme le reste du site */
 input[type='date'],
 input[type='time'] {
-  color-scheme: dark;
+  color-scheme: light;
 }
-
-.gradient-sunset-text {
-  background: linear-gradient(
-    135deg,
-    var(--color-gradient-violet) 0%,
-    var(--color-gradient-rose) 50%,
-    var(--color-gradient-orange) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+@media (prefers-color-scheme: dark) {
+  input[type='date'],
+  input[type='time'] {
+    color-scheme: dark;
+  }
 }
 
 /* Points de suspension qui pulsent l'un après l'autre (écran teasing du quiz) */

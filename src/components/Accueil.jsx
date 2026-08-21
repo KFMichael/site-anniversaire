@@ -17,13 +17,6 @@ export default function Accueil({ onEntrer }) {
 
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center px-6 bg-bg-base overflow-hidden">
-      {/* Halo de dégradé en fond, discret et diffus */}
-      <div
-        className="absolute inset-0 opacity-40 blur-3xl gradient-sunset"
-        style={{ maskImage: 'radial-gradient(circle at center, black, transparent 70%)' }}
-        aria-hidden="true"
-      />
-
       <div className="relative z-10 w-full flex flex-col items-center">
         {ecran === 'mot-de-passe' && (
           <EcranMotDePasse
@@ -97,7 +90,7 @@ function EcranMotDePasse({ mood, onMoodChange, onValide }) {
           onChange={(e) => setMotSaisi(e.target.value)}
           autoComplete="off"
           autoFocus
-          className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary text-center focus:outline-none focus:border-white/40"
+          className="font-sans w-full px-4 py-2.5 rounded-2xl border border-separator bg-bg-elevated text-text-primary text-center transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
         />
       </div>
 
@@ -111,10 +104,10 @@ function EcranMotDePasse({ mood, onMoodChange, onValide }) {
               onClick={() => onMoodChange(h.valeur)}
               aria-label={h.label}
               aria-pressed={mood === h.valeur}
-              className={`text-2xl w-12 h-12 rounded-full border flex items-center justify-center transition-all ${
+              className={`text-2xl w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-200 ease-spring active:scale-95 ${
                 mood === h.valeur
-                  ? 'gradient-sunset border-transparent scale-110'
-                  : 'border-white/20 hover:border-white/40'
+                  ? 'bg-accent border-transparent scale-110'
+                  : 'border-separator hover:border-accent'
               }`}
             >
               {h.emoji}
@@ -130,7 +123,7 @@ function EcranMotDePasse({ mood, onMoodChange, onValide }) {
       <button
         type="submit"
         disabled={verification || motSaisi.trim().length === 0}
-        className="font-sans px-8 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity disabled:opacity-40"
+        className="font-sans px-8 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-40"
       >
         {verification ? 'Vérification…' : 'Valider'}
       </button>
@@ -157,14 +150,14 @@ function EcranBienvenue({ salutation, onSuite }) {
     <div className="flex flex-col items-center gap-10 text-center">
       <div className="flex flex-col items-center">
         <p
-          className={`font-sans text-lg md:text-xl font-medium tracking-[0.3em] uppercase text-text-secondary transition-opacity duration-1000 ${
+          className={`font-sans text-lg md:text-xl font-medium tracking-[0.3em] uppercase text-text-secondary transition-opacity duration-1000 ease-spring ${
             etape >= 1 ? 'opacity-100' : 'opacity-0'
           }`}
         >
           Bienvenue
         </p>
         <h1
-          className={`font-display text-9xl md:text-[12rem] font-bold gradient-sunset-text leading-none transition-all duration-1000 ${
+          className={`font-sans text-9xl md:text-[12rem] font-bold text-accent leading-none transition-all duration-1000 ease-spring ${
             etape >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
@@ -174,7 +167,7 @@ function EcranBienvenue({ salutation, onSuite }) {
 
       <button
         onClick={onSuite}
-        className={`font-sans px-8 py-3 rounded-full border border-white/20 text-text-primary hover:bg-white hover:text-bg-base transition-all duration-700 ${
+        className={`font-sans px-8 py-3 rounded-full border border-separator text-text-primary transition-all duration-300 ease-spring active:scale-95 hover:bg-accent hover:text-white hover:border-accent ${
           etape >= 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -212,15 +205,15 @@ function EcranAimesTu({ onOui }) {
 
   return (
     <div
-      className={`flex flex-col items-center gap-6 text-center transition-opacity duration-1000 ${
+      className={`flex flex-col items-center gap-6 text-center transition-opacity duration-1000 ease-spring ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
-      <p className="font-display text-4xl md:text-5xl font-semibold text-text-primary">
+      <p className="font-sans text-4xl md:text-5xl font-semibold text-text-primary">
         Est-ce que tu m'aimes ? 💭
       </p>
       <p
-        className={`font-sans text-sm text-text-muted italic transition-opacity duration-500 ${
+        className={`font-sans text-sm text-text-muted italic transition-opacity duration-500 ease-spring ${
           aEssaye ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -229,7 +222,7 @@ function EcranAimesTu({ onOui }) {
       <div className="relative flex items-center justify-center gap-6 h-16 w-full max-w-xs mt-4">
         <button
           onClick={onOui}
-          className="font-sans px-8 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
+          className="font-sans px-8 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95"
         >
           Oui 🤍
         </button>
@@ -239,9 +232,9 @@ function EcranAimesTu({ onOui }) {
           onClick={surClicNon}
           style={{
             transform: `translate(${posNon.x}px, ${posNon.y}px)`,
-            transition: 'transform 0.25s ease-out',
+            transition: 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
-          className="font-sans px-8 py-3 rounded-full border border-white/20 text-text-secondary"
+          className="font-sans px-8 py-3 rounded-full border border-separator text-text-secondary"
         >
           Non
         </button>
@@ -267,14 +260,14 @@ function EcranTransition({ onSuite }) {
   return (
     <div className="flex flex-col items-center gap-6 text-center">
       <p
-        className={`font-display text-4xl md:text-5xl font-semibold gradient-sunset-text transition-opacity duration-1000 ${
+        className={`font-sans text-4xl md:text-5xl font-semibold text-accent transition-opacity duration-1000 ease-spring ${
           etape >= 1 ? 'opacity-100' : 'opacity-0'
         }`}
       >
         Je le savais.
       </p>
       <p
-        className={`font-sans text-xl md:text-2xl font-medium text-text-secondary transition-opacity duration-1000 ${
+        className={`font-sans text-xl md:text-2xl font-medium text-text-secondary transition-opacity duration-1000 ease-spring ${
           etape >= 2 ? 'opacity-100' : 'opacity-0'
         }`}
       >

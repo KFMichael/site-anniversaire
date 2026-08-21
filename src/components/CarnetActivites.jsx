@@ -97,14 +97,14 @@ export default function CarnetActivites() {
 
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <h2 className="font-display text-3xl font-semibold text-center text-text-primary mb-8">
+      <h2 className="font-sans text-3xl font-semibold text-center text-text-primary mb-8">
         Notre carnet d'activités
       </h2>
 
       <div className="max-w-2xl mx-auto mb-8 text-center">
         <button
           onClick={() => setFormOuvert(!formOuvert)}
-          className="font-sans px-6 py-3 rounded-full gradient-sunset text-white font-medium hover:opacity-90 transition-opacity"
+          className="font-sans px-6 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95"
         >
           {formOuvert ? 'Annuler' : '📝 Ajouter une activité'}
         </button>
@@ -113,7 +113,7 @@ export default function CarnetActivites() {
       {formOuvert && (
         <form
           onSubmit={ajouterActivite}
-          className="max-w-md mx-auto mb-12 space-y-4 p-6 rounded-xl border border-white/10 bg-bg-elevated"
+          className="max-w-md mx-auto mb-12 space-y-4 p-6 rounded-3xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft"
         >
           <input
             type="text"
@@ -121,7 +121,7 @@ export default function CarnetActivites() {
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             required
-            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
+            className="font-sans w-full px-4 py-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary placeholder:text-text-muted transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
           />
           <div>
             <label className="font-sans text-sm text-text-muted">Note : {note}/10</label>
@@ -131,26 +131,26 @@ export default function CarnetActivites() {
               max="10"
               value={note}
               onChange={(e) => setNote(Number(e.target.value))}
-              className="w-full accent-gradient-rose"
+              className="w-full accent-accent"
             />
           </div>
           <textarea
             placeholder="Un souvenir de cette activité..."
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
+            className="font-sans w-full px-4 py-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary placeholder:text-text-muted transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
             rows={3}
           />
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setPhoto(e.target.files[0])}
-            className="font-sans w-full text-sm text-text-muted file:mr-3 file:px-4 file:py-1.5 file:rounded-full file:border file:border-white/20 file:bg-transparent file:text-text-secondary file:cursor-pointer"
+            className="font-sans w-full text-sm text-text-muted file:mr-3 file:px-4 file:py-1.5 file:rounded-full file:border file:border-separator file:bg-transparent file:text-text-secondary file:cursor-pointer"
           />
           <button
             type="submit"
             disabled={envoiEnCours}
-            className="font-sans w-full px-6 py-3 rounded-full gradient-sunset text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="font-sans w-full px-6 py-3 rounded-full bg-accent text-white transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-50"
           >
             {envoiEnCours ? 'Envoi…' : '💌 Enregistrer'}
           </button>
@@ -171,7 +171,7 @@ export default function CarnetActivites() {
 
       {!chargement && aVenir.length > 0 && (
         <div className="max-w-3xl mx-auto mb-10">
-          <h3 className="font-display text-xl font-semibold text-text-primary mb-4">
+          <h3 className="font-sans text-xl font-semibold text-text-primary mb-4">
             À venir
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,7 +185,7 @@ export default function CarnetActivites() {
       {!chargement && historique.length > 0 && (
         <div className="max-w-3xl mx-auto">
           {aVenir.length > 0 && (
-            <h3 className="font-display text-xl font-semibold text-text-primary mb-4">
+            <h3 className="font-sans text-xl font-semibold text-text-primary mb-4">
               Historique
             </h3>
           )}
@@ -234,14 +234,14 @@ function Lightbox({ src, onClose }) {
   return (
     <div
       onClick={fermer}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 transition-opacity duration-200 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6 transition-opacity duration-200 ease-spring ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <button
         onClick={fermer}
         aria-label="Fermer"
-        className="absolute top-4 right-4 text-2xl leading-none text-white/80 hover:text-white transition-colors rounded-full w-10 h-10 flex items-center justify-center"
+        className="absolute top-4 right-4 text-2xl leading-none text-white/80 hover:text-white transition-all duration-200 ease-spring active:scale-90 rounded-full w-10 h-10 flex items-center justify-center"
       >
         ✕
       </button>
@@ -249,7 +249,7 @@ function Lightbox({ src, onClose }) {
         src={src}
         alt=""
         onClick={(e) => e.stopPropagation()}
-        className={`max-h-[90vh] max-w-[90vw] rounded-lg object-contain transition-transform duration-200 ${
+        className={`max-h-[90vh] max-w-[90vw] rounded-3xl object-contain shadow-elevated transition-transform duration-200 ease-spring ${
           visible ? 'scale-100' : 'scale-95'
         }`}
       />
@@ -259,11 +259,11 @@ function Lightbox({ src, onClose }) {
 
 function CarteAVenir({ activite }) {
   return (
-    <div className="p-5 rounded-xl border border-white/10 bg-bg-elevated">
-      <span className="inline-block mb-3 px-3 py-1 rounded-full text-xs font-sans font-medium gradient-sunset text-white">
+    <div className="p-5 rounded-3xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft">
+      <span className="inline-block mb-3 px-3 py-1 rounded-full text-xs font-sans font-medium bg-accent text-white">
         À venir 🗓️
       </span>
-      <h3 className="font-display text-lg text-text-primary">{activite.nom_activite}</h3>
+      <h3 className="font-sans text-lg font-medium text-text-primary">{activite.nom_activite}</h3>
       {activite.date_activite && (
         <p className="font-sans text-sm text-text-muted mt-1">
           {formatDateActivite(activite.date_activite)}
@@ -315,27 +315,27 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
   }
 
   return (
-    <div className="p-5 rounded-xl border border-white/10 bg-bg-elevated">
+    <div className="p-5 rounded-3xl bg-bg-elevated-glass backdrop-blur-xl shadow-soft">
       {activite.photo_url ? (
         <button
           type="button"
           onClick={() => onOuvrirPhoto(activite.photo_url)}
-          className="block w-full mb-3 rounded-lg overflow-hidden"
+          className="block w-full mb-3 rounded-2xl overflow-hidden transition-all duration-200 ease-spring active:scale-95"
         >
           <img
             src={activite.photo_url}
             alt=""
-            className="w-full h-40 object-cover hover:opacity-90 transition-opacity"
+            className="w-full h-40 object-cover hover:opacity-90 transition-opacity duration-200 ease-spring"
           />
         </button>
       ) : (
-        <div className="w-full h-40 mb-3 rounded-lg border border-dashed border-white/10 flex flex-col items-center justify-center gap-1">
+        <div className="w-full h-40 mb-3 rounded-2xl border border-dashed border-separator flex flex-col items-center justify-center gap-1">
           <span className="text-2xl">📸</span>
           <span className="font-sans text-xs text-text-muted">Toujours pas de photo</span>
         </div>
       )}
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-display text-lg text-text-primary">{activite.nom_activite}</h3>
+        <h3 className="font-sans text-lg font-medium text-text-primary">{activite.nom_activite}</h3>
         <div className="flex items-center gap-2 shrink-0">
           {activite.mood_debut && (
             <span title="Humeur au moment de valider">{emojiHumeur(activite.mood_debut)}</span>
@@ -360,7 +360,7 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
       {!aUneNote && !ouvert && (
         <button
           onClick={() => setOuvert(true)}
-          className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors mt-3"
+          className="font-sans text-sm text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95 mt-3"
         >
           📝 Ajouter une note
         </button>
@@ -376,14 +376,14 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
               max="10"
               value={note}
               onChange={(e) => setNote(Number(e.target.value))}
-              className="w-full accent-gradient-rose"
+              className="w-full accent-accent"
             />
           </div>
           <textarea
             placeholder="Un souvenir de cette activité..."
             value={commentaire}
             onChange={(e) => setCommentaire(e.target.value)}
-            className="font-sans w-full px-4 py-2 rounded-lg border border-white/20 bg-bg-base text-text-primary placeholder:text-text-muted focus:outline-none focus:border-white/40"
+            className="font-sans w-full px-4 py-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary placeholder:text-text-muted transition-colors duration-200 ease-spring focus:outline-none focus:border-accent"
             rows={2}
           />
           <div>
@@ -398,10 +398,10 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
                   onClick={() => setMoodFin(h.valeur)}
                   aria-label={h.label}
                   aria-pressed={moodFin === h.valeur}
-                  className={`text-xl w-10 h-10 rounded-full border flex items-center justify-center transition-all ${
+                  className={`text-xl w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-200 ease-spring active:scale-95 ${
                     moodFin === h.valeur
-                      ? 'gradient-sunset border-transparent scale-110'
-                      : 'border-white/20 hover:border-white/40'
+                      ? 'bg-accent border-transparent scale-110'
+                      : 'border-separator hover:border-accent'
                   }`}
                 >
                   {h.emoji}
@@ -413,12 +413,12 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
             type="file"
             accept="image/*"
             onChange={(e) => setPhoto(e.target.files[0])}
-            className="font-sans w-full text-sm text-text-muted file:mr-3 file:px-4 file:py-1.5 file:rounded-full file:border file:border-white/20 file:bg-transparent file:text-text-secondary file:cursor-pointer"
+            className="font-sans w-full text-sm text-text-muted file:mr-3 file:px-4 file:py-1.5 file:rounded-full file:border file:border-separator file:bg-transparent file:text-text-secondary file:cursor-pointer"
           />
           <button
             type="submit"
             disabled={envoiEnCours}
-            className="font-sans w-full px-4 py-2 rounded-full gradient-sunset text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="font-sans w-full px-4 py-2 rounded-full bg-accent text-white transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-50"
           >
             {envoiEnCours ? 'Envoi…' : '💌 Enregistrer'}
           </button>

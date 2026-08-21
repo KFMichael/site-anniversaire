@@ -38,15 +38,15 @@ function SiteAnniversaire() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <nav className="sticky top-0 z-10 bg-bg-base/90 backdrop-blur border-b border-white/10">
+      <nav className="sticky top-0 z-10 bg-bg-elevated-glass backdrop-blur-xl border-b border-separator">
         <ul className="flex flex-wrap justify-center gap-2 md:gap-6 py-4 px-4 text-sm font-sans">
           {SECTIONS_VISIBLES.map((s) => (
             <li key={s.id}>
               <button
                 onClick={() => setSectionActive(s.id)}
-                className={`px-4 py-1.5 rounded-full transition-all ${
+                className={`px-4 py-1.5 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
                   sectionActive === s.id
-                    ? 'gradient-sunset text-white'
+                    ? 'bg-accent text-white font-medium'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
