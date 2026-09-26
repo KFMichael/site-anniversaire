@@ -13,11 +13,15 @@
 //   RECAP_EXPEDITEUR           ex. « Nido <recap@nido.4sept.com> »
 //   APP_URL                    ex. « https://nido.4sept.com »
 //   RECAP_FUSEAU               fuseau du foyer (défaut Europe/Paris)
+//   VITE_VAPID_CLE_PUBLIQUE    notifications sur le téléphone (facultatif,
+//   VAPID_CLE_PRIVEE           voir docs/NOTIFICATIONS.md)
 //   VITE_SUPABASE_URL          déjà défini pour l'appli
 import { createClient } from '@supabase/supabase-js'
 import { envoyerApercu, executerRecapQuotidien } from './_lib/recap.js'
 import { creerEnvoiResend } from './_lib/resend.js'
 import { cleActions } from './_lib/jetons.js'
+import { executerPushQuotidien } from './_lib/notifications.js'
+import { configurationPush } from './_lib/webpush.js'
 
 const NOM_APP = 'Nido'
 
@@ -59,13 +63,16 @@ export default async function handler(req, res) {
   // Tâche planifiée
   if (req.method === 'GET') {
     if (jeton !== process.env.CRON_SECRET) return res.status(401).json({ erreur: 'Non autorisé' })
-    const bilan = await executerRecapQuotidien({
-      admin: config.admin(),
-      envoyer: config.envoyer(),
-      maintenant: new Date(),
-      config: config.recap,
-    })
-    return res.status(bilan.erreurs.length ? 500 : 200).json(bilan)
+    const admin = config.admin()
+    const maintenant = new Date()
+    const bilan = await executerRecapQuotidien({ admin, envoyer: config.envoyer(), maintenant, config: config.recap })
+    // Notifications sur le téléphone, si les clés VAPID sont configurées
+    const envoyerPush = configurationPush()
+    if (envoyerPush) {
+      bilan.push = await executerPushQuotidien({ admin, envoyerPush, maintenant, config: config.recap })
+    }
+    const enErreur = bilan.erreurs.length || bilan.push?.erreurs.length
+    return res.status(enErreur ? 500 : 200).json(bilan)
   }
 
   // Aperçu demandé par un membre

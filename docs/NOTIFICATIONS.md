@@ -1,0 +1,46 @@
+# Notifications sur le téléphone (Web Push)
+
+| Notification | Quand | Écran ouvert au toucher |
+|---|---|---|
+| 🍽️ Ce soir : *plat* | tous les jours (tâche de 17 h UTC), s'il y a un dîner prévu | Menus |
+| 📋 Ta semaine est prête | le dimanche | Accueil |
+| 🧠 *Mois* : choisis ta charge mentale | le 1er du mois | Charge |
+
+Chaque membre active les notifications **par appareil** (Espace >
+Notifications) et peut couper chaque type. Un bouton envoie une
+notification de test.
+
+**iPhone** : iOS 16.4 ou plus, et Nido **installé sur l'écran d'accueil**
+(Safari > Partager > Sur l'écran d'accueil), puis ouvert depuis l'icône.
+L'appli affiche ces instructions quand ce n'est pas le cas.
+
+## Mise en place
+
+1. Supabase : exécuter `supabase/migrations/0009_notifications.sql`.
+2. Générer une paire de clés VAPID (identifie Nido auprès des services de
+   notification d'Apple, Google, Mozilla) :
+   `npx web-push generate-vapid-keys`
+3. Vercel > Settings > Environment Variables (Production et Preview) :
+
+   | Nom | Valeur |
+   |---|---|
+   | `VITE_VAPID_CLE_PUBLIQUE` | la clé publique (« Public Key ») |
+   | `VAPID_CLE_PRIVEE` | la clé privée (« Private Key »), secrète |
+
+4. Redéployer. La carte « Notifications » apparaît dans Espace ; sans ces
+   variables, elle reste masquée et les emails fonctionnent normalement.
+
+> Changer de clés VAPID invalide tous les abonnements existants : chaque
+> membre devra réactiver les notifications sur ses appareils.
+
+## Fonctionnement
+
+- `public/sw.js` : service worker, uniquement pour recevoir les
+  notifications et ouvrir le bon écran (aucun cache).
+- `src/lib/push.js` : état de l'appareil, abonnement, désabonnement ;
+  l'abonnement est enregistré par la fonction `enregistrer_abonnement_push`
+  (un appareil appartient au compte qui y est connecté).
+- `api/_lib/notifications.js` : envois planifiés, appelés par la tâche
+  quotidienne `api/recap.js` ; journal anti-doublon partagé avec les
+  emails (`envois_recap`, types `push-…`) ; abonnements expirés supprimés.
+- `api/notifications.js` : notification de test.

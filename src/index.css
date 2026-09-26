@@ -15,6 +15,8 @@
   --color-accent: #0071EB;
   /* Bleu pour du texte sur fond de page ou de carte (contraste ≥ 4.5:1) */
   --color-accent-text: #0062CC;
+  /* Piste d'un interrupteur désactivé (contraste ≥ 3:1, WCAG 1.4.11) */
+  --color-interrupteur-off: #86868B;
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -60,6 +62,7 @@
   --color-text-muted: #98989E;
   --color-separator: rgb(255 255 255 / 0.15);
   --color-accent-text: #409CFF;
+  --color-interrupteur-off: #7C7C80;
 
   --shadow-color-soft: rgb(0 0 0 / 0.4);
   --shadow-color-elevated: rgb(0 0 0 / 0.55);
@@ -76,6 +79,7 @@
     --color-text-muted: #98989E;
     --color-separator: rgb(255 255 255 / 0.15);
     --color-accent-text: #409CFF;
+    --color-interrupteur-off: #7C7C80;
 
     --shadow-color-soft: rgb(0 0 0 / 0.4);
     --shadow-color-elevated: rgb(0 0 0 / 0.55);

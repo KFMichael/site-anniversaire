@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from './contexte'
-import { Bouton, Carte } from '../../components/ui'
+import { Bouton, Carte, Interrupteur } from '../../components/ui'
 
 // Préférences du récap par email (sans ligne en base : tout est activé)
 // et envoi d'un aperçu à soi-même
@@ -76,32 +76,5 @@ export default function Emails() {
       </Bouton>
       {message && <p className="font-sans text-sm text-text-muted italic">{message}</p>}
     </Carte>
-  )
-}
-
-function Interrupteur({ label, detail, actif, onChange }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex flex-col">
-        <span className="font-sans text-sm text-text-primary">{label}</span>
-        <span className="font-sans text-xs text-text-muted">{detail}</span>
-      </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={actif}
-        aria-label={label}
-        onClick={() => onChange(!actif)}
-        className={`cible-44 w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
-          actif ? 'bg-accent' : 'bg-separator'
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-soft transition-all duration-200 ease-spring ${
-            actif ? 'left-5.5' : 'left-0.5'
-          }`}
-        />
-      </button>
-    </div>
   )
 }
