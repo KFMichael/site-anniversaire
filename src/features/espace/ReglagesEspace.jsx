@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from './contexte'
+import { useMembres } from './useMembres'
 import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
 
 export default function ReglagesEspace() {
@@ -30,24 +31,15 @@ export default function ReglagesEspace() {
 function Membres() {
   const { utilisateur } = useAuth()
   const { espace } = useEspace()
-  const [membres, setMembres] = useState([])
+  const { membres } = useMembres()
   const [lien, setLien] = useState('')
   const [copie, setCopie] = useState(false)
   const [erreur, setErreur] = useState('')
 
-  const charger = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('membres_espace')
-      .select('user_id, role, profils (prenom, email)')
-      .eq('espace_id', espace.id)
-      .order('created_at', { ascending: true })
-    if (!error) setMembres(data)
-  }, [espace.id])
-
+  // Un lien d'invitation affiché ne vaut que pour l'espace où il a été créé
   useEffect(() => {
-    charger()
     setLien('')
-  }, [charger])
+  }, [espace.id])
 
   async function creerLien() {
     setErreur('')
@@ -89,12 +81,12 @@ function Membres() {
           <li key={m.user_id} className="py-2.5 flex items-center justify-between gap-3">
             <div className="flex flex-col">
               <span className="font-sans text-text-primary">
-                {m.profils?.prenom || m.profils?.email}
+                {m.prenom}
                 {m.user_id === utilisateur.id && (
                   <span className="text-text-muted"> (toi)</span>
                 )}
               </span>
-              <span className="font-sans text-xs text-text-muted">{m.profils?.email}</span>
+              <span className="font-sans text-xs text-text-muted">{m.email}</span>
             </div>
             {m.role === 'admin' && (
               <span className="font-sans text-xs px-2.5 py-1 rounded-full bg-bg-base text-text-muted">

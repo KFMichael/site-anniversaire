@@ -15,6 +15,7 @@ import Chargement from './components/Chargement'
 import { useEspace } from './features/espace/contexte'
 import CoffreProvider from './features/coffre/CoffreProvider'
 import Coffre from './features/coffre/Coffre'
+import ChargeMentale from './features/charge/ChargeMentale'
 
 // Partie Activités (ex-site anniversaire) chargée à la demande : Leaflet et
 // le quiz n'alourdissent pas le premier affichage de l'application.
@@ -75,6 +76,7 @@ function App() {
                     <Route element={<Structure />}>
                       <Route index element={<TableauDeBord />} />
                       <Route path="/espace" element={<ReglagesEspace />} />
+                      <Route path="/charge" element={<ChargeMentale />} />
                       <Route path="/coffre" element={<Coffre />} />
                       <Route path="/activites" element={<Activites />}>
                         <Route index element={<Navigate to="idees" replace />} />

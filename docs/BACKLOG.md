@@ -67,14 +67,15 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Manifest PWA (installable sur l'écran d'accueil)
 - [ ] Icônes PNG 180/192/512 pour l'écran d'accueil iOS/Android
 
-### Phase 1 — Charge mentale
-- [ ] Table `charges` (nom, poids, emoji, archivée) avec liste par défaut à la création de l'espace
-- [ ] Table `attributions` (charge, mois, owner) — contrainte : un seul owner par charge et par mois
-- [ ] Écran du mois : chaque charge est une carte, on la « prend » d'un tap
-- [ ] Jauge de poids par membre, et alerte sur les charges sans owner
-- [ ] Gestion des charges (ajout, modification du poids, archivage)
-- [ ] Tableau de bord : « Ce mois-ci, tu gères… »
-- [ ] Historique des mois précédents
+### Phase 1 — Charge mentale ✅
+- [x] Table `charges` (nom, poids, emoji, archivée) avec liste par défaut à la création de l'espace
+- [x] Table `attributions` (charge, mois, owner) — contrainte : un seul owner par charge et par mois
+- [x] Écran du mois : chaque charge est une carte, on la « prend » d'un tap ; mise à jour en temps réel
+- [x] Jauge de poids par membre, et alerte sur les charges sans owner
+- [x] Gestion des charges (ajout, renommage, poids, archivage)
+- [x] Tableau de bord : « Ce mois-ci, tu gères… »
+- [x] Historique des mois précédents (lecture seule) ; mois suivant préparable à l'avance
+- [x] « Reprendre mes charges du mois dernier »
 
 ### Phase 2 — Courses
 - [ ] Catalogue des produits de la maison, par rayon

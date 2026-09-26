@@ -10,6 +10,7 @@ export const MODULES = [
     titre: 'Charge mentale',
     description: 'Qui gère quoi ce mois-ci',
     emoji: '🧠',
+    route: '/charge',
   },
   {
     id: 'courses',

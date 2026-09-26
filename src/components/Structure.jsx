@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 // (charge mentale, courses, menus…) viendront s'y ajouter.
 const ONGLETS = [
   { to: '/', label: 'Accueil', Icone: IconeMaison, fin: true },
+  { to: '/charge', label: 'Charge', Icone: IconeListe },
   { to: '/coffre', label: 'Coffre', Icone: IconeCadenas },
   { to: '/activites', label: 'Activités', Icone: IconeEtoile },
   { to: '/espace', label: 'Espace', Icone: IconeGroupe },
@@ -24,7 +25,7 @@ export default function Structure() {
                 to={to}
                 end={fin}
                 className={({ isActive }) =>
-                  `font-sans flex flex-col items-center gap-0.5 px-4 py-2 text-[11px] transition-colors duration-200 ease-spring ${
+                  `font-sans flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-colors duration-200 ease-spring ${
                     isActive ? 'text-accent' : 'text-text-muted hover:text-text-primary'
                   }`
                 }
@@ -46,6 +47,19 @@ function IconeMaison() {
       <path d="M3 10.5 12 3l9 7.5" />
       <path d="M5 9.5V21h14V9.5" />
       <path d="M10 21v-6h4v6" />
+    </svg>
+  )
+}
+
+function IconeListe() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m4 6.5 1.5 1.5L8 5.5" />
+      <path d="m4 12.5 1.5 1.5L8 11.5" />
+      <path d="M4.5 18.5h3" />
+      <path d="M11 7h9" />
+      <path d="M11 13h9" />
+      <path d="M11 18.5h9" />
     </svg>
   )
 }

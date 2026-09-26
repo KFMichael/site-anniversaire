@@ -64,6 +64,8 @@ src/
     ├── auth/                # Connexion (lien magique, Google), session
     ├── espace/              # Espace courant, création, invitation, réglages
     ├── tableau-de-bord/     # Accueil : modules de l'espace
+    ├── charge/              # Charge mentale : qui gère quoi chaque mois
+    │   └── calculs.js       # Mois, répartition des points (testé par calculs.test.js)
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
     │   ├── crypto.js        # Clé maîtresse, enveloppes phrase/PRF (WebCrypto), testé par crypto.test.js
     │   ├── biometrie.js     # Face ID / Touch ID : passkey WebAuthn + extension PRF
@@ -89,6 +91,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/rejoindre/:code` | Accepter une invitation |
 | `/` | Tableau de bord |
 | `/espace` | Membres, invitation, profil, changement d'espace |
+| `/charge` | Charge mentale du mois |
 | `/coffre` | Coffre à mots de passe |
 | `/activites/idees` · `carnet` · `voyages` · `messages` | Partie Activités |
 | `/activites/surprise` | Mots de passe du mode surprise |
