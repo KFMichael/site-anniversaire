@@ -59,9 +59,9 @@ export default function BibliothequePlats({ menus }) {
 
       {groupes.map(({ categorie, plats: duGroupe }) => (
         <section key={categorie.id} className="flex flex-col gap-1.5">
-          <h3 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
+          <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
             {categorie.emoji} {categorie.label}
-          </h3>
+          </h2>
           <ul className="rounded-3xl bg-bg-elevated shadow-soft divide-y divide-separator overflow-hidden">
             {duGroupe.map((p) =>
               edition === p.id ? (

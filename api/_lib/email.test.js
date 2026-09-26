@@ -10,9 +10,15 @@ const base = {
   jours: ['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04'],
   mois: '2026-09-01',
   mesCharges: [{ emoji: '🧺', nom: 'Faire la lessive' }],
-  chargesLibres: [{ emoji: '💶', nom: 'Gérer les finances' }],
-  diners: { '2026-09-28': 'Garba', '2026-09-30': 'Sauce graine et riz' },
-  courses: { aAcheter: ['Attiéké', 'Piment'], bientot: ['Huile de palme'] },
+  chargesLibres: [{ emoji: '💶', nom: 'Gérer les finances', lien: 'https://nido.example/api/action?t=prendre' }],
+  diners: {
+    '2026-09-28': { nom: 'Garba', lien: 'https://nido.example/api/action?t=autre' },
+    '2026-09-30': { nom: 'Sauce graine et riz' },
+  },
+  courses: {
+    aAcheter: [{ texte: 'Attiéké', lien: 'https://nido.example/api/action?t=achete' }, { texte: 'Piment' }],
+    bientot: [{ texte: 'Huile de palme' }],
+  },
 }
 
 test('récap hebdo : charges, dîners, courses', () => {
@@ -25,6 +31,11 @@ test('récap hebdo : charges, dîners, courses', () => {
   assert.match(texte, /- Huile de palme \(presque fini\)/)
   assert.match(html, /1 charge sans responsable/)
   assert.match(html, /href="https:\/\/nido.example"/)
+  // Boutons d'action en un clic, seulement là où un lien est fourni
+  assert.match(html, /Gérer les finances <a href="https:\/\/nido.example\/api\/action\?t=prendre"[^>]*>Je prends<\/a>/)
+  assert.match(html, /Garba <a href="https:\/\/nido.example\/api\/action\?t=autre"[^>]*>🎲 Autre<\/a>/)
+  assert.match(html, /Attiéké <a href="https:\/\/nido.example\/api\/action\?t=achete"[^>]*>✓ Acheté<\/a>/)
+  assert.equal((html.match(/api\/action/g) ?? []).length, 3)
 })
 
 test('rappel mensuel seul : pas de dîners ni de courses', () => {
@@ -44,7 +55,7 @@ test('le contenu saisi par les membres est échappé dans le HTML', () => {
     ...base,
     types: ['hebdo'],
     prenom: '<script>alert(1)</script>',
-    diners: { '2026-09-28': '<img src=x onerror=alert(1)>' },
+    diners: { '2026-09-28': { nom: '<img src=x onerror=alert(1)>', lien: 'https://x/"><script>' } },
   })
   assert.doesNotMatch(html, /<script>|<img/)
   assert.equal(echapper(`<a href="x">'&`), '&lt;a href=&quot;x&quot;&gt;&#39;&amp;')

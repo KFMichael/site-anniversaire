@@ -1,12 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Favicon Nido (coins arrondis) ; source : design/icone.svg -->
+  <!-- Icône Nido : un nid et deux œufs. Source des PNG de public/ (voir
+       design/DESIGN.md) ; carré plein, iOS et Android arrondissent eux-mêmes.
+       Le motif tient dans le cercle central de 80 % (icône « maskable »). -->
   <defs>
     <linearGradient id="fond" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1E88FF"/>
       <stop offset="1" stop-color="#0060C9"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#fond)"/>
+  <rect width="512" height="512" fill="url(#fond)"/>
   <g transform="translate(256 256) scale(1.15) translate(-256 -262)">
   <!-- Œufs -->
   <ellipse cx="218" cy="244" rx="54" ry="70" fill="#FFFFFF"/>

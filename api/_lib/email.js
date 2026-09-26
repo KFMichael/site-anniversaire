@@ -19,6 +19,12 @@ const STYLES = {
   texte: 'margin:0 0 8px;font-size:15px;line-height:1.5;color:#48484A;',
   liste: 'margin:0;padding-left:20px;font-size:15px;line-height:1.7;',
   bouton: 'display:inline-block;padding:12px 24px;background:#0071EB;color:#FFFFFF;border-radius:999px;text-decoration:none;font-weight:600;',
+  action: 'display:inline-block;margin-left:8px;padding:3px 10px;background:#E8F1FD;color:#0060C9;border-radius:999px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;',
+}
+
+// Petit bouton d'action à côté d'un élément (absent si pas de lien)
+function action(lien, libelle) {
+  return lien ? ` <a href="${echapper(lien)}" style="${STYLES.action}">${libelle}</a>` : ''
 }
 
 function section(titre, contenuHtml) {
@@ -32,10 +38,11 @@ function listeHtml(elements) {
 // donnees : {
 //   nomApp, lienApp, prenom, espaceNom,
 //   types: ['hebdo' | 'mensuel'], jours: [iso], mois: 'AAAA-MM-01',
-//   mesCharges: [{ emoji, nom }], chargesLibres: [{ emoji, nom }],
-//   diners: { [iso]: nom | null },
-//   courses: { aAcheter: [nom], bientot: [nom] }
+//   mesCharges: [{ emoji, nom }], chargesLibres: [{ emoji, nom, lien? }],
+//   diners: { [iso]: { nom | null, lien? } },
+//   courses: { aAcheter: [{ texte, lien? }], bientot: [{ texte, lien? }] }
 // }
+// Les `lien` sont les boutons d'action en un clic (api/action.js).
 export function construireEmail(d) {
   const hebdo = d.types.includes('hebdo')
   const mensuel = d.types.includes('mensuel')
@@ -54,7 +61,7 @@ export function construireEmail(d) {
   )
 
   if (mensuel) {
-    const libres = d.chargesLibres.map((c) => `${echapper(c.emoji)} ${echapper(c.nom)}`)
+    const libres = d.chargesLibres.map((c) => `${echapper(c.emoji)} ${echapper(c.nom)}${action(c.lien, 'Je prends')}`)
     html.push(
       section(
         `🧠 ${echapper(moisLibelle)} : choisis ta charge mentale`,
@@ -88,7 +95,10 @@ export function construireEmail(d) {
             : `<p style="${STYLES.texte}">Aucune pour l'instant.</p>`
         ) +
           (d.chargesLibres.length
-            ? `<p style="${STYLES.texte};max-width:560px;margin:-8px auto 16px;">⚠️ ${d.chargesLibres.length} charge${d.chargesLibres.length > 1 ? 's' : ''} sans responsable.</p>`
+            ? section(
+                `⚠️ ${d.chargesLibres.length} charge${d.chargesLibres.length > 1 ? 's' : ''} sans responsable`,
+                listeHtml(d.chargesLibres.map((c) => `${echapper(c.emoji)} ${echapper(c.nom)}${action(c.lien, 'Je prends')}`))
+              )
             : '')
       )
       texte.push(`Tes charges de ${moisLibelle.toLowerCase()} :`)
@@ -96,10 +106,15 @@ export function construireEmail(d) {
       texte.push('')
     }
 
-    const lignes = d.jours.map((j) => `<strong>${echapper(libelleJour(j))}</strong> : ${d.diners[j] ? echapper(d.diners[j]) : '<span style="color:#6B6B70;">rien de prévu</span>'}`)
+    const lignes = d.jours.map((j) => {
+      const diner = d.diners[j] ?? {}
+      return `<strong>${echapper(libelleJour(j))}</strong> : ${
+        diner.nom ? echapper(diner.nom) : '<span style="color:#6B6B70;">rien de prévu</span>'
+      }${action(diner.lien, diner.nom ? '🎲 Autre' : '🎲 Au hasard')}`
+    })
     html.push(section(`🍽️ Les dîners, ${echapper(libelleSemaine(d.jours[0]).toLowerCase())}`, listeHtml(lignes)))
     texte.push(`Les dîners, ${libelleSemaine(d.jours[0]).toLowerCase()} :`)
-    texte.push(...d.jours.map((j) => `- ${libelleJour(j)} : ${d.diners[j] ?? 'rien de prévu'}`))
+    texte.push(...d.jours.map((j) => `- ${libelleJour(j)} : ${d.diners[j]?.nom ?? 'rien de prévu'}`))
     texte.push('')
 
     const { aAcheter, bientot } = d.courses
@@ -109,14 +124,16 @@ export function construireEmail(d) {
         `🛒 Liste de courses (${total})`,
         total
           ? listeHtml([
-              ...aAcheter.map(echapper),
-              ...bientot.map((n) => `${echapper(n)} <span style="color:#6B6B70;">(presque fini)</span>`),
+              ...aAcheter.map((x) => `${echapper(x.texte)}${action(x.lien, '✓ Acheté')}`),
+              ...bientot.map(
+                (x) => `${echapper(x.texte)} <span style="color:#6B6B70;">(presque fini)</span>${action(x.lien, '✓ Acheté')}`
+              ),
             ])
           : `<p style="${STYLES.texte}">Rien à acheter pour l'instant 🎉</p>`
       )
     )
     texte.push(`Liste de courses (${total}) :`)
-    texte.push(...aAcheter.map((n) => `- ${n}`), ...bientot.map((n) => `- ${n} (presque fini)`))
+    texte.push(...aAcheter.map((x) => `- ${x.texte}`), ...bientot.map((x) => `- ${x.texte} (presque fini)`))
     texte.push('')
   }
 

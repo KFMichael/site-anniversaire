@@ -29,6 +29,7 @@ les mêmes classes (`bg-bg-base`, `text-text-primary`, etc.).
 | `--color-text-muted`        | `#6B6B70`                     | `#98989E`                      |
 | `--color-separator`         | `rgb(60 60 67 / 0.15)`        | `rgb(255 255 255 / 0.15)`      |
 | `--color-accent`            | `#0071EB` (identique dans les deux thèmes) |
+| `--color-accent-text`       | `#0062CC`                     | `#409CFF`                      |
 
 `--color-accent` est une teinte iOS "systemBlue" (proche de #007AFF, ajustée
 de ~2% pour que le texte blanc sur bouton accent et le texte accent sur fond
@@ -36,7 +37,9 @@ de page passent tous les deux le seuil AA 4.5:1 dans les deux thèmes — le
 #007AFF pur échoue de justesse, à 4.02:1, sur fond blanc). Règle d'usage :
 l'accent n'apparaît **jamais en texte nu directement sur le fond de page** —
 seulement en remplissage de pastille/bouton (texte blanc dessus) ou en
-bordure/anneau de focus (non soumis au seuil 4.5:1 des textes).
+bordure/anneau de focus (non soumis au seuil 4.5:1 des textes). Pour du
+**texte bleu** (onglet actif, « ce soir »…), utiliser `text-accent-text` :
+5.2:1 minimum en clair, 6:1 en sombre.
 
 Contrastes vérifiés (WCAG AA, 4.5:1 texte normal) : primary/secondary/muted
 sur base et sur elevated, dans les deux thèmes ; blanc sur accent, accent sur
@@ -44,7 +47,10 @@ fond clair — voir calculs dans l'historique du projet.
 
 ## Typographie
 
-Uniquement Inter (`--font-sans`). Fraunces et `font-display` sont retirés.
+Police système (`--font-sans`) : **SF Pro** sur iPhone et Mac, la police
+native des Human Interface Guidelines (rien à télécharger), puis Segoe UI /
+Roboto ailleurs. Inter, auparavant chargée depuis Google Fonts, est retirée.
+Champs de saisie à 16 px minimum (sinon Safari iOS zoome à la saisie).
 Hiérarchie construite par poids et taille, pas par police :
 - Titres : `font-semibold` / `font-bold`, tailles `text-2xl` à `text-5xl`
 - Corps / labels : `font-normal` / `font-medium`, `text-sm` à `text-base`
@@ -84,3 +90,21 @@ d'une section (`bg-bg-base` reste opaque).
 Barre du haut en verre dépoli (`bg-bg-elevated-glass backdrop-blur-xl`,
 bordure basse `border-separator`), onglet actif en pastille pleine
 `bg-accent text-white`.
+
+## Icône
+
+Un nid et deux œufs, blanc sur dégradé bleu (`#1E88FF` → `#0060C9`, autour
+de l'accent). Source : `design/icone.svg` (carré plein, le système arrondit),
+déclinée en `public/favicon.svg` (coins arrondis), `apple-touch-icon.png`
+(180 px, écran d'accueil iOS), `icon-192.png` et `icon-512.png` (Android,
+aussi en « maskable » : le motif tient dans le cercle central de 80 %).
+Pour régénérer les PNG, faire une capture du SVG aux tailles voulues
+(navigateur ou `rsvg-convert -w 180 design/icone.svg > public/apple-touch-icon.png`).
+
+## Interactions (iPhone d'abord)
+
+Règles complètes dans `CLAUDE.md` (sections 1 et 2). En bref : zones
+tactiles ≥ 44 pt (classe `cible-44`), état pressé visible sur chaque
+bouton, pas de flash gris ni de délai au toucher, zones de sécurité
+respectées, `prefers-reduced-motion` respecté, écrans vérifiés à 320 px en
+clair et en sombre.

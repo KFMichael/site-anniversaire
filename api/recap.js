@@ -17,6 +17,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { envoyerApercu, executerRecapQuotidien } from './_lib/recap.js'
 import { creerEnvoiResend } from './_lib/resend.js'
+import { cleActions } from './_lib/jetons.js'
 
 const NOM_APP = 'Nido'
 
@@ -42,6 +43,8 @@ function configuration() {
         process.env.APP_URL ||
         (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : ''),
       fuseau: process.env.RECAP_FUSEAU || 'Europe/Paris',
+      // Boutons d'action en un clic dans l'email (api/action.js)
+      cleActions: process.env.CRON_SECRET ? cleActions(process.env.CRON_SECRET) : null,
     },
   }
 }

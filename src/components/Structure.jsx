@@ -26,7 +26,7 @@ export default function Structure() {
                 end={fin}
                 className={({ isActive }) =>
                   `font-sans flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-colors duration-200 ease-spring ${
-                    isActive ? 'text-accent' : 'text-text-muted hover:text-text-primary'
+                    isActive ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
                   }`
                 }
               >

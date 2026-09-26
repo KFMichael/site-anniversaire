@@ -65,7 +65,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] RLS : chaque table filtrée par appartenance à l'espace
 - [x] Barre d'onglets en bas, tableau de bord des modules
 - [x] Manifest PWA (installable sur l'écran d'accueil)
-- [ ] Icônes PNG 180/192/512 pour l'écran d'accueil iOS/Android
+- [x] Icônes PNG 180/192/512 pour l'écran d'accueil iOS/Android (nid et deux œufs, `design/icone.svg`)
 
 ### Phase 1 — Charge mentale ✅
 - [x] Table `charges` (nom, poids, emoji, archivée) avec liste par défaut à la création de l'espace
@@ -84,7 +84,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Ajout manuel d'articles ponctuels (un nom de produit du stock le marque « fini » au lieu de créer un doublon)
 - [x] Mode magasin : cocher = dans le panier ; « Terminer les courses » remet les produits à « il en reste »
 - [x] Synchronisation temps réel (Supabase Realtime)
-- [ ] Quantités (« 2 × lait »)
+- [x] Quantités : pastille modifiable dans la liste, saisie rapide « 2 lait » / « lait x2 » / « farine 1kg », reprises dans le récap par email
 
 ### Phase 3 — Menus ✅
 - [x] Bibliothèque de plats (nom, catégorie, rapide/long, ingrédients) : 34 plats de départ, dont 16 ivoiriens / ouest-africains
@@ -98,6 +98,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Email personnalisé par membre : charges du mois, dîners et courses de la semaine à venir
 - [x] Rappel du 1er du mois pour choisir ses charges (fusionné avec le récap si le 1er est un dimanche)
 - [x] Désinscription par type d'email, aperçu à la demande, journal anti-doublon
+- [x] Boutons d'action en un clic dans l'email : prendre une charge, marquer un article acheté, tirer un autre plat (jetons signés, `api/action.js`)
 - [ ] Jour / heure au choix (nécessite une tâche horaire : offre Vercel Pro)
 
 ### Phase 5 — Sport
@@ -117,6 +118,12 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Réinitialisation du coffre (phrase oubliée), réservée aux admins
 - [ ] Import depuis un export CSV (navigateur, Bitwarden…)
 - [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
+
+### Qualité — iPhone, accessibilité, erreurs ✅
+- [x] Règles du projet dans `CLAUDE.md` : iPhone d'abord (Human Interface Guidelines), accessibilité WCAG 2.1 AA, gestion des erreurs, sécurité des données, vérifications avant push
+- [x] Page 404, limite d'erreur globale (dont « nouvelle version » après déploiement), bandeau hors connexion
+- [x] Audit axe-core de tous les écrans à 320 et 390 px, clair et sombre : 0 violation ; zones tactiles ≥ 44 pt ; champs ≥ 16 px ; pas de défilement horizontal
+- [x] Police système (SF Pro), pas de délai ni de flash au toucher, zones de sécurité, `prefers-reduced-motion`
 
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)

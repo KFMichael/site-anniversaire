@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useTempsReel } from '../../lib/useTempsReel'
 import { useEspace } from '../espace/contexte'
-import { normaliser } from './liste'
+import { lireArticle, normaliser } from './liste'
 
 // Stock des produits et articles ponctuels de l'espace.
 // Les modifications sont appliquées tout de suite à l'écran (optimistes),
@@ -53,7 +53,7 @@ export function useCourses() {
     (id, etat) => {
       // Repasser à « il en reste » sort aussi le produit du panier
       const modifications = { etat, updated_at: new Date().toISOString() }
-      if (etat === 'ok') modifications.dans_panier = false
+      if (etat === 'ok') Object.assign(modifications, { dans_panier: false, quantite: null })
       setProduits((liste) => liste.map((p) => (p.id === id ? { ...p, ...modifications } : p)))
       return persister(
         supabase.from('produits').update(modifications).eq('id', id),
@@ -81,20 +81,44 @@ export function useCourses() {
 
   // Si l'article correspond à un produit du stock, on marque le produit
   // « fini » plutôt que de créer un doublon sur la liste
+  // « 2 lait » ou « lait x2 » : la quantité est extraite du texte saisi
   const ajouterALaListe = useCallback(
-    async (nom, rayonChoisi) => {
+    async (texte, rayonChoisi) => {
+      const { nom, quantite } = lireArticle(texte)
       const existant = produits.find((p) => normaliser(p.nom) === normaliser(nom))
       if (existant) {
-        if (existant.etat === 'fini') return null
-        return changerEtat(existant.id, 'fini')
+        if (existant.etat === 'fini' && !quantite) return null
+        const modifications = { etat: 'fini', updated_at: new Date().toISOString() }
+        if (quantite) modifications.quantite = quantite
+        setProduits((liste) => liste.map((p) => (p.id === existant.id ? { ...p, ...modifications } : p)))
+        return persister(
+          supabase.from('produits').update(modifications).eq('id', existant.id),
+          "L'article n'a pas pu être ajouté."
+        )
       }
       const { error } = await supabase
         .from('articles_courses')
-        .insert({ espace_id: espace.id, nom: nom.trim(), rayon: rayonChoisi })
+        .insert({ espace_id: espace.id, nom, quantite, rayon: rayonChoisi })
       await recharger()
       return error ? "L'article n'a pas pu être ajouté." : null
     },
-    [produits, espace.id, changerEtat, recharger]
+    [produits, espace.id, persister, recharger]
+  )
+
+  // Quantité modifiée depuis la liste (texte vide = pas de quantité)
+  const modifierQuantite = useCallback(
+    (element, texte) => {
+      const quantite = texte.trim().slice(0, 20) || null
+      const table = element.origine === 'stock' ? 'produits' : 'articles_courses'
+      const miseAJour = (liste) => liste.map((e) => (e.id === element.id ? { ...e, quantite } : e))
+      if (element.origine === 'stock') setProduits(miseAJour)
+      else setArticles(miseAJour)
+      return persister(
+        supabase.from(table).update({ quantite }).eq('id', element.id),
+        "La quantité n'a pas pu être enregistrée."
+      )
+    },
+    [persister]
   )
 
   // « Finalement pas besoin » : le produit repasse à « il en reste »,
@@ -119,7 +143,7 @@ export function useCourses() {
       produitsAchetes.length
         ? supabase
             .from('produits')
-            .update({ etat: 'ok', dans_panier: false, updated_at: new Date().toISOString() })
+            .update({ etat: 'ok', dans_panier: false, quantite: null, updated_at: new Date().toISOString() })
             .in('id', produitsAchetes)
         : { error: null },
       articlesAchetes.length
@@ -170,6 +194,7 @@ export function useCourses() {
     changerEtat,
     basculerPanier,
     ajouterALaListe,
+    modifierQuantite,
     retirerDeLaListe,
     terminerCourses,
     ajouterProduit,

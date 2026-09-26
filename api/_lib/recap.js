@@ -4,6 +4,13 @@
 // permet de le tester (recap.test.js).
 import { construireEmail } from './email.js'
 import { dateLocale, envoisDuJour, periodeCouverte } from './planning.js'
+import { creerJeton } from './jetons.js'
+import { afficherQuantite } from '../../src/features/courses/liste.js'
+
+// « Attiéké (× 2) », « Farine (1 kg) », « Lait »
+function avecQuantite({ nom, quantite }) {
+  return quantite ? `${nom} (${afficherQuantite(quantite)})` : nom
+}
 
 const DOUBLON = '23505'
 
@@ -19,8 +26,8 @@ async function donneesEspace(admin, espaceId, { jours, mois }) {
   const [charges, attributions, produits, articles, diners] = await Promise.all([
     lire(admin.from('charges').select('id, nom, emoji, ordre, archivee').eq('espace_id', espaceId)),
     lire(admin.from('attributions').select('charge_id, user_id').eq('espace_id', espaceId).eq('mois', mois)),
-    lire(admin.from('produits').select('nom, etat').eq('espace_id', espaceId).neq('etat', 'ok')),
-    lire(admin.from('articles_courses').select('nom').eq('espace_id', espaceId)),
+    lire(admin.from('produits').select('id, nom, etat, quantite').eq('espace_id', espaceId).neq('etat', 'ok')),
+    lire(admin.from('articles_courses').select('id, nom, quantite').eq('espace_id', espaceId)),
     jours.length
       ? lire(
           admin
@@ -34,6 +41,8 @@ async function donneesEspace(admin, espaceId, { jours, mois }) {
   ])
   const owners = new Map(attributions.map((a) => [a.charge_id, a.user_id]))
   const tri = (a, b) => a.ordre - b.ordre
+  const parTexte = (a, b) => a.texte.localeCompare(b.texte, 'fr')
+  const article = (type) => (x) => ({ id: x.id, type, nom: x.nom, texte: avecQuantite(x) })
   return {
     charges: charges.sort(tri),
     owners,
@@ -41,15 +50,25 @@ async function donneesEspace(admin, espaceId, { jours, mois }) {
     diners: Object.fromEntries(diners.map((d) => [d.jour, d.plats?.nom ?? d.texte ?? null])),
     courses: {
       aAcheter: [
-        ...produits.filter((p) => p.etat === 'fini').map((p) => p.nom),
-        ...articles.map((a) => a.nom),
-      ].sort((a, b) => a.localeCompare(b, 'fr')),
-      bientot: produits.filter((p) => p.etat === 'bientot').map((p) => p.nom).sort((a, b) => a.localeCompare(b, 'fr')),
+        ...produits.filter((p) => p.etat === 'fini').map(article('p')),
+        ...articles.map(article('a')),
+      ].sort(parTexte),
+      bientot: produits.filter((p) => p.etat === 'bientot').map(article('p')).sort(parTexte),
     },
   }
 }
 
+// Boutons d'action du membre (jetons signés à son nom) ; sans clé ou sans
+// adresse de l'appli, l'email part sans boutons
+function fabriqueLiens(membre, espaceId, config) {
+  if (!config.cleActions || !config.lienApp) return () => null
+  return (contenu) =>
+    `${config.lienApp}/api/action?t=${creerJeton(config.cleActions, { u: membre.user_id, e: espaceId, ...contenu })}`
+}
+
 function emailPour(membre, espace, donnees, types, periode, config) {
+  const lien = fabriqueLiens(membre, espace.id, config)
+  const avecLien = (contenu) => (x) => ({ ...x, lien: lien(contenu(x)) })
   return construireEmail({
     nomApp: config.nomApp,
     lienApp: config.lienApp,
@@ -59,9 +78,17 @@ function emailPour(membre, espace, donnees, types, periode, config) {
     jours: periode.jours,
     mois: periode.mois,
     mesCharges: donnees.charges.filter((c) => donnees.owners.get(c.id) === membre.user_id),
-    chargesLibres: donnees.chargesLibres,
-    diners: donnees.diners,
-    courses: donnees.courses,
+    chargesLibres: donnees.chargesLibres.map(avecLien((c) => ({ a: 'prendre', c: c.id, m: periode.mois, n: c.nom }))),
+    diners: Object.fromEntries(
+      periode.jours.map((jour) => [
+        jour,
+        { nom: donnees.diners[jour] ?? null, lien: lien({ a: 'autre', c: jour, n: donnees.diners[jour] ?? jour }) },
+      ])
+    ),
+    courses: {
+      aAcheter: donnees.courses.aAcheter.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
+      bientot: donnees.courses.bientot.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
+    },
   })
 }
 

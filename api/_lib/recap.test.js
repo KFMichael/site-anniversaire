@@ -1,56 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createClient } from '@supabase/supabase-js'
 import { envoyerApercu, executerRecapQuotidien } from './recap.js'
-
-// Faux PostgREST en mémoire : juste ce que recap.js utilise (select avec
-// jointure simple, filtres eq/neq/gte/lte, insert avec clé primaire, delete)
-function fauxSupabase(tables) {
-  const cles = { envois_recap: ['user_id', 'espace_id', 'type', 'periode'] }
-  const jointures = {
-    plats: (ligne) => tables.plats.find((p) => p.id === ligne.plat_id) ?? null,
-    profils: (ligne) => tables.profils.find((p) => p.id === ligne.user_id) ?? null,
-  }
-  async function fetch(url, options = {}) {
-    const u = new URL(url)
-    const table = u.pathname.split('/').pop()
-    const filtres = [...u.searchParams].filter(([k]) => k !== 'select')
-    const garde = (l) =>
-      filtres.every(([k, v]) => {
-        const [op, ...reste] = v.split('.')
-        const val = reste.join('.')
-        return { eq: String(l[k]) === val, neq: String(l[k]) !== val, gte: String(l[k]) >= val, lte: String(l[k]) <= val }[op]
-      })
-    const json = (corps, status = 200) =>
-      new Response(JSON.stringify(corps), { status, headers: { 'Content-Type': 'application/json' } })
-    const methode = options.method ?? 'GET'
-    if (methode === 'GET') {
-      const select = (u.searchParams.get('select') ?? '').replace(/\s/g, '')
-      return json(
-        (tables[table] ?? []).filter(garde).map((l) => {
-          const r = { ...l }
-          for (const [nom, joindre] of Object.entries(jointures)) if (select.includes(`${nom}(`)) r[nom] = joindre(l)
-          return r
-        })
-      )
-    }
-    if (methode === 'POST') {
-      const ligne = JSON.parse(options.body)
-      const cle = cles[table]
-      if (cle && tables[table].some((l) => cle.every((c) => l[c] === ligne[c]))) {
-        return json({ code: '23505', message: 'duplicate key' }, 409)
-      }
-      tables[table].push(ligne)
-      return json(null, 201)
-    }
-    if (methode === 'DELETE') {
-      tables[table] = tables[table].filter((l) => !garde(l))
-      return json(null, 204)
-    }
-    return json({ message: 'non géré' }, 400)
-  }
-  return createClient('http://faux.supabase', 'cle', { global: { fetch }, auth: { persistSession: false } })
-}
+import { fauxSupabase } from '../../test/faux-supabase.js'
 
 function jeuDeDonnees() {
   return {
@@ -71,11 +22,11 @@ function jeuDeDonnees() {
     ],
     attributions: [{ espace_id: 'e1', charge_id: 'c1', user_id: 'u2', mois: '2026-09-01' }],
     produits: [
-      { espace_id: 'e1', nom: 'Attiéké', etat: 'fini' },
+      { espace_id: 'e1', nom: 'Attiéké', etat: 'fini', quantite: '2' },
       { espace_id: 'e1', nom: 'Huile de palme', etat: 'bientot' },
       { espace_id: 'e1', nom: 'Riz', etat: 'ok' },
     ],
-    articles_courses: [{ espace_id: 'e1', nom: 'Bougies' }],
+    articles_courses: [{ espace_id: 'e1', nom: 'Bougies', quantite: '1 paquet' }],
     plats: [{ id: 'p1', nom: 'Garba' }],
     diners: [
       { espace_id: 'e1', jour: '2026-09-28', plat_id: 'p1', texte: null },
@@ -106,7 +57,7 @@ test('dimanche : un récap par membre, avec les données de la semaine à venir'
   assert.match(lea.texte, /- Lundi 28 : Garba/)
   assert.match(lea.texte, /- Mardi 29 : Resto/)
   assert.doesNotMatch(lea.texte, /21/) // pas la semaine passée
-  assert.match(lea.texte, /- Attiéké\n- Bougies\n- Huile de palme \(presque fini\)/)
+  assert.match(lea.texte, /- Attiéké \(× 2\)\n- Bougies \(1 paquet\)\n- Huile de palme \(presque fini\)/)
   assert.doesNotMatch(lea.texte, /Riz/)
 
   const michael = envoyes.find((e) => e.a === 'michael@exemple.fr')

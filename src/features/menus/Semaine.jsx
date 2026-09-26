@@ -34,7 +34,7 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
         <button
           onClick={() => changerSemaine(-1)}
           aria-label="Semaine précédente"
-          className="w-10 h-10 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
+          className="cible-44 shrink-0 w-11 h-11 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
         >
           ‹
         </button>
@@ -45,7 +45,7 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
         <button
           onClick={() => changerSemaine(1)}
           aria-label="Semaine suivante"
-          className="w-10 h-10 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
+          className="cible-44 shrink-0 w-11 h-11 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
         >
           ›
         </button>
@@ -136,13 +136,13 @@ function CarteJour({ jour, estAujourdhui, plats, onChoisir, onVerrou, onTirer })
       <div className="flex items-center gap-2">
         <span className="font-sans text-sm font-medium text-text-muted flex-1">
           {libelleJour(jour.jour)}
-          {estAujourdhui && <span className="text-accent"> · ce soir</span>}
+          {estAujourdhui && <span className="text-accent-text"> · ce soir</span>}
         </span>
         <button
           onClick={onTirer}
           disabled={jour.verrouille}
           aria-label={`Tirer au sort le ${libelleJour(jour.jour)}`}
-          className="w-9 h-9 rounded-full bg-bg-base active:scale-90 transition-transform duration-200 ease-spring disabled:opacity-30"
+          className="cible-44 w-9 h-9 rounded-full bg-bg-base active:scale-90 transition-transform duration-200 ease-spring disabled:opacity-30"
         >
           🎲
         </button>
@@ -150,7 +150,7 @@ function CarteJour({ jour, estAujourdhui, plats, onChoisir, onVerrou, onTirer })
           onClick={onVerrou}
           aria-pressed={jour.verrouille}
           aria-label={jour.verrouille ? 'Déverrouiller ce soir' : 'Verrouiller ce soir'}
-          className={`w-9 h-9 rounded-full active:scale-90 transition-transform duration-200 ease-spring ${
+          className={`cible-44 w-9 h-9 rounded-full active:scale-90 transition-transform duration-200 ease-spring ${
             jour.verrouille ? 'bg-accent/15' : 'bg-bg-base opacity-60'
           }`}
         >
@@ -375,7 +375,7 @@ function Interrupteur({ label, actif, onChange }) {
         role="switch"
         aria-checked={actif}
         onClick={() => onChange(!actif)}
-        className={`relative w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
+        className={`cible-44 w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
           actif ? 'bg-accent' : 'bg-separator'
         }`}
       >

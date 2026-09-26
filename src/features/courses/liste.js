@@ -41,3 +41,26 @@ export function compterListe(liste) {
 export function normaliser(texte) {
   return (texte ?? '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim()
 }
+
+// « 2 lait », « lait x2 », « 500 g farine », « Farine 1kg » → { nom, quantite }
+// Sans quantité reconnue : { nom: texte, quantite: null }
+const UNITES = '(?:kg|g|l|cl|ml|x|×|paquets?|boîtes?|bouteilles?|sachets?|pots?)'
+const QUANTITE_AVANT = new RegExp(`^(\\d+(?:[.,]\\d+)?\\s*${UNITES}?)\\s+(.+)$`, 'i')
+const QUANTITE_APRES_X = /^(.+?)\s+[x×]\s*(\d+(?:[.,]\d+)?)$/i
+const QUANTITE_APRES = new RegExp(`^(.+?)\\s+(\\d+(?:[.,]\\d+)?\\s*${UNITES})$`, 'i')
+
+export function lireArticle(texte) {
+  const propre = texte.trim().replace(/\s+/g, ' ')
+  let m = propre.match(QUANTITE_AVANT)
+  if (m) return { nom: m[2], quantite: m[1].replace(/\s*[x×]$/i, '') }
+  m = propre.match(QUANTITE_APRES_X)
+  if (m) return { nom: m[1], quantite: m[2] }
+  m = propre.match(QUANTITE_APRES)
+  if (m) return { nom: m[1], quantite: m[2] }
+  return { nom: propre, quantite: null }
+}
+
+// Un nombre seul se lit « × 2 » ; une quantité avec unité reste telle quelle
+export function afficherQuantite(quantite) {
+  return /^\d+(?:[.,]\d+)?$/.test(quantite) ? `× ${quantite}` : quantite
+}
