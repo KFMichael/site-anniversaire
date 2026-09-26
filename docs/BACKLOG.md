@@ -86,11 +86,12 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Synchronisation temps réel (Supabase Realtime)
 - [ ] Quantités (« 2 × lait »)
 
-### Phase 3 — Menus
-- [ ] Bibliothèque de plats (nom, catégorie, rapide/long, ingrédients)
-- [ ] Planning des dîners de la semaine
-- [ ] Assistant de tirage aléatoire avec les règles ci-dessus, verrouillage par jour
-- [ ] Envoi des ingrédients de la semaine vers la liste de courses
+### Phase 3 — Menus ✅
+- [x] Bibliothèque de plats (nom, catégorie, rapide/long, ingrédients) : 34 plats de départ, dont 16 ivoiriens / ouest-africains
+- [x] Planning des dîners de la semaine (plat ou texte libre : resto, restes…)
+- [x] Assistant de tirage aléatoire avec les règles ci-dessus (chacune activable), verrouillage par jour ; un choix manuel verrouille le soir
+- [x] Envoi des ingrédients de la semaine vers la liste de courses (manquants pré-cochés, stock et liste détectés)
+- [x] Stock enrichi de 31 produits ivoiriens / ouest-africains (attiéké, plantain, igname, gombo, huile et crème de palme…)
 
 ### Phase 4 — Récap hebdo
 - [ ] Edge Function Supabase + `pg_cron` + Resend (envoi d'email)
