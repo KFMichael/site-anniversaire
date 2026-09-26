@@ -6,6 +6,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 
 1. `supabase/migrations/0001_espaces.sql` — profils, espaces, membres, invitations, RLS
 2. `supabase/migrations/0002_activites_par_espace.sql` — rattache le carnet, les messages et les mots de passe du mode surprise à un espace
+3. `supabase/migrations/0003_coffre.sql` — coffre à mots de passe (données chiffrées uniquement)
 
 La migration 0002 **supprime les anciennes policies** des tables
 `activites_carnet`, `messages_proches` et `mots_passe_accueil` (accès

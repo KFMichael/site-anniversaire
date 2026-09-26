@@ -11,6 +11,14 @@ Backlog et plan : [`docs/BACKLOG.md`](docs/BACKLOG.md). Le site anniversaire
 d'origine est archivé sur la branche `archive/site-anniversaire` ; ses
 écrans vivent dans la partie **Activités**.
 
+## Coffre à mots de passe
+
+Les mots de passe sont chiffrés **dans le navigateur** avec une clé dérivée
+de la phrase secrète de l'espace (PBKDF2-SHA256, 600 000 itérations →
+AES-GCM 256). Supabase ne stocke que du chiffré : ni la phrase, ni la clé,
+ni même le nom des entrées. Conséquence : une phrase oubliée est
+irrécupérable (le coffre peut seulement être réinitialisé par un admin).
+
 ## Stack
 
 - React + Vite, React Router
@@ -24,6 +32,7 @@ d'origine est archivé sur la branche `archive/site-anniversaire` ; ses
 npm install
 cp .env.local.example .env.local   # renseigner les clés Supabase
 npm run dev
+npm test        # tests unitaires (node --test)
 ```
 
 Configuration de Supabase (migrations, lien magique, Google) :
@@ -44,6 +53,9 @@ src/
     ├── auth/                # Connexion (lien magique, Google), session
     ├── espace/              # Espace courant, création, invitation, réglages
     ├── tableau-de-bord/     # Accueil : modules de l'espace
+    ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
+    │   ├── crypto.js        # PBKDF2 + AES-GCM (WebCrypto), testé par crypto.test.js
+    │   └── CoffreProvider.jsx # Clé en mémoire, verrouillage auto
     └── activites/           # Ex-site anniversaire
         ├── Activites.jsx    # Sous-navigation
         ├── Quiz.jsx         # Idées d'activités (5 questions)
@@ -65,6 +77,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/rejoindre/:code` | Accepter une invitation |
 | `/` | Tableau de bord |
 | `/espace` | Membres, invitation, profil, changement d'espace |
+| `/coffre` | Coffre à mots de passe |
 | `/activites/idees` · `carnet` · `voyages` · `messages` | Partie Activités |
 | `/activites/surprise` | Mots de passe du mode surprise |
 | `/surprise` | Mode surprise (plein écran, enchaîne sur le quiz) |

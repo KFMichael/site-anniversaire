@@ -102,11 +102,14 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [ ] Suggestion des créneaux libres pour tous les membres (API free/busy)
 - [ ] Création de l'événement dans les agendas des participants
 
-### Phase 6 — Coffre à mots de passe
-- [ ] Phrase secrète de l'espace → clé dérivée dans le navigateur (PBKDF2, AES-GCM via WebCrypto)
-- [ ] Entrées chiffrées : nom, identifiant, mot de passe, note, catégorie
-- [ ] Masquage par défaut, copie en un tap, verrouillage automatique
-- [ ] Changement de phrase secrète (rechiffrement)
+### Phase 6 — Coffre à mots de passe ✅ (réalisée en premier)
+- [x] Phrase secrète de l'espace → clé dérivée dans le navigateur (PBKDF2-SHA256 600 000 itérations, AES-GCM 256 via WebCrypto)
+- [x] Entrées entièrement chiffrées (nom compris) : nom, catégorie, identifiant, mot de passe, site, note
+- [x] Masquage par défaut, copie en un tap (presse-papier vidé après 30 s), générateur de mots de passe
+- [x] Verrouillage automatique (5 min d'inactivité, rechargement de la page, changement d'espace)
+- [x] Changement de phrase secrète (rechiffrement de toutes les entrées en une transaction)
+- [x] Réinitialisation du coffre (phrase oubliée), réservée aux admins
+- [ ] Import depuis un export CSV (navigateur, Bitwarden…)
 
 ### Phase 7 — Finitions
 - [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)

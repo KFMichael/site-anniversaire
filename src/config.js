@@ -41,5 +41,6 @@ export const MODULES = [
     titre: 'Mots de passe',
     description: 'Le coffre-fort partagé',
     emoji: '🔐',
+    route: '/coffre',
   },
 ]

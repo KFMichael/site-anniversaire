@@ -12,6 +12,9 @@ import ReglagesEspace from './features/espace/ReglagesEspace'
 import TableauDeBord from './features/tableau-de-bord/TableauDeBord'
 import Structure from './components/Structure'
 import Chargement from './components/Chargement'
+import { useEspace } from './features/espace/contexte'
+import CoffreProvider from './features/coffre/CoffreProvider'
+import Coffre from './features/coffre/Coffre'
 
 // Partie Activités (ex-site anniversaire) chargée à la demande : Leaflet et
 // le quiz n'alourdissent pas le premier affichage de l'application.
@@ -28,6 +31,17 @@ function AvecEspace() {
     <EspaceProvider>
       <Outlet />
     </EspaceProvider>
+  )
+}
+
+// La clé du coffre vit au niveau de l'espace : elle survit à la navigation
+// entre onglets, et `key` la jette dès qu'on change d'espace
+function AvecCoffre() {
+  const { espace } = useEspace()
+  return (
+    <CoffreProvider key={espace.id}>
+      <Outlet />
+    </CoffreProvider>
   )
 }
 
@@ -54,19 +68,22 @@ function App() {
                 <Route path="/rejoindre/:code" element={<Rejoindre />} />
 
                 <Route element={<RequiertEspace />}>
-                  {/* Plein écran, sans barre d'onglets */}
-                  <Route path="/surprise" element={<ModeSurprise />} />
+                  <Route element={<AvecCoffre />}>
+                    {/* Plein écran, sans barre d'onglets */}
+                    <Route path="/surprise" element={<ModeSurprise />} />
 
-                  <Route element={<Structure />}>
-                    <Route index element={<TableauDeBord />} />
-                    <Route path="/espace" element={<ReglagesEspace />} />
-                    <Route path="/activites" element={<Activites />}>
-                      <Route index element={<Navigate to="idees" replace />} />
-                      <Route path="idees" element={<Quiz />} />
-                      <Route path="carnet" element={<CarnetActivites />} />
-                      <Route path="voyages" element={<CarteVoyages />} />
-                      <Route path="messages" element={<MurMessages />} />
-                      <Route path="surprise" element={<ReglagesSurprise />} />
+                    <Route element={<Structure />}>
+                      <Route index element={<TableauDeBord />} />
+                      <Route path="/espace" element={<ReglagesEspace />} />
+                      <Route path="/coffre" element={<Coffre />} />
+                      <Route path="/activites" element={<Activites />}>
+                        <Route index element={<Navigate to="idees" replace />} />
+                        <Route path="idees" element={<Quiz />} />
+                        <Route path="carnet" element={<CarnetActivites />} />
+                        <Route path="voyages" element={<CarteVoyages />} />
+                        <Route path="messages" element={<MurMessages />} />
+                        <Route path="surprise" element={<ReglagesSurprise />} />
+                      </Route>
                     </Route>
                   </Route>
                 </Route>
