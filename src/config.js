@@ -17,6 +17,7 @@ export const MODULES = [
     titre: 'Courses',
     description: 'Le stock de la maison et la liste à acheter',
     emoji: '🛒',
+    route: '/courses',
   },
   {
     id: 'menus',

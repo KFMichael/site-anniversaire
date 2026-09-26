@@ -77,13 +77,14 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Historique des mois précédents (lecture seule) ; mois suivant préparable à l'avance
 - [x] « Reprendre mes charges du mois dernier »
 
-### Phase 2 — Courses
-- [ ] Catalogue des produits de la maison, par rayon
-- [ ] État par produit : il en reste / presque fini / fini
-- [ ] Liste de courses générée : « fini » ajouté normalement, « presque fini » ajouté en couleur spécifique
-- [ ] Ajout manuel d'articles ponctuels
-- [ ] Mode magasin : cocher = acheté, le produit repasse à « il en reste »
-- [ ] Synchronisation temps réel (Supabase Realtime)
+### Phase 2 — Courses ✅
+- [x] Catalogue des produits de la maison, par rayon (39 produits de départ, modifiable)
+- [x] État par produit : il en reste / presque fini / fini
+- [x] Liste de courses générée : « fini » ajouté normalement, « presque fini » ajouté en couleur spécifique
+- [x] Ajout manuel d'articles ponctuels (un nom de produit du stock le marque « fini » au lieu de créer un doublon)
+- [x] Mode magasin : cocher = dans le panier ; « Terminer les courses » remet les produits à « il en reste »
+- [x] Synchronisation temps réel (Supabase Realtime)
+- [ ] Quantités (« 2 × lait »)
 
 ### Phase 3 — Menus
 - [ ] Bibliothèque de plats (nom, catégorie, rapide/long, ingrédients)
@@ -116,6 +117,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
 
 ### Phase 7 — Finitions
+- [ ] Réglage du thème dans les paramètres : clair / sombre / système (par appareil ; aujourd'hui le thème suit uniquement le système, voir `design/DESIGN.md` à mettre à jour)
 - [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)
 - [ ] Statistiques d'équilibre de la charge sur plusieurs mois
 - [ ] Voyages de la carte en base (aujourd'hui dans `src/features/activites/data/voyages.js`, commun à tous les espaces)

@@ -3,6 +3,7 @@ import { MODULES } from '../../config'
 import { useEspace } from '../espace/contexte'
 import { Page } from '../../components/ui'
 import ResumeCharge from '../charge/ResumeCharge'
+import ResumeCourses from '../courses/ResumeCourses'
 
 export default function TableauDeBord() {
   const { espace, profil } = useEspace()
@@ -10,6 +11,7 @@ export default function TableauDeBord() {
   return (
     <Page titre={`Bonjour${profil?.prenom ? ` ${profil.prenom}` : ''} 👋`} sousTitre={espace.nom}>
       <ResumeCharge />
+      <ResumeCourses />
       <div className="grid grid-cols-2 gap-3">
         {MODULES.map((m) => {
           const contenu = (
