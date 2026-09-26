@@ -93,11 +93,12 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Envoi des ingrédients de la semaine vers la liste de courses (manquants pré-cochés, stock et liste détectés)
 - [x] Stock enrichi de 31 produits ivoiriens / ouest-africains (attiéké, plantain, igname, gombo, huile et crème de palme…)
 
-### Phase 4 — Récap hebdo
-- [ ] Edge Function Supabase + `pg_cron` + Resend (envoi d'email)
-- [ ] Email personnalisé par membre (contenu ci-dessus)
-- [ ] Rappel du 1er du mois pour choisir ses charges
-- [ ] Réglages : jour/heure, désinscription
+### Phase 4 — Récap hebdo ✅
+- [x] Fonction Vercel `api/recap.js` + tâche planifiée quotidienne + Resend (plutôt qu'Edge Function + `pg_cron` : déployé avec l'appli, rien à installer)
+- [x] Email personnalisé par membre : charges du mois, dîners et courses de la semaine à venir
+- [x] Rappel du 1er du mois pour choisir ses charges (fusionné avec le récap si le 1er est un dimanche)
+- [x] Désinscription par type d'email, aperçu à la demande, journal anti-doublon
+- [ ] Jour / heure au choix (nécessite une tâche horaire : offre Vercel Pro)
 
 ### Phase 5 — Sport
 - [ ] Grille de la semaine, sélection de 3 créneaux de 45 min
