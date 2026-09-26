@@ -33,7 +33,7 @@ des entrées. Une phrase oubliée est irrécupérable (le coffre peut seulement
 ## Stack
 
 - React + Vite, React Router
-- Tailwind CSS v4 (identité iOS : `design/DESIGN.md`)
+- Tailwind CSS v4 (identité iOS, thème clair / sombre / système : `design/DESIGN.md`)
 - Supabase : Auth, Postgres + RLS, Storage
 - Leaflet (carte des voyages)
 

@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from './contexte'
 import { useMembres } from './useMembres'
+import Apparence from './Apparence'
 import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
 
 export default function ReglagesEspace() {
@@ -23,6 +24,7 @@ export default function ReglagesEspace() {
       )}
       <Membres />
       <Profil />
+      <Apparence />
       <Espaces />
     </Page>
   )

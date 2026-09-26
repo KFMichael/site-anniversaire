@@ -12,6 +12,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Nido" />
     <title>Nido</title>
+    <!-- Thème choisi dans l'appli (voir src/lib/theme.js), appliqué avant le
+         premier affichage pour éviter un flash de la mauvaise couleur -->
+    <script>
+      try {
+        var theme = localStorage.getItem('nido-theme')
+        if (theme === 'clair') document.documentElement.dataset.theme = 'light'
+        if (theme === 'sombre') document.documentElement.dataset.theme = 'dark'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
