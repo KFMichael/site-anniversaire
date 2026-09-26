@@ -31,6 +31,7 @@ export const MODULES = [
     titre: 'Sport',
     description: '3 séances de 45 min ensemble',
     emoji: '🏃',
+    route: '/sport',
   },
   {
     id: 'activites',

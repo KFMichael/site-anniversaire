@@ -60,6 +60,15 @@ dans le navigateur : les antivirus de messagerie qui analysent les liens
 n'exécutent pas ce script et ne déclenchent donc rien. Aucune variable
 supplémentaire à configurer.
 
+### Invitations des séances de sport
+
+Depuis **Sport**, « Envoyer l'invitation » appelle `/api/sport` : chaque
+membre reçoit un email par séance, expédié par `RECAP_EXPEDITEUR`, avec une
+invitation d'agenda (`.ics`, méthode REQUEST ou CANCEL). Gmail, Apple Mail
+et Outlook proposent « Accepter » et l'ajoutent à l'agenda ; une
+modification met à jour le même événement, une suppression l'annule.
+Aucune variable supplémentaire (heures affichées dans `RECAP_FUSEAU`).
+
 ## 4. Liens magiques via Resend (Supabase)
 
 L'envoi intégré à Supabase est limité à quelques emails par heure. Supabase >
