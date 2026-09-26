@@ -65,7 +65,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] RLS : chaque table filtrée par appartenance à l'espace
 - [x] Barre d'onglets en bas, tableau de bord des modules
 - [x] Manifest PWA (installable sur l'écran d'accueil)
-- [ ] Icônes PNG 180/192/512 pour l'écran d'accueil iOS/Android
+- [x] Icônes PNG 180/192/512 pour l'écran d'accueil iOS/Android (nid et deux œufs, `design/icone.svg`)
 
 ### Phase 1 — Charge mentale ✅
 - [x] Table `charges` (nom, poids, emoji, archivée) avec liste par défaut à la création de l'espace
@@ -84,7 +84,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Ajout manuel d'articles ponctuels (un nom de produit du stock le marque « fini » au lieu de créer un doublon)
 - [x] Mode magasin : cocher = dans le panier ; « Terminer les courses » remet les produits à « il en reste »
 - [x] Synchronisation temps réel (Supabase Realtime)
-- [ ] Quantités (« 2 × lait »)
+- [x] Quantités : pastille modifiable dans la liste, saisie rapide « 2 lait » / « lait x2 » / « farine 1kg », reprises dans le récap par email
 
 ### Phase 3 — Menus ✅
 - [x] Bibliothèque de plats (nom, catégorie, rapide/long, ingrédients) : 34 plats de départ, dont 16 ivoiriens / ouest-africains

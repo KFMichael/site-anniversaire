@@ -71,11 +71,11 @@ function jeuDeDonnees() {
     ],
     attributions: [{ espace_id: 'e1', charge_id: 'c1', user_id: 'u2', mois: '2026-09-01' }],
     produits: [
-      { espace_id: 'e1', nom: 'Attiéké', etat: 'fini' },
+      { espace_id: 'e1', nom: 'Attiéké', etat: 'fini', quantite: '2' },
       { espace_id: 'e1', nom: 'Huile de palme', etat: 'bientot' },
       { espace_id: 'e1', nom: 'Riz', etat: 'ok' },
     ],
-    articles_courses: [{ espace_id: 'e1', nom: 'Bougies' }],
+    articles_courses: [{ espace_id: 'e1', nom: 'Bougies', quantite: '1 paquet' }],
     plats: [{ id: 'p1', nom: 'Garba' }],
     diners: [
       { espace_id: 'e1', jour: '2026-09-28', plat_id: 'p1', texte: null },
@@ -106,7 +106,7 @@ test('dimanche : un récap par membre, avec les données de la semaine à venir'
   assert.match(lea.texte, /- Lundi 28 : Garba/)
   assert.match(lea.texte, /- Mardi 29 : Resto/)
   assert.doesNotMatch(lea.texte, /21/) // pas la semaine passée
-  assert.match(lea.texte, /- Attiéké\n- Bougies\n- Huile de palme \(presque fini\)/)
+  assert.match(lea.texte, /- Attiéké \(× 2\)\n- Bougies \(1 paquet\)\n- Huile de palme \(presque fini\)/)
   assert.doesNotMatch(lea.texte, /Riz/)
 
   const michael = envoyes.find((e) => e.a === 'michael@exemple.fr')

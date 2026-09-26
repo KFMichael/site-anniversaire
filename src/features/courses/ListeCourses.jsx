@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Bouton } from '../../components/ui'
-import { compterListe, construireListe, grouperParRayon } from './liste'
+import { afficherQuantite, compterListe, construireListe, grouperParRayon } from './liste'
 import { COULEURS_ETAT, RAYONS } from './rayons'
 
 export default function ListeCourses({ courses, onMessage }) {
@@ -33,7 +33,7 @@ export default function ListeCourses({ courses, onMessage }) {
         </label>
         <input
           id="article"
-          placeholder="Ajouter à la liste…"
+          placeholder="Ajouter… (ex. 2 lait, farine 1kg)"
           value={nom}
           maxLength={80}
           onChange={(e) => setNom(e.target.value)}
@@ -93,6 +93,10 @@ export default function ListeCourses({ courses, onMessage }) {
                 >
                   {e.nom}
                 </span>
+                <Quantite
+                  element={e}
+                  onChanger={async (texte) => onMessage(await courses.modifierQuantite(e, texte))}
+                />
                 {e.origine === 'stock' && e.etat === 'bientot' && (
                   <span
                     className="font-sans text-xs px-2 py-0.5 rounded-full text-text-primary shrink-0"
@@ -136,5 +140,55 @@ export default function ListeCourses({ courses, onMessage }) {
           </Bouton>
         ))}
     </div>
+  )
+}
+
+// Pastille de quantité : un tap pour la saisir ou la modifier
+function Quantite({ element, onChanger }) {
+  const [edition, setEdition] = useState(false)
+  const [texte, setTexte] = useState(element.quantite ?? '')
+
+  function valider() {
+    setEdition(false)
+    if ((texte.trim() || null) !== (element.quantite ?? null)) onChanger(texte)
+  }
+
+  if (edition) {
+    return (
+      <input
+        autoFocus
+        aria-label={`Quantité de ${element.nom}`}
+        value={texte}
+        maxLength={20}
+        placeholder="2, 500 g…"
+        onChange={(e) => setTexte(e.target.value)}
+        onBlur={valider}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur()
+          if (e.key === 'Escape') {
+            setTexte(element.quantite ?? '')
+            setEdition(false)
+          }
+        }}
+        className="font-sans text-sm w-20 shrink-0 px-2 py-1 rounded-xl border border-accent bg-bg-base text-text-primary focus:outline-none"
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={() => {
+        setTexte(element.quantite ?? '')
+        setEdition(true)
+      }}
+      aria-label={
+        element.quantite ? `Quantité de ${element.nom} : ${element.quantite}, modifier` : `Ajouter une quantité à ${element.nom}`
+      }
+      className={`font-sans text-xs shrink-0 px-2.5 py-1 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
+        element.quantite ? 'bg-bg-base text-text-primary font-medium' : 'text-text-muted'
+      }`}
+    >
+      {element.quantite ? afficherQuantite(element.quantite) : '+ qté'}
+    </button>
   )
 }

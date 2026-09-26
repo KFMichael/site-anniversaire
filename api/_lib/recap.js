@@ -4,6 +4,12 @@
 // permet de le tester (recap.test.js).
 import { construireEmail } from './email.js'
 import { dateLocale, envoisDuJour, periodeCouverte } from './planning.js'
+import { afficherQuantite } from '../../src/features/courses/liste.js'
+
+// « Attiéké (× 2) », « Farine (1 kg) », « Lait »
+function avecQuantite({ nom, quantite }) {
+  return quantite ? `${nom} (${afficherQuantite(quantite)})` : nom
+}
 
 const DOUBLON = '23505'
 
@@ -19,8 +25,8 @@ async function donneesEspace(admin, espaceId, { jours, mois }) {
   const [charges, attributions, produits, articles, diners] = await Promise.all([
     lire(admin.from('charges').select('id, nom, emoji, ordre, archivee').eq('espace_id', espaceId)),
     lire(admin.from('attributions').select('charge_id, user_id').eq('espace_id', espaceId).eq('mois', mois)),
-    lire(admin.from('produits').select('nom, etat').eq('espace_id', espaceId).neq('etat', 'ok')),
-    lire(admin.from('articles_courses').select('nom').eq('espace_id', espaceId)),
+    lire(admin.from('produits').select('nom, etat, quantite').eq('espace_id', espaceId).neq('etat', 'ok')),
+    lire(admin.from('articles_courses').select('nom, quantite').eq('espace_id', espaceId)),
     jours.length
       ? lire(
           admin
@@ -41,10 +47,10 @@ async function donneesEspace(admin, espaceId, { jours, mois }) {
     diners: Object.fromEntries(diners.map((d) => [d.jour, d.plats?.nom ?? d.texte ?? null])),
     courses: {
       aAcheter: [
-        ...produits.filter((p) => p.etat === 'fini').map((p) => p.nom),
-        ...articles.map((a) => a.nom),
+        ...produits.filter((p) => p.etat === 'fini').map(avecQuantite),
+        ...articles.map(avecQuantite),
       ].sort((a, b) => a.localeCompare(b, 'fr')),
-      bientot: produits.filter((p) => p.etat === 'bientot').map((p) => p.nom).sort((a, b) => a.localeCompare(b, 'fr')),
+      bientot: produits.filter((p) => p.etat === 'bientot').map(avecQuantite).sort((a, b) => a.localeCompare(b, 'fr')),
     },
   }
 }

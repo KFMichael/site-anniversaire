@@ -84,3 +84,13 @@ d'une section (`bg-bg-base` reste opaque).
 Barre du haut en verre dépoli (`bg-bg-elevated-glass backdrop-blur-xl`,
 bordure basse `border-separator`), onglet actif en pastille pleine
 `bg-accent text-white`.
+
+## Icône
+
+Un nid et deux œufs, blanc sur dégradé bleu (`#1E88FF` → `#0060C9`, autour
+de l'accent). Source : `design/icone.svg` (carré plein, le système arrondit),
+déclinée en `public/favicon.svg` (coins arrondis), `apple-touch-icon.png`
+(180 px, écran d'accueil iOS), `icon-192.png` et `icon-512.png` (Android,
+aussi en « maskable » : le motif tient dans le cercle central de 80 %).
+Pour régénérer les PNG, faire une capture du SVG aux tailles voulues
+(navigateur ou `rsvg-convert -w 180 design/icone.svg > public/apple-touch-icon.png`).
