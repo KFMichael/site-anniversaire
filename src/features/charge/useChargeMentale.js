@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useTempsReel } from '../../lib/useTempsReel'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from '../espace/contexte'
 import { decalerMois } from './calculs'
@@ -41,19 +42,7 @@ export function useChargeMentale(mois) {
   }, [chargerCharges, chargerAttributions])
 
   // Temps réel : quand un autre membre prend ou relâche une charge
-  useEffect(() => {
-    const canal = supabase
-      .channel(`attributions-${espace.id}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'attributions', filter: `espace_id=eq.${espace.id}` },
-        () => chargerAttributions()
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(canal)
-    }
-  }, [espace.id, chargerAttributions])
+  useTempsReel(['attributions'], espace.id, chargerAttributions)
 
   const prendre = useCallback(
     async (chargeId) => {

@@ -64,6 +64,8 @@ src/
     ├── auth/                # Connexion (lien magique, Google), session
     ├── espace/              # Espace courant, création, invitation, réglages
     ├── tableau-de-bord/     # Accueil : modules de l'espace
+    ├── courses/             # Stock de la maison et liste de courses générée
+    │   └── liste.js         # Construction de la liste par rayon (testé par liste.test.js)
     ├── charge/              # Charge mentale : qui gère quoi chaque mois
     │   └── calculs.js       # Mois, répartition des points (testé par calculs.test.js)
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
@@ -91,6 +93,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/rejoindre/:code` | Accepter une invitation |
 | `/` | Tableau de bord |
 | `/espace` | Membres, invitation, profil, changement d'espace |
+| `/courses` | Liste de courses et stock de la maison |
 | `/charge` | Charge mentale du mois |
 | `/coffre` | Coffre à mots de passe |
 | `/activites/idees` · `carnet` · `voyages` · `messages` | Partie Activités |

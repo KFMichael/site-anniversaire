@@ -1,12 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
 
-// Barre d'onglets façon iOS, fixée en bas de l'écran. Les futurs modules
-// (charge mentale, courses, menus…) viendront s'y ajouter.
+// Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus.
+// Les autres modules (Activités…) s'ouvrent depuis le tableau de bord.
 const ONGLETS = [
   { to: '/', label: 'Accueil', Icone: IconeMaison, fin: true },
+  { to: '/courses', label: 'Courses', Icone: IconePanier },
   { to: '/charge', label: 'Charge', Icone: IconeListe },
   { to: '/coffre', label: 'Coffre', Icone: IconeCadenas },
-  { to: '/activites', label: 'Activités', Icone: IconeEtoile },
   { to: '/espace', label: 'Espace', Icone: IconeGroupe },
 ]
 
@@ -74,10 +74,12 @@ function IconeCadenas() {
   )
 }
 
-function IconeEtoile() {
+function IconePanier() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
+      <path d="M3 4h2l2.2 11h10.6L20 7.5H6.2" />
+      <circle cx="9" cy="19.5" r="1.3" />
+      <circle cx="17" cy="19.5" r="1.3" />
     </svg>
   )
 }

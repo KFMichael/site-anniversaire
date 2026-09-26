@@ -8,6 +8,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 2. `supabase/migrations/0002_activites_par_espace.sql` — rattache le carnet, les messages et les mots de passe du mode surprise à un espace
 3. `supabase/migrations/0003_coffre.sql` — coffre à mots de passe et appareils Face ID (données chiffrées uniquement)
 4. `supabase/migrations/0004_charge_mentale.sql` — charges (liste par défaut ajoutée à chaque espace) et attributions mensuelles
+5. `supabase/migrations/0005_courses.sql` — stock des produits (catalogue de départ ajouté à chaque espace) et articles ponctuels
 
 > Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
 > l'ajout de Face ID), la supprimer d'abord :
