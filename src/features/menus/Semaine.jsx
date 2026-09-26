@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bouton, Carte } from '../../components/ui'
+import { Bouton, Carte, Interrupteur } from '../../components/ui'
 import { CATEGORIES_PLATS, categoriePlat } from './categories'
 import { decalerJours, libelleJour, libelleSemaine, lundiDe, versIso } from './tirage'
 
@@ -363,28 +363,5 @@ function ReglagesTirage({ menus }) {
         </select>
       </div>
     </Carte>
-  )
-}
-
-function Interrupteur({ label, actif, onChange }) {
-  return (
-    <label className="flex items-center justify-between gap-3 font-sans text-sm text-text-primary">
-      {label}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={actif}
-        onClick={() => onChange(!actif)}
-        className={`cible-44 w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
-          actif ? 'bg-accent' : 'bg-separator'
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow-soft transition-all duration-200 ease-spring ${
-            actif ? 'left-5.5' : 'left-0.5'
-          }`}
-        />
-      </button>
-    </label>
   )
 }

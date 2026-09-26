@@ -22,7 +22,7 @@ async function lire(requete) {
 
 // Données d'un espace pour une période : charges et attributions du mois,
 // dîners des jours, courses. Communes à tous les membres de l'espace.
-async function donneesEspace(admin, espaceId, { jours, mois }) {
+export async function donneesEspace(admin, espaceId, { jours, mois }) {
   const [charges, attributions, produits, articles, diners] = await Promise.all([
     lire(admin.from('charges').select('id, nom, emoji, ordre, archivee').eq('espace_id', espaceId)),
     lire(admin.from('attributions').select('charge_id, user_id').eq('espace_id', espaceId).eq('mois', mois)),
@@ -92,7 +92,7 @@ function emailPour(membre, espace, donnees, types, periode, config) {
   })
 }
 
-async function membresDe(admin, espaceId) {
+export async function membresDe(admin, espaceId) {
   const membres = await lire(
     admin.from('membres_espace').select('user_id, profils (prenom, email)').eq('espace_id', espaceId)
   )
@@ -102,14 +102,14 @@ async function membresDe(admin, espaceId) {
 }
 
 // Réserve un envoi dans le journal ; false s'il a déjà eu lieu
-async function reserver(admin, ligne) {
+export async function reserver(admin, ligne) {
   const { error } = await admin.from('envois_recap').insert(ligne)
   if (!error) return true
   if (error.code === DOUBLON) return false
   throw new Error(error.message)
 }
 
-async function annulerReservation(admin, { user_id, espace_id, type, periode }) {
+export async function annulerReservation(admin, { user_id, espace_id, type, periode }) {
   await admin
     .from('envois_recap')
     .delete()

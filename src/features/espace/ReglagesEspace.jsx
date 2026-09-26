@@ -6,6 +6,7 @@ import { useEspace } from './contexte'
 import { useMembres } from './useMembres'
 import Apparence from './Apparence'
 import Emails from './Emails'
+import Notifications from './Notifications'
 import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
 
 export default function ReglagesEspace() {
@@ -25,6 +26,7 @@ export default function ReglagesEspace() {
       )}
       <Membres />
       <Profil />
+      <Notifications />
       <Emails />
       <Apparence />
       <Espaces />

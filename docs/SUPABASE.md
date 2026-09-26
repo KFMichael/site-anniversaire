@@ -12,6 +12,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 6. `supabase/migrations/0006_menus.sql` — plats (dont cuisine ivoirienne / ouest-africaine), dîners de la semaine, règles du tirage ; ajoute aussi des produits ouest-africains au stock
 7. `supabase/migrations/0007_recap.sql` — préférences des emails et journal des envois (configuration de l'envoi : `docs/EMAILS.md`)
 8. `supabase/migrations/0008_quantites.sql` — quantités sur la liste de courses
+9. `supabase/migrations/0009_notifications.sql` — notifications sur le téléphone : appareils abonnés et préférences (mise en place : `docs/NOTIFICATIONS.md`)
 
 > Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
 > l'ajout de Face ID), la supprimer d'abord :

@@ -127,6 +127,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
-- [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)
+- [x] Notifications push : dîner du soir, récap du dimanche, rappel du 1er ; par appareil, types désactivables, test (`docs/NOTIFICATIONS.md`)
+- [ ] Notifications en temps réel des actions de l'autre (« Léa a ajouté du lait à la liste ») : nécessite un Database Webhook Supabase
 - [ ] Statistiques d'équilibre de la charge sur plusieurs mois
 - [ ] Voyages de la carte en base (aujourd'hui dans `src/features/activites/data/voyages.js`, commun à tous les espaces)

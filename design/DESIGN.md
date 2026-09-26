@@ -30,6 +30,7 @@ les mêmes classes (`bg-bg-base`, `text-text-primary`, etc.).
 | `--color-separator`         | `rgb(60 60 67 / 0.15)`        | `rgb(255 255 255 / 0.15)`      |
 | `--color-accent`            | `#0071EB` (identique dans les deux thèmes) |
 | `--color-accent-text`       | `#0062CC`                     | `#409CFF`                      |
+| `--color-interrupteur-off`  | `#86868B`                     | `#7C7C80`                      |
 
 `--color-accent` est une teinte iOS "systemBlue" (proche de #007AFF, ajustée
 de ~2% pour que le texte blanc sur bouton accent et le texte accent sur fond
