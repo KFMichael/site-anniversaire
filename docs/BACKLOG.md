@@ -101,11 +101,13 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Boutons d'action en un clic dans l'email : prendre une charge, marquer un article acheté, tirer un autre plat (jetons signés, `api/action.js`)
 - [ ] Jour / heure au choix (nécessite une tâche horaire : offre Vercel Pro)
 
-### Phase 5 — Sport
-- [ ] Grille de la semaine, sélection de 3 créneaux de 45 min
-- [ ] Connexion Google Calendar de chaque membre (OAuth, jetons stockés côté serveur)
-- [ ] Suggestion des créneaux libres pour tous les membres (API free/busy)
-- [ ] Création de l'événement dans les agendas des participants
+### Phase 5 — Sport (version simple ✅)
+- [x] Semaine par semaine : jusqu'à 3 séances de 45 min (jour + heure), jours passés grisés
+- [x] Responsable : le membre qui a pris la charge « sport » du mois planifie, les autres voient en lecture seule (sans responsable ou sans charge « sport » : tout le monde) ; « Je m'en occupe » depuis l'écran
+- [x] « Envoyer l'invitation » : un email par séance à chaque membre, avec invitation d'agenda (.ics) acceptée par Google Agenda, Apple Calendrier et Outlook (`api/sport.js`)
+- [x] Modification → mise à jour de l'événement (même UID, séquence +1) ; suppression d'une séance envoyée → annulation dans les agendas ; statut par séance (envoyée, à envoyer, modifiée)
+- [ ] Connexion Google Calendar de chaque membre (OAuth) et suggestion des créneaux libres (API free/busy)
+- [ ] Rappel push avant la séance
 
 ### Phase 6 — Coffre à mots de passe ✅ (réalisée en premier)
 - [x] Phrase secrète de l'espace → clé dérivée dans le navigateur (PBKDF2-SHA256 600 000 itérations, AES-GCM 256 via WebCrypto)
