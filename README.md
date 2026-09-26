@@ -1,137 +1,76 @@
-# Site anniversaire surprise
+# Nido
 
-Site web surprise avec écran d'accueil animé + 4 sections : quiz d'activité, carnet, carte des voyages, mur de messages.
+Application pour organiser la vie courante à deux (ou en coloc, entre
+amis) : répartition de la charge mentale, courses, menus de la semaine,
+séances de sport, mots de passe partagés et récap hebdomadaire.
+
+Chaque couple ou groupe a son **espace** : on s'y connecte par lien magique
+ou Google, et on invite les autres membres avec un lien.
+
+Backlog et plan : [`docs/BACKLOG.md`](docs/BACKLOG.md). Le site anniversaire
+d'origine est archivé sur la branche `archive/site-anniversaire` ; ses
+écrans vivent dans la partie **Activités**.
 
 ## Stack
 
-- React + Vite
-- Tailwind CSS v4
-- Supabase (base de données + stockage photos)
-- Leaflet (carte interactive)
+- React + Vite, React Router
+- Tailwind CSS v4 (identité iOS : `design/DESIGN.md`)
+- Supabase : Auth, Postgres + RLS, Storage
+- Leaflet (carte des voyages)
 
 ## Démarrer en local
 
 ```bash
 npm install
+cp .env.local.example .env.local   # renseigner les clés Supabase
 npm run dev
 ```
 
-## État du code
-
-### Composants
-
-| Composant | État | Visible |
-|---|---|---|
-| `Accueil.jsx` | Complet | Toujours (écran d'entrée) |
-| `Quiz.jsx` | Complet | Oui |
-| `CarnetActivites.jsx` | Complet | Oui |
-| `CarteVoyages.jsx` | Structure OK, données vides | Non (`actif: false`) |
-| `MurMessages.jsx` | Structure OK, données vides | Non (`actif: false`) |
-
-### Parcours Accueil (3 écrans animés)
-
-1. **Bienvenue** — "Bienvenue / U" apparaît en fondu, bouton Entrer
-2. **Aimes-tu** — "Est-ce que tu m'aimes ?" — bouton Non esquive la souris
-3. **Transition** — "Je le savais. / Maintenant, aide-moi à te gâter." puis bascule auto vers l'app
-
-### Quiz
-
-- 2 questions (axe actif/calme + axe créatif/passif)
-- Grille 2x2 dans `src/data/activites.js` — tirage aléatoire dans la case correspondante
-- Option "Tirer une autre idée" et "Recommencer"
-
-### Carnet d'activités
-
-- Lit depuis Supabase `activites_carnet`
-- Formulaire d'ajout : nom, note /10, commentaire, photo (upload vers bucket `photos-carnet`)
-- Affiche "table à créer" si Supabase non configuré
-
-### Carte des voyages
-
-- Leaflet, centré sur Paris par défaut
-- Données dans `src/data/voyages.js` — **actuellement vide**
-- Masquée jusqu'à avoir des données
-
-### Mur de messages
-
-- Lit depuis Supabase `messages_proches`
-- Lecture seule (les proches envoient les messages directement en BDD)
-- Masqué jusqu'à avoir des messages
-
-## Identité visuelle
-
-Style iOS, thème clair/sombre automatique (suit `prefers-color-scheme`,
-pas de bouton de bascule). Détail complet : `design/DESIGN.md`. Tokens
-Tailwind custom (définis dans `src/index.css`, valeurs différentes par
-thème sauf l'accent) :
-- `bg-bg-base` / `bg-bg-elevated` / `bg-bg-elevated-glass` — fonds
-- `text-text-primary`, `text-text-secondary`, `text-text-muted`
-- `border-separator` — bordures fines
-- `bg-accent` / `text-accent` — bleu iOS unique (`#0071EB`)
-- `shadow-soft`, `shadow-elevated` — ombres douces
-- `ease-spring` — courbe de transition avec léger rebond
-
-## Avant la mise en ligne
-
-### 1. Connecter Supabase
-
-```bash
-cp .env.local.example .env.local
-# Renseigner VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY
-# (Supabase > Project Settings > API)
-```
-
-### 2. Créer les tables Supabase
-
-**`activites_carnet`**
-```sql
-create table activites_carnet (
-  id uuid primary key default gen_random_uuid(),
-  nom_activite text not null,
-  note int,
-  commentaire text,
-  photo_url text,
-  date timestamp default now()
-);
-```
-
-**`messages_proches`**
-```sql
-create table messages_proches (
-  id uuid primary key default gen_random_uuid(),
-  auteur text not null,
-  message text not null,
-  photo_url text,
-  date timestamp default now()
-);
-```
-
-Créer un bucket de stockage `photos-carnet` (accès public en lecture).
-
-### 3. Remplir les données
-
-- `src/data/voyages.js` : ajouter les lieux visités (voir exemple dans le fichier)
-- Insérer les messages des proches directement dans Supabase
-- Activer `CarteVoyages` et `MurMessages` dans `App.jsx` (`actif: true`)
-
-### 4. Déployer
-
-Vercel ou Netlify — connecter les variables d'environnement Supabase dans les settings du projet.
+Configuration de Supabase (migrations, lien magique, Google) :
+[`docs/SUPABASE.md`](docs/SUPABASE.md).
 
 ## Structure
 
 ```
 src/
+├── App.jsx                  # Routes et garde-fous (connecté ? espace ?)
+├── config.js                # Nom de l'app, liste des modules du tableau de bord
+├── lib/supabase.js          # Client Supabase
 ├── components/
-│   ├── Accueil.jsx        # Écran d'entrée animé (3 étapes)
-│   ├── Quiz.jsx           # Quiz 2 questions -> suggestion d'activité
-│   ├── CarnetActivites.jsx # Carnet avec upload photo (Supabase)
-│   ├── CarteVoyages.jsx   # Carte Leaflet (masquée, données vides)
-│   └── MurMessages.jsx    # Mur de messages (masqué, données vides)
-├── data/
-│   ├── activites.js       # Grille quiz + questions
-│   └── voyages.js         # Liste des voyages (vide, à remplir)
-├── lib/
-│   └── supabase.js        # Client Supabase
-└── App.jsx                # Navigation entre sections
+│   ├── Structure.jsx        # Barre d'onglets en bas
+│   ├── ui.jsx               # Page, Carte, Bouton, ChampTexte
+│   └── Chargement.jsx
+└── features/
+    ├── auth/                # Connexion (lien magique, Google), session
+    ├── espace/              # Espace courant, création, invitation, réglages
+    ├── tableau-de-bord/     # Accueil : modules de l'espace
+    └── activites/           # Ex-site anniversaire
+        ├── Activites.jsx    # Sous-navigation
+        ├── Quiz.jsx         # Idées d'activités (5 questions)
+        ├── CarnetActivites.jsx
+        ├── CarteVoyages.jsx
+        ├── MurMessages.jsx
+        ├── ModeSurprise.jsx # Ex-écran d'accueil animé (mot de passe → quiz)
+        ├── ReglagesSurprise.jsx
+        └── data/
+supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 ```
+
+## Routes
+
+| Route | Page |
+|---|---|
+| `/connexion` | Lien magique / Google |
+| `/bienvenue` | Créer ou rejoindre un espace |
+| `/rejoindre/:code` | Accepter une invitation |
+| `/` | Tableau de bord |
+| `/espace` | Membres, invitation, profil, changement d'espace |
+| `/activites/idees` · `carnet` · `voyages` · `messages` | Partie Activités |
+| `/activites/surprise` | Mots de passe du mode surprise |
+| `/surprise` | Mode surprise (plein écran, enchaîne sur le quiz) |
+
+## Déployer
+
+Vercel : renseigner `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY` dans les
+variables d'environnement du projet, puis ajouter l'URL de production dans
+les *Redirect URLs* de Supabase.

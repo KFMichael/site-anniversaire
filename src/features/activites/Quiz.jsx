@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { questions, getActiviteSuggeree } from '../data/activites'
-import { supabase } from '../lib/supabase'
+import { useLocation } from 'react-router-dom'
+import { questions, getActiviteSuggeree } from './data/activites'
+import { supabase } from '../../lib/supabase'
+import { NOM_APP } from '../../config'
+import { useEspace } from '../espace/contexte'
 
 const DUREES = [
   { label: '⏱️ 30 min', minutes: 30 },
@@ -9,7 +12,7 @@ const DUREES = [
   { label: '☀️ Journée', minutes: 480 },
 ]
 
-const DESCRIPTION_EVENEMENT = 'Généré depuis notre site anniversaire'
+const DESCRIPTION_EVENEMENT = `Généré depuis ${NOM_APP}`
 
 // Indice d'ambiance affiché avant le nom complet de l'activité, composé
 // à partir des axes actif/créatif du profil de réponses (5 axes au total,
@@ -24,11 +27,12 @@ function indiceAmbiance(reponses) {
 // Exclut du tirage les activités des 5 dernières entrées du carnet
 // (tous statuts confondus), pour ne pas répéter une activité récente.
 // Ne bloque jamais : en cas d'erreur réseau, on tire sans exclusion.
-async function recupererExclusionsRecentes() {
+async function recupererExclusionsRecentes(espaceId) {
   try {
     const { data, error } = await supabase
       .from('activites_carnet')
       .select('nom_activite')
+      .eq('espace_id', espaceId)
       .order('date', { ascending: false })
       .limit(5)
     if (!error && data) return data.map((entree) => entree.nom_activite)
@@ -78,7 +82,7 @@ function construireICS(activite, dtDebut, dtFin) {
     'VERSION:2.0',
     'PRODID:-//Site Anniversaire//FR',
     'BEGIN:VEVENT',
-    `UID:${Date.now()}@site-anniversaire`,
+    `UID:${Date.now()}@${NOM_APP.toLowerCase()}`,
     `DTSTAMP:${formatDateUTC(new Date())}`,
     `DTSTART:${formatDateLocale(dtDebut)}`,
     `DTEND:${formatDateLocale(dtFin)}`,
@@ -114,7 +118,10 @@ function ajourdhuiISO() {
 const DUREE_TEASING = 1400
 const DUREE_INDICE = 1000
 
-export default function Quiz({ mood }) {
+export default function Quiz() {
+  const { espace } = useEspace()
+  // Humeur choisie dans le mode surprise, transmise via la navigation
+  const mood = useLocation().state?.mood ?? null
   const [reponses, setReponses] = useState({})
   const [etape, setEtape] = useState(0)
   const [activite, setActivite] = useState(null)
@@ -143,7 +150,7 @@ export default function Quiz({ mood }) {
     setEtape(prochaineEtape)
 
     if (prochaineEtape >= questions.length) {
-      const exclusions = await recupererExclusionsRecentes()
+      const exclusions = await recupererExclusionsRecentes(espace.id)
       setActivite(getActiviteSuggeree(nouvellesReponses, exclusions))
     }
   }
@@ -152,7 +159,7 @@ export default function Quiz({ mood }) {
     setValide(false)
     setAjouteAuCarnet(false)
     setCarnetEnregistre(false)
-    const exclusions = await recupererExclusionsRecentes()
+    const exclusions = await recupererExclusionsRecentes(espace.id)
     setActivite(getActiviteSuggeree(reponses, exclusions))
   }
 
@@ -227,9 +234,10 @@ export default function Quiz({ mood }) {
     supabase
       .from('activites_carnet')
       .insert({
+        espace_id: espace.id,
         nom_activite: activite,
         date_activite: dtDebut.toISOString(),
-        mood_debut: mood ?? null,
+        mood_debut: mood,
         date: new Date().toISOString(),
         note: null,
         commentaire: null,
@@ -242,7 +250,7 @@ export default function Quiz({ mood }) {
           setCarnetEnregistre(true)
         }
       })
-  }, [planComplet, ajouteAuCarnet, activite, dtDebut, mood])
+  }, [planComplet, ajouteAuCarnet, activite, dtDebut, mood, espace.id])
 
   const enRevelation = termine && etapeResultat === 'resultat'
 

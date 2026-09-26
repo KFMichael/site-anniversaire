@@ -1,75 +1,83 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Accueil from './components/Accueil'
-import Quiz from './components/Quiz'
-import CarteVoyages from './components/CarteVoyages'
-import MurMessages from './components/MurMessages'
-import CarnetActivites from './components/CarnetActivites'
-import AdminMotsPasse from './components/AdminMotsPasse'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { supabaseConfigure } from './lib/supabase'
+import AuthProvider from './features/auth/AuthProvider'
+import RequiertConnexion from './features/auth/RequiertConnexion'
+import Connexion from './features/auth/Connexion'
+import EspaceProvider from './features/espace/EspaceProvider'
+import RequiertEspace from './features/espace/RequiertEspace'
+import Bienvenue from './features/espace/Bienvenue'
+import Rejoindre from './features/espace/Rejoindre'
+import ReglagesEspace from './features/espace/ReglagesEspace'
+import TableauDeBord from './features/tableau-de-bord/TableauDeBord'
+import Structure from './components/Structure'
+import Chargement from './components/Chargement'
 
-const SECTIONS = [
-  { id: 'quiz', label: 'Activité surprise', Composant: Quiz, actif: true },
-  { id: 'carte', label: 'Nos voyages', Composant: CarteVoyages, actif: false },
-  { id: 'messages', label: 'Ils pensent à toi', Composant: MurMessages, actif: false },
-  { id: 'carnet', label: 'Notre carnet', Composant: CarnetActivites, actif: true },
-]
+// Partie Activités (ex-site anniversaire) chargée à la demande : Leaflet et
+// le quiz n'alourdissent pas le premier affichage de l'application.
+const Activites = lazy(() => import('./features/activites/Activites'))
+const Quiz = lazy(() => import('./features/activites/Quiz'))
+const CarnetActivites = lazy(() => import('./features/activites/CarnetActivites'))
+const CarteVoyages = lazy(() => import('./features/activites/CarteVoyages'))
+const MurMessages = lazy(() => import('./features/activites/MurMessages'))
+const ModeSurprise = lazy(() => import('./features/activites/ModeSurprise'))
+const ReglagesSurprise = lazy(() => import('./features/activites/ReglagesSurprise'))
 
-const SECTIONS_VISIBLES = SECTIONS.filter((s) => s.actif)
-
-function SiteAnniversaire() {
-  const [entree, setEntree] = useState(false)
-  const [sectionActive, setSectionActive] = useState('quiz')
-  // Humeur du jour, choisie sur l'écran d'accueil, gardée en mémoire pour
-  // la session (pas encore en base) et utilisée à la validation du quiz.
-  const [mood, setMood] = useState(null)
-
-  if (!entree) {
-    return (
-      <Accueil
-        onEntrer={(moodChoisi) => {
-          setMood(moodChoisi)
-          setEntree(true)
-        }}
-      />
-    )
-  }
-
-  const SectionActuelle = SECTIONS_VISIBLES.find((s) => s.id === sectionActive)?.Composant
-
+function AvecEspace() {
   return (
-    <div className="min-h-screen bg-bg-base">
-      <nav className="sticky top-0 z-10 bg-bg-elevated-glass backdrop-blur-xl border-b border-separator">
-        <ul className="flex flex-wrap justify-center gap-2 md:gap-6 py-4 px-4 text-sm font-sans">
-          {SECTIONS_VISIBLES.map((s) => (
-            <li key={s.id}>
-              <button
-                onClick={() => setSectionActive(s.id)}
-                className={`px-4 py-1.5 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
-                  sectionActive === s.id
-                    ? 'bg-accent text-white font-medium'
-                    : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                {s.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      {SectionActuelle && <SectionActuelle mood={mood} />}
-    </div>
+    <EspaceProvider>
+      <Outlet />
+    </EspaceProvider>
   )
 }
 
 function App() {
+  if (!supabaseConfigure) {
+    return (
+      <Chargement
+        plein
+        texte="Supabase n'est pas configuré : renseigne .env.local (voir README)."
+      />
+    )
+  }
+
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Pas de lien visible : page d'admin accessible uniquement en connaissant l'URL */}
-        <Route path="/admin-zMd_uRSay5JaTurR" element={<AdminMotsPasse />} />
-        <Route path="/*" element={<SiteAnniversaire />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Suspense fallback={<Chargement plein />}>
+          <Routes>
+            <Route path="/connexion" element={<Connexion />} />
+
+            <Route element={<RequiertConnexion />}>
+              <Route element={<AvecEspace />}>
+                <Route path="/bienvenue" element={<Bienvenue />} />
+                <Route path="/rejoindre/:code" element={<Rejoindre />} />
+
+                <Route element={<RequiertEspace />}>
+                  {/* Plein écran, sans barre d'onglets */}
+                  <Route path="/surprise" element={<ModeSurprise />} />
+
+                  <Route element={<Structure />}>
+                    <Route index element={<TableauDeBord />} />
+                    <Route path="/espace" element={<ReglagesEspace />} />
+                    <Route path="/activites" element={<Activites />}>
+                      <Route index element={<Navigate to="idees" replace />} />
+                      <Route path="idees" element={<Quiz />} />
+                      <Route path="carnet" element={<CarnetActivites />} />
+                      <Route path="voyages" element={<CarteVoyages />} />
+                      <Route path="messages" element={<MurMessages />} />
+                      <Route path="surprise" element={<ReglagesSurprise />} />
+                    </Route>
+                  </Route>
+                </Route>
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

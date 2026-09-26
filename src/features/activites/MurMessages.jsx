@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
+import { useEspace } from '../espace/contexte'
 
 export default function MurMessages() {
+  const { espace } = useEspace()
   const [messages, setMessages] = useState([])
   const [chargement, setChargement] = useState(true)
 
@@ -10,13 +12,14 @@ export default function MurMessages() {
       const { data, error } = await supabase
         .from('messages_proches')
         .select('*')
+        .eq('espace_id', espace.id)
         .order('date', { ascending: false })
 
       if (!error && data) setMessages(data)
       setChargement(false)
     }
     charger()
-  }, [])
+  }, [espace.id])
 
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
@@ -30,8 +33,7 @@ export default function MurMessages() {
 
       {!chargement && messages.length === 0 && (
         <p className="font-sans text-center text-text-muted text-sm">
-          Aucun message pour le moment. (Table `messages_proches` à créer dans
-          Supabase.)
+          Aucun message pour le moment.
         </p>
       )}
 

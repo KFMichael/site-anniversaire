@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { HUMEURS, emojiHumeur } from '../data/humeurs'
+import { supabase } from '../../lib/supabase'
+import { useEspace } from '../espace/contexte'
+import { HUMEURS, emojiHumeur } from './data/humeurs'
 
 function formatDateActivite(iso) {
   return new Date(iso).toLocaleString('fr-FR', {
@@ -18,6 +19,7 @@ function estAVenir(a) {
 }
 
 export default function CarnetActivites() {
+  const { espace } = useEspace()
   const [activites, setActivites] = useState([])
   const [chargement, setChargement] = useState(true)
   const [formOuvert, setFormOuvert] = useState(false)
@@ -37,6 +39,7 @@ export default function CarnetActivites() {
     const { data, error } = await supabase
       .from('activites_carnet')
       .select('*')
+      .eq('espace_id', espace.id)
       .order('date', { ascending: false })
 
     if (!error && data) setActivites(data)
@@ -50,7 +53,8 @@ export default function CarnetActivites() {
     let photoUrl = null
 
     if (photo) {
-      const nomFichier = `${Date.now()}-${photo.name}`
+      // Dossier par espace : exigé par la policy de stockage (voir migrations)
+      const nomFichier = `${espace.id}/${Date.now()}-${photo.name}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('photos-carnet')
         .upload(nomFichier, photo)
@@ -65,6 +69,7 @@ export default function CarnetActivites() {
 
     const maintenant = new Date().toISOString()
     const { error } = await supabase.from('activites_carnet').insert({
+      espace_id: espace.id,
       nom_activite: nom,
       note,
       commentaire,
@@ -163,9 +168,8 @@ export default function CarnetActivites() {
 
       {!chargement && activites.length === 0 && (
         <p className="font-sans text-center text-text-muted text-sm">
-          Aucune activité enregistrée pour le moment. (Table
-          `activites_carnet` et bucket `photos-carnet` à créer dans
-          Supabase.)
+          Aucune activité enregistrée pour le moment. Trouve une idée dans
+          l'onglet Idées !
         </p>
       )}
 
@@ -274,6 +278,7 @@ function CarteAVenir({ activite }) {
 }
 
 function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
+  const { espace } = useEspace()
   const [ouvert, setOuvert] = useState(false)
   const [note, setNote] = useState(5)
   const [commentaire, setCommentaire] = useState('')
@@ -289,7 +294,8 @@ function CarteHistorique({ activite, onEnregistre, onOuvrirPhoto }) {
 
     let photoUrl = null
     if (photo) {
-      const nomFichier = `${Date.now()}-${photo.name}`
+      // Dossier par espace : exigé par la policy de stockage (voir migrations)
+      const nomFichier = `${espace.id}/${Date.now()}-${photo.name}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('photos-carnet')
         .upload(nomFichier, photo)

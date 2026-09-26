@@ -1,23 +1,18 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { Link } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
+import { useEspace } from '../espace/contexte'
 
-export default function AdminMotsPasse() {
+// Mots de passe acceptés par le mode surprise, et la salutation affichée en
+// grand pour chacun (ex. « chaton » -> « Mon amour »). Propres à l'espace.
+export default function ReglagesSurprise() {
+  const { espace } = useEspace()
   const [lignes, setLignes] = useState([])
   const [chargement, setChargement] = useState(true)
   const [motDePasse, setMotDePasse] = useState('')
   const [salutation, setSalutation] = useState('')
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [erreur, setErreur] = useState('')
-
-  // Page non indexable : balise robots ajoutée/retirée avec le montage
-  // du composant, sans toucher au reste du site.
-  useEffect(() => {
-    const meta = document.createElement('meta')
-    meta.name = 'robots'
-    meta.content = 'noindex, nofollow'
-    document.head.appendChild(meta)
-    return () => document.head.removeChild(meta)
-  }, [])
 
   useEffect(() => {
     charger()
@@ -28,6 +23,7 @@ export default function AdminMotsPasse() {
     const { data, error } = await supabase
       .from('mots_passe_accueil')
       .select('*')
+      .eq('espace_id', espace.id)
       .order('id', { ascending: true })
 
     if (!error && data) setLignes(data)
@@ -41,6 +37,7 @@ export default function AdminMotsPasse() {
 
     setEnvoiEnCours(true)
     const { error } = await supabase.from('mots_passe_accueil').insert({
+      espace_id: espace.id,
       mot_de_passe: motDePasse.trim(),
       salutation: salutation.trim(),
     })
@@ -63,9 +60,16 @@ export default function AdminMotsPasse() {
   return (
     <section className="min-h-screen px-6 py-16 bg-bg-base">
       <div className="max-w-lg mx-auto">
-        <h1 className="font-sans text-2xl font-semibold text-text-primary mb-8">
-          Mots de passe &amp; salutations
+        <Link to="/activites" className="font-sans text-sm text-text-muted hover:text-text-primary">
+          ‹ Activités
+        </Link>
+        <h1 className="font-sans text-2xl font-semibold text-text-primary mt-4 mb-2">
+          Mode surprise
         </h1>
+        <p className="font-sans text-sm text-text-muted mb-8">
+          Le mode surprise demande un mot de passe avant d'afficher la salutation
+          associée, puis enchaîne sur le quiz d'activités.
+        </p>
 
         <form
           onSubmit={ajouter}
