@@ -3,12 +3,19 @@
 Remplace l'ancienne identité (fond sombre fixe, dégradé coucher de soleil,
 Fraunces/Inter). Référence pour tout le site.
 
-## Thème clair/sombre automatique
+## Thème clair / sombre / système
 
-Pas de bouton de bascule. Le thème suit `prefers-color-scheme` du système,
-via une media query en CSS qui redéfinit les tokens de couleur — les
-composants ne connaissent jamais le thème actif, ils utilisent toujours les
-mêmes classes (`bg-bg-base`, `text-text-primary`, etc.).
+Réglable dans **Espace > Apparence**, par appareil (`localStorage`) :
+*Système* (par défaut, suit `prefers-color-scheme`), *Clair* ou *Sombre*.
+Le choix est posé en attribut `data-theme` sur `<html>` (`light` / `dark`,
+absent pour *Système*) par `src/lib/theme.js`, et dès le chargement par un
+petit script en tête d'`index.html` (pas de flash de la mauvaise couleur).
+
+Le CSS redéfinit les tokens de couleur pour `:root[data-theme='dark']` et,
+sous `prefers-color-scheme: dark`, pour `:root:not([data-theme='light'])`.
+`color-scheme` suit aussi le thème (champs natifs, barres de défilement).
+Les composants ne connaissent jamais le thème actif, ils utilisent toujours
+les mêmes classes (`bg-bg-base`, `text-text-primary`, etc.).
 
 ## Couleurs
 

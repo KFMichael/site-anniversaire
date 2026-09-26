@@ -118,7 +118,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
 
 ### Phase 7 — Finitions
-- [ ] Réglage du thème dans les paramètres : clair / sombre / système (par appareil ; aujourd'hui le thème suit uniquement le système, voir `design/DESIGN.md` à mettre à jour)
+- [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
 - [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)
 - [ ] Statistiques d'équilibre de la charge sur plusieurs mois
 - [ ] Voyages de la carte en base (aujourd'hui dans `src/features/activites/data/voyages.js`, commun à tous les espaces)
