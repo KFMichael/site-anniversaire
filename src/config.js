@@ -24,6 +24,7 @@ export const MODULES = [
     titre: 'Menus',
     description: 'Les dîners de la semaine',
     emoji: '🍽️',
+    route: '/menus',
   },
   {
     id: 'sport',
