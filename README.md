@@ -47,7 +47,8 @@ npm test        # tests unitaires (node --test)
 ```
 
 Configuration de Supabase (migrations, lien magique, Google) :
-[`docs/SUPABASE.md`](docs/SUPABASE.md).
+[`docs/SUPABASE.md`](docs/SUPABASE.md). Domaine `nido.4sept.com` et emails
+(Resend, récap hebdo) : [`docs/EMAILS.md`](docs/EMAILS.md).
 
 ## Structure
 
@@ -83,6 +84,8 @@ src/
         ├── ModeSurprise.jsx # Ex-écran d'accueil animé (mot de passe → quiz)
         ├── ReglagesSurprise.jsx
         └── data/
+api/recap.js                 # Fonction Vercel : récap par email (tâche planifiée + aperçu)
+api/_lib/                    # Planning, contenu de l'email, envoi (testés)
 supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 ```
 
