@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
-import { HUMEURS } from '../data/humeurs'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
+import { useEspace } from '../espace/contexte'
+import { HUMEURS } from './data/humeurs'
 
 const MESSAGES_ERREUR = [
   'Pas tout à fait... 😏',
@@ -8,15 +10,24 @@ const MESSAGES_ERREUR = [
   'Presque. Ou pas du tout.',
 ]
 
-// Étapes du parcours d'accueil :
-// 'mot-de-passe' -> 'bienvenue' -> 'aimes-tu' -> 'transition' -> (fin, on passe au quiz)
-export default function Accueil({ onEntrer }) {
+// Ex-écran d'accueil du site anniversaire, devenu le « mode surprise » de la
+// partie Activités : on le lance pour l'autre, puis on enchaîne sur le quiz.
+// Étapes : 'mot-de-passe' -> 'bienvenue' -> 'aimes-tu' -> 'transition' -> quiz
+export default function ModeSurprise() {
+  const navigate = useNavigate()
   const [ecran, setEcran] = useState('mot-de-passe')
   const [salutation, setSalutation] = useState('U')
   const [mood, setMood] = useState(null)
 
   return (
     <section className="min-h-screen relative flex flex-col items-center justify-center px-6 bg-bg-base overflow-hidden">
+      <Link
+        to="/activites"
+        aria-label="Quitter le mode surprise"
+        className="absolute top-4 left-4 z-20 font-sans text-text-muted hover:text-text-primary w-10 h-10 flex items-center justify-center rounded-full"
+      >
+        ✕
+      </Link>
       <div className="relative z-10 w-full flex flex-col items-center">
         {ecran === 'mot-de-passe' && (
           <EcranMotDePasse
@@ -35,7 +46,9 @@ export default function Accueil({ onEntrer }) {
           <EcranAimesTu onOui={() => setEcran('transition')} />
         )}
         {ecran === 'transition' && (
-          <EcranTransition onSuite={() => onEntrer(mood)} />
+          <EcranTransition
+            onSuite={() => navigate('/activites/idees', { replace: true, state: { mood } })}
+          />
         )}
       </div>
     </section>
@@ -43,6 +56,7 @@ export default function Accueil({ onEntrer }) {
 }
 
 function EcranMotDePasse({ mood, onMoodChange, onValide }) {
+  const { espace } = useEspace()
   const [motSaisi, setMotSaisi] = useState('')
   const [erreur, setErreur] = useState('')
   const [verification, setVerification] = useState(false)
@@ -60,9 +74,11 @@ function EcranMotDePasse({ mood, onMoodChange, onValide }) {
     const { data, error } = await supabase
       .from('mots_passe_accueil')
       .select('salutation')
+      .eq('espace_id', espace.id)
       // ilike sans wildcard = comparaison insensible à la casse ; on
       // échappe % et _ pour éviter tout effet de motif involontaire
       .ilike('mot_de_passe', motSaisi.trim().replace(/[%_]/g, '\\$&'))
+      .limit(1)
       .maybeSingle()
     setVerification(false)
 

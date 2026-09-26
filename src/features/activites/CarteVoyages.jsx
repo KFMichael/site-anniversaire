@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { voyages } from '../data/voyages'
+import { voyages } from './data/voyages'
 
 export default function CarteVoyages() {
   const centreDefaut = [48.8566, 2.3522]
