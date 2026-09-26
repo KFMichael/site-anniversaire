@@ -40,7 +40,7 @@ export default function Stock({ courses, onMessage }) {
         </Bouton>
       </div>
 
-      <label className="flex items-center gap-2 font-sans text-sm text-text-secondary px-1">
+      <label className="min-h-11 flex items-center gap-2 font-sans text-sm text-text-secondary px-1">
         <input
           type="checkbox"
           checked={aRacheter}
@@ -58,9 +58,9 @@ export default function Stock({ courses, onMessage }) {
 
       {groupes.map(({ rayon, elements }) => (
         <section key={rayon.id} className="flex flex-col gap-1.5">
-          <h3 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
+          <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
             {rayon.emoji} {rayon.label}
-          </h3>
+          </h2>
           <ul className="rounded-3xl bg-bg-elevated shadow-soft divide-y divide-separator overflow-hidden">
             {elements.map((p) =>
               edition ? (

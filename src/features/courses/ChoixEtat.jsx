@@ -25,7 +25,7 @@ export default function ChoixEtat({ etat, onChange, nomProduit }) {
             aria-label={e.label}
             title={e.label}
             onClick={() => onChange(e.id)}
-            className={`font-sans text-xs px-2.5 py-1.5 rounded-full border transition-all duration-200 ease-spring active:scale-95 flex items-center gap-1.5 ${
+            className={`cible-44 font-sans text-xs px-2.5 py-1.5 rounded-full border transition-all duration-200 ease-spring active:scale-95 flex items-center gap-1.5 ${
               actif ? 'text-text-primary font-medium' : 'border-transparent text-text-muted'
             }`}
             style={

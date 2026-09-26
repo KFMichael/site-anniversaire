@@ -119,6 +119,12 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [ ] Import depuis un export CSV (navigateur, Bitwarden…)
 - [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
 
+### Qualité — iPhone, accessibilité, erreurs ✅
+- [x] Règles du projet dans `CLAUDE.md` : iPhone d'abord (Human Interface Guidelines), accessibilité WCAG 2.1 AA, gestion des erreurs, sécurité des données, vérifications avant push
+- [x] Page 404, limite d'erreur globale (dont « nouvelle version » après déploiement), bandeau hors connexion
+- [x] Audit axe-core de tous les écrans à 320 et 390 px, clair et sombre : 0 violation ; zones tactiles ≥ 44 pt ; champs ≥ 16 px ; pas de défilement horizontal
+- [x] Police système (SF Pro), pas de délai ni de flash au toucher, zones de sécurité, `prefers-reduced-motion`
+
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
 - [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)

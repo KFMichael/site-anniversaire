@@ -12,6 +12,7 @@ import ReglagesEspace from './features/espace/ReglagesEspace'
 import TableauDeBord from './features/tableau-de-bord/TableauDeBord'
 import Structure from './components/Structure'
 import Chargement from './components/Chargement'
+import { BandeauHorsConnexion, LimiteErreur, PageIntrouvable } from './components/Erreurs'
 import { useEspace } from './features/espace/contexte'
 import CoffreProvider from './features/coffre/CoffreProvider'
 import Coffre from './features/coffre/Coffre'
@@ -59,48 +60,51 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Suspense fallback={<Chargement plein />}>
-          <Routes>
-            <Route path="/connexion" element={<Connexion />} />
+    <LimiteErreur>
+      <AuthProvider>
+        <BrowserRouter>
+          <BandeauHorsConnexion />
+          <Suspense fallback={<Chargement plein />}>
+            <Routes>
+              <Route path="/connexion" element={<Connexion />} />
 
-            <Route element={<RequiertConnexion />}>
-              <Route element={<AvecEspace />}>
-                <Route path="/bienvenue" element={<Bienvenue />} />
-                <Route path="/rejoindre/:code" element={<Rejoindre />} />
+              <Route element={<RequiertConnexion />}>
+                <Route element={<AvecEspace />}>
+                  <Route path="/bienvenue" element={<Bienvenue />} />
+                  <Route path="/rejoindre/:code" element={<Rejoindre />} />
 
-                <Route element={<RequiertEspace />}>
-                  <Route element={<AvecCoffre />}>
-                    {/* Plein écran, sans barre d'onglets */}
-                    <Route path="/surprise" element={<ModeSurprise />} />
+                  <Route element={<RequiertEspace />}>
+                    <Route element={<AvecCoffre />}>
+                      {/* Plein écran, sans barre d'onglets */}
+                      <Route path="/surprise" element={<ModeSurprise />} />
 
-                    <Route element={<Structure />}>
-                      <Route index element={<TableauDeBord />} />
-                      <Route path="/espace" element={<ReglagesEspace />} />
-                      <Route path="/charge" element={<ChargeMentale />} />
-                      <Route path="/courses" element={<Courses />} />
-                      <Route path="/menus" element={<Menus />} />
-                      <Route path="/coffre" element={<Coffre />} />
-                      <Route path="/activites" element={<Activites />}>
-                        <Route index element={<Navigate to="idees" replace />} />
-                        <Route path="idees" element={<Quiz />} />
-                        <Route path="carnet" element={<CarnetActivites />} />
-                        <Route path="voyages" element={<CarteVoyages />} />
-                        <Route path="messages" element={<MurMessages />} />
-                        <Route path="surprise" element={<ReglagesSurprise />} />
+                      <Route element={<Structure />}>
+                        <Route index element={<TableauDeBord />} />
+                        <Route path="/espace" element={<ReglagesEspace />} />
+                        <Route path="/charge" element={<ChargeMentale />} />
+                        <Route path="/courses" element={<Courses />} />
+                        <Route path="/menus" element={<Menus />} />
+                        <Route path="/coffre" element={<Coffre />} />
+                        <Route path="/activites" element={<Activites />}>
+                          <Route index element={<Navigate to="idees" replace />} />
+                          <Route path="idees" element={<Quiz />} />
+                          <Route path="carnet" element={<CarnetActivites />} />
+                          <Route path="voyages" element={<CarteVoyages />} />
+                          <Route path="messages" element={<MurMessages />} />
+                          <Route path="surprise" element={<ReglagesSurprise />} />
+                        </Route>
                       </Route>
                     </Route>
                   </Route>
                 </Route>
               </Route>
-            </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+              <Route path="*" element={<PageIntrouvable />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </LimiteErreur>
   )
 }
 

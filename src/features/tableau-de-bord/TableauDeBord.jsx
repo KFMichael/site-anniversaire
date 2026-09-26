@@ -40,7 +40,7 @@ export default function TableauDeBord() {
               {contenu}
             </Link>
           ) : (
-            <div key={m.id} className={`${classes} opacity-60`}>
+            <div key={m.id} className={`${classes} !bg-transparent !shadow-none border border-dashed border-separator`}>
               {contenu}
             </div>
           )

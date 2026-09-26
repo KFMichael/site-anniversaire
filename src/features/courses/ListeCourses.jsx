@@ -69,9 +69,9 @@ export default function ListeCourses({ courses, onMessage }) {
 
       {groupes.map(({ rayon, elements }) => (
         <section key={rayon.id} className="flex flex-col gap-1.5">
-          <h3 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
+          <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
             {rayon.emoji} {rayon.label}
-          </h3>
+          </h2>
           <ul className="rounded-3xl bg-bg-elevated shadow-soft divide-y divide-separator overflow-hidden">
             {elements.map((e) => (
               <li key={`${e.origine}-${e.id}`} className="flex items-center gap-3 px-4 py-3">
@@ -80,7 +80,7 @@ export default function ListeCourses({ courses, onMessage }) {
                   aria-checked={e.dans_panier}
                   aria-label={`${e.nom} dans le panier`}
                   onClick={async () => onMessage(await courses.basculerPanier(e))}
-                  className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center text-xs text-white transition-all duration-200 ease-spring active:scale-90 ${
+                  className={`cible-44 w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center text-xs text-white transition-all duration-200 ease-spring active:scale-90 ${
                     e.dans_panier ? 'bg-accent border-accent' : 'border-separator'
                   }`}
                 >
@@ -109,7 +109,7 @@ export default function ListeCourses({ courses, onMessage }) {
                   onClick={async () => onMessage(await courses.retirerDeLaListe(e))}
                   aria-label={`Retirer ${e.nom} de la liste`}
                   title="Finalement pas besoin"
-                  className="font-sans text-text-muted hover:text-text-primary w-8 h-8 shrink-0"
+                  className="cible-44 font-sans text-text-muted hover:text-text-primary w-8 h-8 shrink-0"
                 >
                   ✕
                 </button>
@@ -184,7 +184,7 @@ function Quantite({ element, onChanger }) {
       aria-label={
         element.quantite ? `Quantité de ${element.nom} : ${element.quantite}, modifier` : `Ajouter une quantité à ${element.nom}`
       }
-      className={`font-sans text-xs shrink-0 px-2.5 py-1 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
+      className={`cible-44 font-sans text-xs shrink-0 px-2.5 py-1 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
         element.quantite ? 'bg-bg-base text-text-primary font-medium' : 'text-text-muted'
       }`}
     >

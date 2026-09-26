@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  /* Police système : SF Pro sur iPhone / Mac (rendu natif, rien à télécharger) */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
 
   --color-bg-base: #F2F2F7;
   --color-bg-elevated: #FFFFFF;
@@ -12,6 +13,8 @@
   --color-text-muted: #6B6B70;
   --color-separator: rgb(60 60 67 / 0.15);
   --color-accent: #0071EB;
+  /* Bleu pour du texte sur fond de page ou de carte (contraste ≥ 4.5:1) */
+  --color-accent-text: #0062CC;
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -56,6 +59,7 @@
   --color-text-secondary: #C7C7CC;
   --color-text-muted: #98989E;
   --color-separator: rgb(255 255 255 / 0.15);
+  --color-accent-text: #409CFF;
 
   --shadow-color-soft: rgb(0 0 0 / 0.4);
   --shadow-color-elevated: rgb(0 0 0 / 0.55);
@@ -71,6 +75,7 @@
     --color-text-secondary: #C7C7CC;
     --color-text-muted: #98989E;
     --color-separator: rgb(255 255 255 / 0.15);
+    --color-accent-text: #409CFF;
 
     --shadow-color-soft: rgb(0 0 0 / 0.4);
     --shadow-color-elevated: rgb(0 0 0 / 0.55);
@@ -85,6 +90,40 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   background-color: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Encoche et coins arrondis en paysage */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Interactions tactiles façon iOS (Human Interface Guidelines) :
+   - pas de délai de 300 ms ni de zoom au double tap sur les contrôles ;
+   - pas de flash gris au toucher : chaque bouton a son propre état pressé
+     (active:scale-95…) ;
+   - pas de sélection de texte ni de menu contextuel sur un appui long. */
+html {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+[role='button'],
+[role='tab'],
+[role='radio'],
+[role='switch'],
+[role='checkbox'] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Champs à 16 px minimum : en dessous, Safari iOS zoome sur la page à la
+   saisie. Hors @layer, cette règle l'emporte sur les classes text-sm. */
+input,
+select,
+textarea {
+  font-size: max(16px, 1em);
 }
 
 /* Focus clavier cohérent avec l'identité visuelle, sur tous les éléments
@@ -123,4 +162,33 @@ select:focus-visible {
 
 .dot-pulse span:nth-child(3) {
   animation-delay: 0.3s;
+}
+
+/* Zone tactile d'au moins 44 × 44 px (recommandation Apple, WCAG 2.5.5)
+   autour d'un petit bouton, sans changer son apparence : le pseudo-élément
+   invisible étend la surface cliquable. */
+.cible-44 {
+  position: relative;
+}
+.cible-44::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
+
+/* Réglage système « Réduire les animations » : on coupe transitions et
+   animations (les changements d'état restent instantanés et lisibles) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

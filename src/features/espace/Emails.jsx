@@ -92,7 +92,7 @@ function Interrupteur({ label, detail, actif, onChange }) {
         aria-checked={actif}
         aria-label={label}
         onClick={() => onChange(!actif)}
-        className={`relative w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
+        className={`cible-44 w-12 h-7 shrink-0 rounded-full transition-colors duration-200 ease-spring ${
           actif ? 'bg-accent' : 'bg-separator'
         }`}
       >

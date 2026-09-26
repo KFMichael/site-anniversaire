@@ -80,7 +80,7 @@ export default function ChargeMentale() {
         <button
           onClick={() => changerMois(-1)}
           aria-label="Mois précédent"
-          className="w-10 h-10 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
+          className="cible-44 w-11 h-11 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring"
         >
           ‹
         </button>
@@ -94,7 +94,7 @@ export default function ChargeMentale() {
           onClick={() => changerMois(1)}
           disabled={mois > courant}
           aria-label="Mois suivant"
-          className="w-10 h-10 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring disabled:opacity-30"
+          className="cible-44 w-11 h-11 rounded-full bg-bg-elevated shadow-soft text-text-primary active:scale-95 transition-transform duration-200 ease-spring disabled:opacity-30"
         >
           ›
         </button>
