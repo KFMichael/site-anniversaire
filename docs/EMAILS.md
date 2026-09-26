@@ -49,6 +49,17 @@ La tâche planifiée (`vercel.json`) appelle `/api/recap` tous les jours à
 17 h UTC (19 h à Paris l'été, 18 h l'hiver) : elle envoie le récap le
 dimanche et le rappel le 1er du mois, et ne fait rien les autres jours.
 
+### Boutons d'action dans l'email
+
+Le récap contient des boutons en un clic : **Je prends** (charge sans
+responsable), **✓ Acheté** (article de la liste), **🎲 Autre / Au hasard**
+(dîner d'un soir). Chaque bouton porte un jeton signé (HMAC, clé dérivée de
+`CRON_SECRET`), valable 8 jours, limité à un membre, un espace et une
+action. Le lien ouvre `/api/action`, qui déclenche l'action par un script
+dans le navigateur : les antivirus de messagerie qui analysent les liens
+n'exécutent pas ce script et ne déclenchent donc rien. Aucune variable
+supplémentaire à configurer.
+
 ## 4. Liens magiques via Resend (Supabase)
 
 L'envoi intégré à Supabase est limité à quelques emails par heure. Supabase >

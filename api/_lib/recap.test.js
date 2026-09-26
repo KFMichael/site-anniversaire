@@ -1,56 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { createClient } from '@supabase/supabase-js'
 import { envoyerApercu, executerRecapQuotidien } from './recap.js'
-
-// Faux PostgREST en mémoire : juste ce que recap.js utilise (select avec
-// jointure simple, filtres eq/neq/gte/lte, insert avec clé primaire, delete)
-function fauxSupabase(tables) {
-  const cles = { envois_recap: ['user_id', 'espace_id', 'type', 'periode'] }
-  const jointures = {
-    plats: (ligne) => tables.plats.find((p) => p.id === ligne.plat_id) ?? null,
-    profils: (ligne) => tables.profils.find((p) => p.id === ligne.user_id) ?? null,
-  }
-  async function fetch(url, options = {}) {
-    const u = new URL(url)
-    const table = u.pathname.split('/').pop()
-    const filtres = [...u.searchParams].filter(([k]) => k !== 'select')
-    const garde = (l) =>
-      filtres.every(([k, v]) => {
-        const [op, ...reste] = v.split('.')
-        const val = reste.join('.')
-        return { eq: String(l[k]) === val, neq: String(l[k]) !== val, gte: String(l[k]) >= val, lte: String(l[k]) <= val }[op]
-      })
-    const json = (corps, status = 200) =>
-      new Response(JSON.stringify(corps), { status, headers: { 'Content-Type': 'application/json' } })
-    const methode = options.method ?? 'GET'
-    if (methode === 'GET') {
-      const select = (u.searchParams.get('select') ?? '').replace(/\s/g, '')
-      return json(
-        (tables[table] ?? []).filter(garde).map((l) => {
-          const r = { ...l }
-          for (const [nom, joindre] of Object.entries(jointures)) if (select.includes(`${nom}(`)) r[nom] = joindre(l)
-          return r
-        })
-      )
-    }
-    if (methode === 'POST') {
-      const ligne = JSON.parse(options.body)
-      const cle = cles[table]
-      if (cle && tables[table].some((l) => cle.every((c) => l[c] === ligne[c]))) {
-        return json({ code: '23505', message: 'duplicate key' }, 409)
-      }
-      tables[table].push(ligne)
-      return json(null, 201)
-    }
-    if (methode === 'DELETE') {
-      tables[table] = tables[table].filter((l) => !garde(l))
-      return json(null, 204)
-    }
-    return json({ message: 'non géré' }, 400)
-  }
-  return createClient('http://faux.supabase', 'cle', { global: { fetch }, auth: { persistSession: false } })
-}
+import { fauxSupabase } from '../../test/faux-supabase.js'
 
 function jeuDeDonnees() {
   return {

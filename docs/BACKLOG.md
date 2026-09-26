@@ -98,6 +98,7 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Email personnalisé par membre : charges du mois, dîners et courses de la semaine à venir
 - [x] Rappel du 1er du mois pour choisir ses charges (fusionné avec le récap si le 1er est un dimanche)
 - [x] Désinscription par type d'email, aperçu à la demande, journal anti-doublon
+- [x] Boutons d'action en un clic dans l'email : prendre une charge, marquer un article acheté, tirer un autre plat (jetons signés, `api/action.js`)
 - [ ] Jour / heure au choix (nécessite une tâche horaire : offre Vercel Pro)
 
 ### Phase 5 — Sport

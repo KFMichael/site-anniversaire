@@ -85,6 +85,7 @@ src/
         ├── ReglagesSurprise.jsx
         └── data/
 api/recap.js                 # Fonction Vercel : récap par email (tâche planifiée + aperçu)
+api/action.js                # Fonction Vercel : boutons d'action de l'email (jetons signés)
 api/_lib/                    # Planning, contenu de l'email, envoi (testés)
 supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 ```
