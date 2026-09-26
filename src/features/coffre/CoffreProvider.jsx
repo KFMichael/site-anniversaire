@@ -1,33 +1,72 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../auth/contexte'
 import { useEspace } from '../espace/contexte'
 import { CoffreContexte } from './contexte'
 import {
   chiffrerEntree,
   dechiffrerEntree,
+  deriverClePrf,
+  desenvelopperCle,
+  envelopperAvecPhrase,
+  envelopperCle,
   ouvrirCoffre,
   preparerCoffre,
 } from './crypto'
+import {
+  authentifier,
+  creerPasskey,
+  ErreurBiometrie,
+  libelleAppareil,
+  memoriserPasskeyLocale,
+  oublierPasskeyLocale,
+  passkeysLocales,
+} from './biometrie'
 
-// Verrouillage automatique après 5 min sans interaction
+// Verrouillage automatique sans interaction. Plus court quand Face ID est
+// activé : le rouvrir ne coûte qu'un regard.
 const DELAI_VERROUILLAGE_MS = 5 * 60 * 1000
+const DELAI_VERROUILLAGE_BIOMETRIE_MS = 60 * 1000
 
 // Monté au niveau de l'espace (et remonté à chaque changement d'espace) :
 // la clé survit à la navigation entre onglets, mais uniquement en mémoire —
-// recharger la page ou attendre 5 min verrouille le coffre.
+// recharger la page ou rester inactif verrouille le coffre.
 export default function CoffreProvider({ children }) {
-  const { espace } = useEspace()
+  const { utilisateur } = useAuth()
+  const { espace, profil } = useEspace()
   // undefined = pas encore chargé, null = pas de coffre dans cet espace
   const [coffre, setCoffre] = useState(undefined)
   const [cle, setCle] = useState(null)
   const [entrees, setEntrees] = useState([])
+  // Appareils de l'utilisateur courant avec Face ID activé pour ce coffre
+  const [appareils, setAppareils] = useState([])
+  // Relu à chaque activation / retrait (localStorage n'est pas réactif)
+  const [locales, setLocales] = useState(() => passkeysLocales(espace.id))
   const [erreur, setErreur] = useState('')
   const derniereActivite = useRef(0)
+
+  // Appareils enregistrés, marqués `ici` s'ils ont été activés sur celui-ci
+  const appareilsMarques = useMemo(
+    () => appareils.map((a) => ({ ...a, ici: locales.includes(a.credential_id) })),
+    [appareils, locales]
+  )
+  const appareilsIci = useMemo(() => appareilsMarques.filter((a) => a.ici), [appareilsMarques])
 
   const verrouiller = useCallback(() => {
     setCle(null)
     setEntrees([])
   }, [])
+
+  const chargerAppareils = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('cles_appareils')
+      .select('*')
+      .eq('espace_id', espace.id)
+      .eq('user_id', utilisateur.id)
+      .order('created_at', { ascending: true })
+    if (!error) setAppareils(data)
+    return error ? [] : data
+  }, [espace.id, utilisateur.id])
 
   const chargerCoffre = useCallback(async () => {
     const { data, error } = await supabase
@@ -41,8 +80,10 @@ export default function CoffreProvider({ children }) {
     }
     setErreur('')
     setCoffre(data)
+    if (data) await chargerAppareils()
+    else setAppareils([])
     return data
-  }, [espace.id])
+  }, [espace.id, chargerAppareils])
 
   const chargerEntrees = useCallback(
     async (cleCourante) => {
@@ -70,54 +111,109 @@ export default function CoffreProvider({ children }) {
     [espace.id]
   )
 
+  const ouvrirAvecCle = useCallback(
+    async (cleMaitresse) => {
+      derniereActivite.current = Date.now()
+      setCle(cleMaitresse)
+      await chargerEntrees(cleMaitresse)
+    },
+    [chargerEntrees]
+  )
+
   const creer = useCallback(
     async (phrase) => {
       const { cle: nouvelleCle, parametres } = await preparerCoffre(phrase, espace.id)
       const { error } = await supabase
         .from('coffres')
         .insert({ espace_id: espace.id, ...parametres })
-      if (error) {
-        // Un autre membre a créé le coffre entretemps : on recharge
-        await chargerCoffre()
-        return false
-      }
-      await chargerCoffre()
-      setCle(nouvelleCle)
-      setEntrees([])
+      // En cas d'échec, un autre membre a créé le coffre entretemps
+      const cree = await chargerCoffre()
+      if (error || !cree) return false
+      await ouvrirAvecCle(nouvelleCle)
       return true
     },
-    [espace.id, chargerCoffre]
+    [espace.id, chargerCoffre, ouvrirAvecCle]
   )
 
   const deverrouiller = useCallback(
     async (phrase) => {
-      // Relit les paramètres : la phrase a pu être changée par l'autre membre
+      // Relit l'enveloppe : la phrase a pu être changée par un autre membre
       const courant = await chargerCoffre()
       if (!courant) return false
       const cleTrouvee = await ouvrirCoffre(phrase, espace.id, courant)
       if (!cleTrouvee) return false
-      derniereActivite.current = Date.now()
-      setCle(cleTrouvee)
-      await chargerEntrees(cleTrouvee)
+      await ouvrirAvecCle(cleTrouvee)
       return true
     },
-    [espace.id, chargerCoffre, chargerEntrees]
+    [espace.id, chargerCoffre, ouvrirAvecCle]
+  )
+
+  // Renvoie null si le coffre est ouvert, sinon un message d'erreur
+  const deverrouillerBiometrie = useCallback(async () => {
+    try {
+      const { appareil, secret } = await authentifier(appareilsIci)
+      const cleMaitresse = await desenvelopperCle(await deriverClePrf(secret), espace.id, appareil)
+      secret.fill(0)
+      await ouvrirAvecCle(cleMaitresse)
+      return null
+    } catch (e) {
+      return e instanceof ErreurBiometrie
+        ? e.message
+        : "L'enveloppe de cet appareil est invalide : retire-le et réactive-le."
+    }
+  }, [appareilsIci, espace.id, ouvrirAvecCle])
+
+  // Crée une passkey sur cet appareil et y enveloppe la clé du coffre ouvert.
+  // Renvoie null si tout va bien, sinon un message d'erreur.
+  const activerBiometrie = useCallback(async () => {
+    try {
+      const { credentialId, prfSel, secret } = await creerPasskey({ utilisateur, profil, espace })
+      const enveloppe = await envelopperCle(await deriverClePrf(secret), espace.id, cle)
+      secret.fill(0)
+      const { error } = await supabase.from('cles_appareils').insert({
+        espace_id: espace.id,
+        user_id: utilisateur.id,
+        credential_id: credentialId,
+        prf_sel: prfSel,
+        libelle: libelleAppareil(),
+        ...enveloppe,
+      })
+      if (error) return "L'activation n'a pas pu être enregistrée."
+      memoriserPasskeyLocale(espace.id, credentialId)
+      setLocales(passkeysLocales(espace.id))
+      await chargerAppareils()
+      return null
+    } catch (e) {
+      return e instanceof ErreurBiometrie ? e.message : "L'activation a échoué."
+    }
+  }, [utilisateur, profil, espace, cle, chargerAppareils])
+
+  const retirerAppareil = useCallback(
+    async (appareil) => {
+      const { error } = await supabase.from('cles_appareils').delete().eq('id', appareil.id)
+      if (error) return false
+      oublierPasskeyLocale(espace.id, appareil.credential_id)
+      setLocales(passkeysLocales(espace.id))
+      setAppareils((liste) => liste.filter((a) => a.id !== appareil.id))
+      return true
+    },
+    [espace.id]
   )
 
   // Renvoie null si tout va bien, sinon un message d'erreur
   const enregistrer = useCallback(
     async (id, contenu) => {
-      // Si la phrase a été changée par un autre membre depuis l'ouverture,
+      // Si le coffre a été réinitialisé (puis recréé) depuis l'ouverture,
       // notre clé est périmée : écrire avec rendrait l'entrée illisible
       const { data: actuel } = await supabase
         .from('coffres')
-        .select('updated_at')
+        .select('created_at')
         .eq('espace_id', espace.id)
         .maybeSingle()
-      if (!actuel || actuel.updated_at !== coffre?.updated_at) {
+      if (!actuel || actuel.created_at !== coffre?.created_at) {
         verrouiller()
         await chargerCoffre()
-        return 'La phrase secrète a changé : déverrouille à nouveau le coffre.'
+        return 'Le coffre a été réinitialisé entretemps : rouvre-le.'
       }
 
       const ligne = await chiffrerEntree(cle, espace.id, contenu)
@@ -135,58 +231,32 @@ export default function CoffreProvider({ children }) {
     [cle, coffre, espace.id, verrouiller, chargerCoffre, chargerEntrees]
   )
 
-  const supprimer = useCallback(
-    async (id) => {
-      const { error } = await supabase.from('entrees_coffre').delete().eq('id', id)
-      if (error) return false
-      setEntrees((liste) => liste.filter((e) => e.id !== id))
-      return true
-    },
-    []
-  )
+  const supprimer = useCallback(async (id) => {
+    const { error } = await supabase.from('entrees_coffre').delete().eq('id', id)
+    if (error) return false
+    setEntrees((liste) => liste.filter((e) => e.id !== id))
+    return true
+  }, [])
 
-  // Rechiffre toutes les entrées avec une clé dérivée de la nouvelle phrase,
-  // puis remplace tout en une transaction (RPC changer_phrase_coffre)
+  // Seule l'enveloppe « phrase » change : les entrées et les appareils
+  // Face ID restent valides (la clé maîtresse est la même)
   const changerPhrase = useCallback(
     async (nouvellePhrase) => {
+      const parametres = await envelopperAvecPhrase(cle, nouvellePhrase, espace.id)
       const { data, error } = await supabase
-        .from('entrees_coffre')
-        .select('id, iv, chiffre')
+        .from('coffres')
+        .update({ ...parametres, updated_at: new Date().toISOString() })
         .eq('espace_id', espace.id)
-      if (error) return "Impossible de lire le coffre."
-
-      const { cle: nouvelleCle, parametres } = await preparerCoffre(nouvellePhrase, espace.id)
-      let rechiffrees
-      try {
-        rechiffrees = await Promise.all(
-          data.map(async (ligne) => {
-            const contenu = await dechiffrerEntree(cle, espace.id, ligne)
-            return { id: ligne.id, ...(await chiffrerEntree(nouvelleCle, espace.id, contenu)) }
-          })
-        )
-      } catch {
-        return 'Une entrée illisible empêche le changement : supprime-la avant.'
-      }
-
-      const { error: erreurRpc } = await supabase.rpc('changer_phrase_coffre', {
-        p_espace_id: espace.id,
-        p_sel: parametres.sel,
-        p_iterations: parametres.iterations,
-        p_verificateur_iv: parametres.verificateur_iv,
-        p_verificateur: parametres.verificateur,
-        p_entrees: rechiffrees,
-      })
-      if (erreurRpc) return "Le changement a échoué, rien n'a été modifié. Réessaie."
-
+        .select('espace_id')
+      if (error || data.length !== 1) return "Le changement a échoué, rien n'a été modifié."
       await chargerCoffre()
-      setCle(nouvelleCle)
-      await chargerEntrees(nouvelleCle)
       return null
     },
-    [cle, espace.id, chargerCoffre, chargerEntrees]
+    [cle, espace.id, chargerCoffre]
   )
 
-  // Efface le coffre et toutes ses entrées (phrase oubliée). Admin uniquement.
+  // Efface le coffre, ses entrées et les appareils activés (phrase oubliée).
+  // Admin uniquement.
   const reinitialiser = useCallback(async () => {
     const { error } = await supabase.from('coffres').delete().eq('espace_id', espace.id)
     if (error) return false
@@ -197,15 +267,17 @@ export default function CoffreProvider({ children }) {
 
   // Verrouillage automatique : toute interaction repousse l'échéance ; au
   // retour sur un onglet resté caché trop longtemps, on verrouille aussitôt
+  const delaiVerrouillage =
+    appareilsIci.length > 0 ? DELAI_VERROUILLAGE_BIOMETRIE_MS : DELAI_VERROUILLAGE_MS
   useEffect(() => {
     if (!cle) return
     const marquer = () => {
       derniereActivite.current = Date.now()
     }
     const verifier = () => {
-      if (Date.now() - derniereActivite.current > DELAI_VERROUILLAGE_MS) verrouiller()
+      if (Date.now() - derniereActivite.current > delaiVerrouillage) verrouiller()
     }
-    const intervalle = setInterval(verifier, 15_000)
+    const intervalle = setInterval(verifier, 5_000)
     window.addEventListener('pointerdown', marquer)
     window.addEventListener('keydown', marquer)
     document.addEventListener('visibilitychange', verifier)
@@ -215,24 +287,49 @@ export default function CoffreProvider({ children }) {
       window.removeEventListener('keydown', marquer)
       document.removeEventListener('visibilitychange', verifier)
     }
-  }, [cle, verrouiller])
+  }, [cle, delaiVerrouillage, verrouiller])
 
   const valeur = useMemo(
     () => ({
       coffre,
       ouvert: Boolean(cle),
       entrees,
+      appareils: appareilsMarques,
+      biometrieIci: appareilsIci.length > 0,
+      delaiVerrouillage,
       erreur,
       chargerCoffre,
       creer,
       deverrouiller,
+      deverrouillerBiometrie,
+      activerBiometrie,
+      retirerAppareil,
       verrouiller,
       enregistrer,
       supprimer,
       changerPhrase,
       reinitialiser,
     }),
-    [coffre, cle, entrees, erreur, chargerCoffre, creer, deverrouiller, verrouiller, enregistrer, supprimer, changerPhrase, reinitialiser]
+    [
+      coffre,
+      cle,
+      entrees,
+      appareilsMarques,
+      appareilsIci,
+      delaiVerrouillage,
+      erreur,
+      chargerCoffre,
+      creer,
+      deverrouiller,
+      deverrouillerBiometrie,
+      activerBiometrie,
+      retirerAppareil,
+      verrouiller,
+      enregistrer,
+      supprimer,
+      changerPhrase,
+      reinitialiser,
+    ]
   )
 
   return <CoffreContexte.Provider value={valeur}>{children}</CoffreContexte.Provider>

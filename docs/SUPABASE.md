@@ -6,7 +6,12 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 
 1. `supabase/migrations/0001_espaces.sql` — profils, espaces, membres, invitations, RLS
 2. `supabase/migrations/0002_activites_par_espace.sql` — rattache le carnet, les messages et les mots de passe du mode surprise à un espace
-3. `supabase/migrations/0003_coffre.sql` — coffre à mots de passe (données chiffrées uniquement)
+3. `supabase/migrations/0003_coffre.sql` — coffre à mots de passe et appareils Face ID (données chiffrées uniquement)
+
+> Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
+> l'ajout de Face ID), la supprimer d'abord :
+> `drop table if exists cles_appareils, entrees_coffre, coffres cascade;
+> drop function if exists changer_phrase_coffre;` puis exécuter la nouvelle.
 
 La migration 0002 **supprime les anciennes policies** des tables
 `activites_carnet`, `messages_proches` et `mots_passe_accueil` (accès

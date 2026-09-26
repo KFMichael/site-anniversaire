@@ -106,10 +106,13 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] Phrase secrète de l'espace → clé dérivée dans le navigateur (PBKDF2-SHA256 600 000 itérations, AES-GCM 256 via WebCrypto)
 - [x] Entrées entièrement chiffrées (nom compris) : nom, catégorie, identifiant, mot de passe, site, note
 - [x] Masquage par défaut, copie en un tap (presse-papier vidé après 30 s), générateur de mots de passe
-- [x] Verrouillage automatique (5 min d'inactivité, rechargement de la page, changement d'espace)
-- [x] Changement de phrase secrète (rechiffrement de toutes les entrées en une transaction)
+- [x] Clé maîtresse aléatoire, enveloppée par la phrase et par Face ID : changer la phrase ne rechiffre pas les entrées
+- [x] Face ID / Touch ID par appareil (passkey WebAuthn + PRF), liste des appareils, retrait
+- [x] Verrouillage automatique (5 min d'inactivité, 1 min avec Face ID, rechargement de la page, changement d'espace)
+- [x] Changement de phrase secrète
 - [x] Réinitialisation du coffre (phrase oubliée), réservée aux admins
 - [ ] Import depuis un export CSV (navigateur, Bitwarden…)
+- [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
 
 ### Phase 7 — Finitions
 - [ ] Notifications push (service worker, Web Push ; iOS : appli installée sur l'écran d'accueil)

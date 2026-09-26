@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useCoffre } from './contexte'
+import { biometrieDisponible, nomBiometrie } from './biometrie'
 import { useEspace } from '../espace/contexte'
 import { LONGUEUR_MIN_PHRASE } from './crypto'
 import { Bouton, Carte, ChampTexte } from '../../components/ui'
@@ -13,6 +14,7 @@ export default function ReglagesCoffre() {
 
   return (
     <Carte titre="Réglages du coffre">
+      {ouvert && <Biometrie />}
       {ouvert && <ChangementPhrase />}
       {estAdmin && <Reinitialisation />}
     </Carte>
@@ -38,7 +40,9 @@ function ChangementPhrase() {
     if (erreur) {
       setMessage(erreur)
     } else {
-      setMessage('Phrase changée. Préviens les autres membres !')
+      setMessage(
+        `Phrase changée. Préviens les autres membres ! L'ouverture avec ${nomBiometrie()} fonctionne toujours.`
+      )
       setPhrase('')
       setConfirmation('')
       setOuvert(false)
@@ -76,7 +80,7 @@ function ChangementPhrase() {
       />
       <div className="flex gap-3 flex-wrap">
         <Bouton type="submit" disabled={!valide || enCours}>
-          {enCours ? 'Rechiffrement…' : 'Changer'}
+          {enCours ? 'Changement…' : 'Changer'}
         </Bouton>
         <Bouton type="button" variante="discret" onClick={() => setOuvert(false)}>
           Annuler
@@ -84,6 +88,74 @@ function ChangementPhrase() {
       </div>
       {message && <p className="font-sans text-sm text-text-muted italic">{message}</p>}
     </form>
+  )
+}
+
+function Biometrie() {
+  const { appareils, biometrieIci, activerBiometrie, retirerAppareil } = useCoffre()
+  const [disponible, setDisponible] = useState(false)
+  const [enCours, setEnCours] = useState(false)
+  const [message, setMessage] = useState('')
+  const nom = nomBiometrie()
+
+  useEffect(() => {
+    biometrieDisponible().then(setDisponible)
+  }, [])
+
+  async function activer() {
+    setEnCours(true)
+    setMessage('')
+    const erreur = await activerBiometrie()
+    setEnCours(false)
+    setMessage(erreur ?? `C'est activé : le coffre s'ouvrira avec ${nom} sur cet appareil ✓`)
+  }
+
+  async function retirer(appareil) {
+    const question = appareil.ici
+      ? `Désactiver ${nom} sur cet appareil ?`
+      : `Retirer « ${appareil.libelle} » ? Le coffre ne pourra plus y être ouvert avec ${nom}.`
+    if (window.confirm(question)) await retirerAppareil(appareil)
+  }
+
+  if (!disponible && appareils.length === 0) return null
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="font-sans text-sm text-text-secondary">
+        Ouvre le coffre avec {nom}, sans taper la phrase. La clé reste protégée par la
+        puce sécurisée de l'appareil, et le coffre se reverrouille après 1 minute
+        d'inactivité.
+      </p>
+
+      {appareils.length > 0 && (
+        <ul className="flex flex-col divide-y divide-separator">
+          {appareils.map((a) => (
+            <li key={a.id} className="py-2 flex items-center justify-between gap-3">
+              <span className="font-sans text-sm text-text-primary">
+                {a.libelle}
+                {a.ici && <span className="text-text-muted"> (cet appareil)</span>}
+                <span className="block text-xs text-text-muted">
+                  activé le {new Date(a.created_at).toLocaleDateString('fr-FR')}
+                </span>
+              </span>
+              <button
+                onClick={() => retirer(a)}
+                className="font-sans text-xs text-text-muted hover:text-text-primary underline shrink-0"
+              >
+                Retirer
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {disponible && !biometrieIci && (
+        <Bouton variante="secondaire" onClick={activer} disabled={enCours}>
+          {enCours ? 'Activation…' : `Activer ${nom} sur cet appareil`}
+        </Bouton>
+      )}
+      {message && <p className="font-sans text-sm text-text-muted italic">{message}</p>}
+    </div>
   )
 }
 

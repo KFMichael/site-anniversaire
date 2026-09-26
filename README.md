@@ -13,11 +13,22 @@ d'origine est archivé sur la branche `archive/site-anniversaire` ; ses
 
 ## Coffre à mots de passe
 
-Les mots de passe sont chiffrés **dans le navigateur** avec une clé dérivée
-de la phrase secrète de l'espace (PBKDF2-SHA256, 600 000 itérations →
-AES-GCM 256). Supabase ne stocke que du chiffré : ni la phrase, ni la clé,
-ni même le nom des entrées. Conséquence : une phrase oubliée est
-irrécupérable (le coffre peut seulement être réinitialisé par un admin).
+Les mots de passe sont chiffrés **dans le navigateur** par une clé
+maîtresse aléatoire (AES-GCM 256). Cette clé n'est jamais stockée en clair,
+seulement enveloppée :
+
+- par la **phrase secrète** de l'espace (PBKDF2-SHA256, 600 000 itérations) ;
+- par **Face ID / Touch ID** sur chaque appareil activé : une passkey
+  WebAuthn et son extension PRF fournissent un secret calculé dans la puce
+  sécurisée de l'appareil (iOS 18+, macOS Safari 18+, Chrome récent).
+
+Supabase ne stocke que du chiffré : ni la phrase, ni la clé, ni même le nom
+des entrées. Une phrase oubliée est irrécupérable (le coffre peut seulement
+être réinitialisé par un admin).
+
+> Les passkeys sont liées au nom de domaine : celles créées sur une URL de
+> prévisualisation Vercel ne fonctionnent pas en production. Activer Face ID
+> sur le domaine définitif.
 
 ## Stack
 
@@ -54,7 +65,8 @@ src/
     ├── espace/              # Espace courant, création, invitation, réglages
     ├── tableau-de-bord/     # Accueil : modules de l'espace
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
-    │   ├── crypto.js        # PBKDF2 + AES-GCM (WebCrypto), testé par crypto.test.js
+    │   ├── crypto.js        # Clé maîtresse, enveloppes phrase/PRF (WebCrypto), testé par crypto.test.js
+    │   ├── biometrie.js     # Face ID / Touch ID : passkey WebAuthn + extension PRF
     │   └── CoffreProvider.jsx # Clé en mémoire, verrouillage auto
     └── activites/           # Ex-site anniversaire
         ├── Activites.jsx    # Sous-navigation
