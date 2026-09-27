@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
-import { ChoixPoids } from './Poids'
+import { ChoixPoids, PoidsPastilles } from './Poids'
+import { catalogueAvecEtat } from './catalogue'
 
 // Liste des charges de l'espace : ajout, renommage, poids, archivage.
 // Archiver plutôt que supprimer : l'historique des mois passés reste juste.
 export default function GestionCharges({ donnees, onFermer }) {
-  const { charges, ajouterCharge, modifierCharge } = donnees
+  const { charges, ajouterCharge, ajouterDepuisCatalogue, modifierCharge } = donnees
   const [message, setMessage] = useState('')
   const actives = charges.filter((c) => !c.archivee)
   const archivees = charges.filter((c) => c.archivee)
@@ -17,13 +18,23 @@ export default function GestionCharges({ donnees, onFermer }) {
   }
 
   return (
-    <Page titre="Gérer les charges" sousTitre="Communes à tout l'espace">
-      <Bouton variante="secondaire" onClick={onFermer} className="self-start">
-        ‹ Retour
-      </Bouton>
+    <Page titre="Gérer les charges" sousTitre="Communes à tout l'espace" retour={{ onClick: onFermer, label: 'Charge mentale' }}>
 
+      <Catalogue
+        charges={charges}
+        onAjouter={async (nouvelles, ids) => {
+          setMessage('')
+          const erreur = await ajouterDepuisCatalogue(nouvelles, ids)
+          const n = nouvelles.length + ids.length
+          setMessage(erreur ?? `${n} charge${n > 1 ? 's ajoutées' : ' ajoutée'} ✓`)
+        }}
+      />
+      {message && (
+        <p role="status" className="font-sans text-sm text-text-secondary px-1">
+          {message}
+        </p>
+      )}
       <NouvelleCharge onAjouter={(c) => action(ajouterCharge(c))} />
-      {message && <p className="font-sans text-sm text-text-muted italic px-1">{message}</p>}
 
       <Carte titre={`Charges actives (${actives.length})`}>
         <ul className="flex flex-col divide-y divide-separator">
@@ -42,7 +53,7 @@ export default function GestionCharges({ donnees, onFermer }) {
                 <span className="font-sans text-text-muted flex-1">{c.nom}</span>
                 <button
                   onClick={() => action(modifierCharge(c.id, { archivee: false }))}
-                  className="font-sans text-xs text-text-muted hover:text-text-primary underline"
+                  className="cible-44 font-sans text-xs text-text-muted hover:text-text-primary underline"
                 >
                   Réactiver
                 </button>
@@ -94,13 +105,13 @@ function LigneCharge({ charge, onModifier }) {
           <span className="font-sans text-text-primary flex-1">{charge.nom}</span>
           <button
             onClick={() => setEdition(true)}
-            className="font-sans text-xs text-text-muted hover:text-text-primary underline"
+            className="cible-44 font-sans text-xs text-text-muted hover:text-text-primary underline"
           >
             Renommer
           </button>
           <button
             onClick={() => onModifier({ archivee: true })}
-            className="font-sans text-xs text-text-muted hover:text-text-primary underline"
+            className="cible-44 font-sans text-xs text-text-muted hover:text-text-primary underline"
           >
             Archiver
           </button>
@@ -125,7 +136,7 @@ function NouvelleCharge({ onAjouter }) {
   }
 
   return (
-    <Carte titre="Nouvelle charge">
+    <Carte titre="Autre charge">
       <form onSubmit={soumettre} className="flex flex-col gap-3">
         <div className="flex gap-2 items-end">
           <div className="w-16">
@@ -155,6 +166,97 @@ function NouvelleCharge({ onAjouter }) {
           Ajouter
         </Bouton>
       </form>
+    </Carte>
+  )
+}
+
+// Charges courantes à ajouter d'un tap, par thème ; celles déjà dans
+// l'espace sont marquées, les archivées peuvent être réactivées
+function Catalogue({ charges, onAjouter }) {
+  const [ouvert, setOuvert] = useState(charges.filter((c) => !c.archivee).length === 0)
+  const [choisies, setChoisies] = useState(new Set())
+  const [enCours, setEnCours] = useState(false)
+  const themes = catalogueAvecEtat(charges)
+  const toutes = themes.flatMap((t) => t.charges)
+
+  function basculer(nom) {
+    setChoisies((x) => {
+      const suivant = new Set(x)
+      if (suivant.has(nom)) suivant.delete(nom)
+      else suivant.add(nom)
+      return suivant
+    })
+  }
+
+  async function ajouter() {
+    setEnCours(true)
+    const selection = toutes.filter((c) => choisies.has(c.nom))
+    await onAjouter(
+      selection.filter((c) => c.etat === 'libre').map(({ nom, emoji, poids }) => ({ nom, emoji, poids })),
+      selection.filter((c) => c.etat === 'archivee').map((c) => c.id)
+    )
+    setChoisies(new Set())
+    setEnCours(false)
+  }
+
+  if (!ouvert) {
+    return (
+      <Bouton variante="secondaire" onClick={() => setOuvert(true)} aria-expanded={false}>
+        📋 Choisir dans la liste des charges
+      </Bouton>
+    )
+  }
+
+  return (
+    <Carte titre="Choisir dans la liste">
+      <p className="font-sans text-sm text-text-secondary -mt-2">
+        Touche les charges qui vous concernent, puis ajoute-les. Le poids se change ensuite.
+      </p>
+      {themes.map((t) => (
+        <section key={t.theme} aria-labelledby={`theme-${t.theme}`} className="flex flex-col gap-2">
+          <h3 id={`theme-${t.theme}`} className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
+            {t.theme}
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {t.charges.map((c) => {
+              const active = c.etat === 'active'
+              const choisie = choisies.has(c.nom)
+              return (
+                <button
+                  key={c.nom}
+                  type="button"
+                  disabled={active}
+                  aria-pressed={active ? undefined : choisie}
+                  onClick={() => basculer(c.nom)}
+                  className={`font-sans text-sm min-h-11 px-3.5 rounded-full flex items-center gap-1.5 text-left transition-all duration-200 ease-spring active:scale-95 ${
+                    choisie
+                      ? 'bg-accent text-white'
+                      : active
+                        ? 'bg-bg-base text-text-muted'
+                        : 'bg-bg-base text-text-primary border border-separator'
+                  }`}
+                >
+                  <span aria-hidden="true">{active || choisie ? '✓' : c.emoji}</span>
+                  <span>{c.nom}</span>
+                  {active && <span className="text-xs">(déjà là)</span>}
+                  {c.etat === 'archivee' && <span className={`text-xs ${choisie ? '' : 'text-text-muted'}`}>(archivée)</span>}
+                  {!active && <PoidsPastilles poids={c.poids} couleur={choisie ? 'text-white' : 'text-text-muted'} />}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      ))}
+      <Bouton onClick={ajouter} disabled={enCours || choisies.size === 0} className="sticky bottom-24 shadow-elevated">
+        {enCours
+          ? 'Ajout…'
+          : choisies.size === 0
+            ? 'Choisis une ou plusieurs charges'
+            : `Ajouter ${choisies.size} charge${choisies.size > 1 ? 's' : ''}`}
+      </Bouton>
+      <Bouton variante="discret" onClick={() => setOuvert(false)}>
+        Fermer la liste
+      </Bouton>
     </Carte>
   )
 }

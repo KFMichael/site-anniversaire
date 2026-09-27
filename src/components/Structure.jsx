@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 // Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus.
 // Les autres modules (Activités…) s'ouvrent depuis le tableau de bord.
@@ -10,7 +11,19 @@ const ONGLETS = [
   { to: '/espace', label: 'Espace', Icone: IconeGroupe },
 ]
 
+// Modules ouverts depuis l'accueil : l'onglet Accueil reste allumé
+// pour qu'on sache toujours où l'on est
+const MODULES_ACCUEIL = ['/menus', '/sport', '/echeances', '/listes', '/activites']
+
 export default function Structure() {
+  const { pathname } = useLocation()
+  const depuisAccueil = MODULES_ACCUEIL.some((m) => pathname === m || pathname.startsWith(`${m}/`))
+
+  // Chaque nouvel écran s'ouvre en haut de page
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <>
       <Outlet />
@@ -26,7 +39,7 @@ export default function Structure() {
                 end={fin}
                 className={({ isActive }) =>
                   `font-sans flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-colors duration-200 ease-spring ${
-                    isActive ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
+                    isActive || (to === '/' && depuisAccueil) ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
                   }`
                 }
               >

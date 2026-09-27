@@ -14,7 +14,7 @@ export default function Menus() {
   if (menus.chargement) return <Chargement plein />
 
   return (
-    <Page titre="Menus" sousTitre="Les dîners de la semaine">
+    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Menus" sousTitre="Les dîners de la semaine">
       {menus.erreur && <p className="font-sans text-sm text-text-muted italic px-1">{menus.erreur}</p>}
 
       <div role="tablist" className="flex p-1 rounded-full bg-bg-elevated shadow-soft">
@@ -27,7 +27,7 @@ export default function Menus() {
             role="tab"
             aria-selected={onglet === o.id}
             onClick={() => setOnglet(o.id)}
-            className={`font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
+            className={`cible-44 font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
               onglet === o.id ? 'bg-accent text-white font-medium' : 'text-text-muted'
             }`}
           >

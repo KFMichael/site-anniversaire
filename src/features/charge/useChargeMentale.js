@@ -114,6 +114,27 @@ export function useChargeMentale(mois) {
     [charges, espace.id, chargerCharges]
   )
 
+  // Choix dans le catalogue : ajoute les nouvelles charges en une fois et
+  // réactive celles qui étaient archivées
+  const ajouterDepuisCatalogue = useCallback(
+    async (nouvelles, idsAReactiver) => {
+      let ordre = Math.max(0, ...charges.map((c) => c.ordre))
+      const resultats = await Promise.all([
+        nouvelles.length
+          ? supabase.from('charges').insert(
+              nouvelles.map(({ nom, emoji, poids }) => ({ espace_id: espace.id, nom, emoji, poids, ordre: (ordre += 1) }))
+            )
+          : { error: null },
+        idsAReactiver.length
+          ? supabase.from('charges').update({ archivee: false }).in('id', idsAReactiver)
+          : { error: null },
+      ])
+      await chargerCharges()
+      return resultats.some((r) => r.error) ? "Une partie des charges n'a pas pu être ajoutée." : null
+    },
+    [charges, espace.id, chargerCharges]
+  )
+
   const modifierCharge = useCallback(
     async (id, modifications) => {
       const { error } = await supabase.from('charges').update(modifications).eq('id', id)
@@ -132,6 +153,7 @@ export function useChargeMentale(mois) {
     relacher,
     reprendreMoisPrecedent,
     ajouterCharge,
+    ajouterDepuisCatalogue,
     modifierCharge,
   }
 }

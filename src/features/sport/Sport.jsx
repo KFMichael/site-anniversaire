@@ -50,7 +50,7 @@ export default function Sport() {
   if (sport.chargement) return <Chargement plein />
 
   return (
-    <Page titre="Sport" sousTitre={`${SEANCES_PAR_SEMAINE} séances de ${DUREE_SEANCE} min par semaine, ensemble`}>
+    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Sport" sousTitre={`${SEANCES_PAR_SEMAINE} séances de ${DUREE_SEANCE} min par semaine, ensemble`}>
       {sport.erreur && <p className="font-sans text-sm text-text-muted italic px-1">{sport.erreur}</p>}
 
       <div className="flex items-center justify-between gap-2">

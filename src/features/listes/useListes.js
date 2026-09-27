@@ -20,7 +20,7 @@ export function useListes() {
       supabase.from('listes').select('*').eq('espace_id', espace.id),
       supabase.from('elements_liste').select('*').eq('espace_id', espace.id),
     ])
-    if (l.error || el.error) setErreur('Impossible de charger les listes. La migration 0013 a-t-elle été exécutée ?')
+    if (l.error || el.error) setErreur('Les listes ne sont pas encore disponibles : la base de données doit être mise à jour (migration 0013 dans Supabase).')
     else {
       setErreur('')
       setListes(l.data.sort((a, b) => a.ordre - b.ordre || a.created_at.localeCompare(b.created_at)))

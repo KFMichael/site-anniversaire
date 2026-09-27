@@ -17,7 +17,7 @@ export function useEcheances() {
 
   const charger = useCallback(async () => {
     const { data, error } = await supabase.from('echeances').select('*').eq('espace_id', espace.id)
-    if (error) setErreur('Impossible de charger les échéances. La migration 0013 a-t-elle été exécutée ?')
+    if (error) setErreur('Les échéances ne sont pas encore disponibles : la base de données doit être mise à jour (migration 0013 dans Supabase).')
     else {
       setErreur('')
       setEcheances(data)
