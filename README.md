@@ -79,6 +79,8 @@ src/
     ├── charge/              # Charge mentale : qui gère quoi chaque mois
     │   └── calculs.js       # Mois, répartition des points (testé par calculs.test.js)
     ├── sport/               # Séances de la semaine, envoi des invitations d'agenda
+    ├── echeances/           # Échéances du foyer (impôts, assurances…) et rappels
+    ├── listes/              # Listes partagées (films à voir, choses à faire…), invitations
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
     │   ├── crypto.js        # Clé maîtresse, enveloppes phrase/PRF (WebCrypto), testé par crypto.test.js
     │   ├── biometrie.js     # Face ID / Touch ID : passkey WebAuthn + extension PRF
@@ -95,6 +97,8 @@ src/
 api/recap.js                 # Fonction Vercel : récap par email (tâche planifiée + aperçu)
 api/action.js                # Fonction Vercel : boutons d'action de l'email (jetons signés)
 api/sport.js                 # Fonction Vercel : invitations d'agenda (.ics) des séances de sport
+api/echeances.js             # Fonction Vercel : rappel immédiat d'une échéance (email + notification)
+api/invitation.js            # Fonction Vercel : invitation d'agenda depuis un élément de liste
 api/notifications.js         # Fonction Vercel : notification de test (les envois planifiés passent par api/recap.js)
 api/activite.js              # Fonction Vercel : notifications des actions des autres membres
 public/sw.js                 # Service worker : réception des notifications

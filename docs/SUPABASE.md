@@ -16,6 +16,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 10. `supabase/migrations/0010_sport.sql` — séances de sport de la semaine et suivi des invitations envoyées
 11. `supabase/migrations/0011_activite.sql` — journal des actions (ajouts à la liste, courses faites, charges prises, dîners prévus) pour les notifications aux autres membres
 12. `supabase/migrations/0012_rappel_sport.sql` — préférence du rappel de sport la veille au soir
+13. `supabase/migrations/0013_echeances_listes.sql` — échéances avec rappels, listes partagées et invitations, préférence des rappels d'échéances
 
 > Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
 > l'ajout de Face ID), la supprimer d'abord :

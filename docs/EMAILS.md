@@ -51,7 +51,12 @@ dimanche et le rappel le 1er du mois, et ne fait rien les autres jours.
 
 Le récap du dimanche contient, pour la semaine à venir : tes charges du
 mois, les dîners, les séances de sport (heure du foyer, séances annulées
-exclues ; « Planifier » s'il n'y en a pas) et la liste de courses.
+exclues ; « Planifier » s'il n'y en a pas), les échéances en retard ou
+dans les 30 jours, et la liste de courses.
+
+Autres emails : rappel immédiat d'une échéance (bouton « 🔔 Rappeler »,
+`api/echeances.js`) et invitation d'agenda depuis une liste partagée
+(« 📅 », `api/invitation.js`, fichier .ics comme pour le sport).
 
 ### Boutons d'action dans l'email
 

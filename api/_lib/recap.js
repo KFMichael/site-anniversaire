@@ -6,6 +6,7 @@ import { construireEmail } from './email.js'
 import { bornesSeances, dateLocale, envoisDuJour, periodeCouverte, seancesDesJours } from './planning.js'
 import { creerJeton } from './jetons.js'
 import { afficherQuantite } from '../../src/features/courses/liste.js'
+import { joursRestants } from '../../src/features/echeances/echeances.js'
 
 // « Attiéké (× 2) », « Farine (1 kg) », « Lait »
 function avecQuantite({ nom, quantite }) {
@@ -25,7 +26,7 @@ async function lire(requete) {
 // membres de l'espace.
 export async function donneesEspace(admin, espaceId, { jours, mois }, fuseau = 'Europe/Paris') {
   const bornes = jours.length ? bornesSeances(jours) : null
-  const [charges, attributions, produits, articles, diners, seances] = await Promise.all([
+  const [charges, attributions, produits, articles, diners, seances, echeances] = await Promise.all([
     lire(admin.from('charges').select('id, nom, emoji, ordre, archivee').eq('espace_id', espaceId)),
     lire(admin.from('attributions').select('charge_id, user_id').eq('espace_id', espaceId).eq('mois', mois)),
     lire(admin.from('produits').select('id, nom, etat, quantite').eq('espace_id', espaceId).neq('etat', 'ok')),
@@ -50,6 +51,7 @@ export async function donneesEspace(admin, espaceId, { jours, mois }, fuseau = '
             .lt('debut', bornes.fin)
         )
       : [],
+    lire(admin.from('echeances').select('titre, categorie, date, faite_le').eq('espace_id', espaceId)),
   ])
   const owners = new Map(attributions.map((a) => [a.charge_id, a.user_id]))
   const tri = (a, b) => a.ordre - b.ordre
@@ -61,6 +63,7 @@ export async function donneesEspace(admin, espaceId, { jours, mois }, fuseau = '
     chargesLibres: charges.filter((c) => !c.archivee && !owners.has(c.id)).sort(tri),
     diners: Object.fromEntries(diners.map((d) => [d.jour, d.plats?.nom ?? d.texte ?? null])),
     seances: seancesDesJours(seances, jours, fuseau),
+    echeances: echeances.filter((e) => !e.faite_le).sort((a, b) => a.date.localeCompare(b.date)),
     courses: {
       aAcheter: [
         ...produits.filter((p) => p.etat === 'fini').map(article('p')),
@@ -79,7 +82,10 @@ function fabriqueLiens(membre, espaceId, config) {
     `${config.lienApp}/api/action?t=${creerJeton(config.cleActions, { u: membre.user_id, e: espaceId, ...contenu })}`
 }
 
-function emailPour(membre, espace, donnees, types, periode, config) {
+// Échéances en retard ou dans les 30 jours qui suivent `aujourdhui`
+const HORIZON_ECHEANCES = 30
+
+function emailPour(membre, espace, donnees, types, periode, config, aujourdhui) {
   const lien = fabriqueLiens(membre, espace.id, config)
   const avecLien = (contenu) => (x) => ({ ...x, lien: lien(contenu(x)) })
   return construireEmail({
@@ -99,6 +105,9 @@ function emailPour(membre, espace, donnees, types, periode, config) {
       ])
     ),
     seances: donnees.seances,
+    echeances: (donnees.echeances ?? [])
+      .map((e) => ({ ...e, jours: joursRestants(e.date, aujourdhui) }))
+      .filter((e) => e.jours <= HORIZON_ECHEANCES),
     courses: {
       aAcheter: donnees.courses.aAcheter.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
       bientot: donnees.courses.bientot.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
@@ -172,7 +181,7 @@ export async function executerRecapQuotidien({ admin, envoyer, maintenant, confi
         continue
       }
 
-      const email = emailPour(membre, espace, donnees, reserves.map((r) => r.type), periode, config)
+      const email = emailPour(membre, espace, donnees, reserves.map((r) => r.type), periode, config, date.iso)
       try {
         await envoyer({ a: membre.email, ...email })
         bilan.envoyes += 1
@@ -207,7 +216,7 @@ export async function envoyerApercu({ admin, envoyer, maintenant, config, utilis
   const periode = periodeCouverte(date.iso, envois)
 
   const donnees = await donneesEspace(admin, espaceId, periode, config.fuseau)
-  const email = emailPour(membre, espace, donnees, ['hebdo', 'mensuel'], periode, config)
+  const email = emailPour(membre, espace, donnees, ['hebdo', 'mensuel'], periode, config, date.iso)
   try {
     await envoyer({ a: membre.email, ...email, sujet: `[Aperçu] ${email.sujet}` })
     return null

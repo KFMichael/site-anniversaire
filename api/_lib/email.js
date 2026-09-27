@@ -2,6 +2,7 @@
 // sujet, version HTML et version texte, à partir des données d'un membre.
 import { libelleMois } from '../../src/features/charge/calculs.js'
 import { libelleJour, libelleSemaine } from '../../src/features/menus/tirage.js'
+import { categorieEcheance, libelleDate, libelleDelai } from '../../src/features/echeances/echeances.js'
 
 export function echapper(texte) {
   return String(texte ?? '')
@@ -41,6 +42,7 @@ function listeHtml(elements) {
 //   mesCharges: [{ emoji, nom }], chargesLibres: [{ emoji, nom, lien? }],
 //   diners: { [iso]: { nom | null, lien? } },
 //   seances: [{ jour: iso, horaire: '18h30–19h15' }],
+//   echeances: [{ titre, categorie, date, jours }] (en retard ou à 30 jours),
 //   courses: { aAcheter: [{ texte, lien? }], bientot: [{ texte, lien? }] }
 // }
 // Les `lien` sont les boutons d'action en un clic (api/action.js).
@@ -130,6 +132,25 @@ export function construireEmail(d) {
     texte.push(`Sport (${seances.length} séance${seances.length > 1 ? 's' : ''}) :`)
     texte.push(...(seances.length ? seances.map((x) => `- ${libelleJour(x.jour)} : ${x.horaire}`) : ['Aucune séance prévue pour l’instant.']))
     texte.push('')
+
+    const echeances = d.echeances ?? []
+    if (echeances.length) {
+      const ligne = (e) => `${libelleDate(e.date)} (${libelleDelai(e.jours)})`
+      html.push(
+        section(
+          '📅 Échéances à venir',
+          listeHtml(
+            echeances.map(
+              (e) =>
+                `${echapper(categorieEcheance(e.categorie).emoji)} <strong>${echapper(e.titre)}</strong> : ${
+                  e.jours < 0 ? `<span style="color:#C4271C;">${echapper(ligne(e))}</span>` : echapper(ligne(e))
+                }`
+            )
+          )
+        )
+      )
+      texte.push('Échéances à venir :', ...echeances.map((e) => `- ${e.titre} : ${ligne(e)}`), '')
+    }
 
     const { aAcheter, bientot } = d.courses
     const total = aAcheter.length + bientot.length

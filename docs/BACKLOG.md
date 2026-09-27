@@ -97,6 +97,12 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Audit axe-core de tous les écrans à 320 et 390 px, clair et sombre : 0 violation ; zones tactiles ≥ 44 pt ; champs ≥ 16 px ; pas de défilement horizontal
 - [x] Police système (SF Pro), pas de délai ni de flash au toucher, zones de sécurité, `prefers-reduced-motion`
 
+### Phase 8 — Échéances et listes partagées ✅
+- [x] Échéances : titre, catégorie, date, répétition (mensuelle, annuelle), personne concernée, note ; suggestions (déclaration des impôts, taxe foncière, assurances, contrôle technique, loyer…)
+- [x] Rappels automatiques par notification (1 mois, 1 semaine, la veille, le jour même), « 🔔 Rappeler » immédiat (email + notification), « Fait » qui passe à la prochaine date, échéances dans le récap du dimanche et sur l'accueil
+- [x] Listes partagées (films à voir, choses à faire, restos, idées cadeaux…), cochées en temps réel, « Léa a ajouté Dune à Films à voir »
+- [x] « 📅 Proposer » un élément : invitation d'agenda (.ics) à tous les membres, mise à jour ou annulation
+
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
 - [x] Notifications push : dîner du soir, récap du dimanche, rappel du 1er ; par appareil, types désactivables, test (`docs/NOTIFICATIONS.md`)

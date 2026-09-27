@@ -7,7 +7,7 @@
 
   --color-bg-base: #F2F2F7;
   --color-bg-elevated: #FFFFFF;
-  --color-bg-elevated-glass: rgb(255 255 255 / 0.72);
+  --color-bg-elevated-glass: rgb(255 255 255 / 0.9);
   --color-text-primary: #000000;
   --color-text-secondary: #48484A;
   --color-text-muted: #6B6B70;
@@ -56,7 +56,7 @@
   color-scheme: dark;
   --color-bg-base: #000000;
   --color-bg-elevated: #1C1C1E;
-  --color-bg-elevated-glass: rgb(28 28 30 / 0.72);
+  --color-bg-elevated-glass: rgb(28 28 30 / 0.9);
   --color-text-primary: #FFFFFF;
   --color-text-secondary: #C7C7CC;
   --color-text-muted: #98989E;
@@ -73,7 +73,7 @@
     color-scheme: dark;
     --color-bg-base: #000000;
     --color-bg-elevated: #1C1C1E;
-    --color-bg-elevated-glass: rgb(28 28 30 / 0.72);
+    --color-bg-elevated-glass: rgb(28 28 30 / 0.9);
     --color-text-primary: #FFFFFF;
     --color-text-secondary: #C7C7CC;
     --color-text-muted: #98989E;

@@ -20,6 +20,8 @@ import ChargeMentale from './features/charge/ChargeMentale'
 import Courses from './features/courses/Courses'
 import Menus from './features/menus/Menus'
 import Sport from './features/sport/Sport'
+import Echeances from './features/echeances/Echeances'
+import Listes from './features/listes/Listes'
 
 // Partie Activités (ex-site anniversaire) chargée à la demande : Leaflet et
 // le quiz n'alourdissent pas le premier affichage de l'application.
@@ -86,6 +88,8 @@ function App() {
                         <Route path="/courses" element={<Courses />} />
                         <Route path="/menus" element={<Menus />} />
                         <Route path="/sport" element={<Sport />} />
+                        <Route path="/echeances" element={<Echeances />} />
+                        <Route path="/listes" element={<Listes />} />
                         <Route path="/coffre" element={<Coffre />} />
                         <Route path="/activites" element={<Activites />}>
                           <Route index element={<Navigate to="idees" replace />} />

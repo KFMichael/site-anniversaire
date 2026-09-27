@@ -1,10 +1,12 @@
 // Notifications sur le téléphone (Web Push) envoyées par la tâche
-// quotidienne : dîner du soir et séances de sport du lendemain (tous les
+// quotidienne : dîner du soir, séances de sport du lendemain et rappels
+// d'échéances (tous les
 // jours), récap court (dimanche), rappel de la charge mentale (le 1er). Indépendant de Vercel et de la
 // bibliothèque web-push (l'envoi est passé en paramètre) : testé par
 // notifications.test.js.
 import { libelleMois } from '../../src/features/charge/calculs.js'
 import { decalerJours } from '../../src/features/menus/tirage.js'
+import { categorieEcheance, libelleDate, libelleDelai, rappelsDuJour } from '../../src/features/echeances/echeances.js'
 import { bornesSeances, dateLocale, envoisDuJour, periodeCouverte, seancesDesJours } from './planning.js'
 import { annulerReservation, donneesEspace, membresDe, reserver } from './recap.js'
 
@@ -42,6 +44,17 @@ export function notificationSport(horaires) {
   }
 }
 
+// « 🧾 Déclaration des impôts » / « Dans 7 jours · vendredi 21 mai 2027 »
+export function notificationEcheance(echeance, jours) {
+  const delai = libelleDelai(jours)
+  return {
+    titre: `${categorieEcheance(echeance.categorie).emoji} ${echeance.titre}`,
+    corps: `${delai.charAt(0).toUpperCase()}${delai.slice(1)} · ${libelleDate(echeance.date)}`,
+    url: '/echeances',
+    tag: `echeance-${echeance.id}`,
+  }
+}
+
 export function notificationMensuel(mois, libres) {
   return {
     titre: `🧠 ${libelleMois(mois)}`,
@@ -73,7 +86,7 @@ export async function envoyerAuMembre(admin, envoyerPush, abonnements, notificat
   return atteints
 }
 
-const PREFERENCE = { diner: 'push_diner', sport: 'push_sport', hebdo: 'push_hebdo', mensuel: 'push_mensuel' }
+const PREFERENCE = { diner: 'push_diner', sport: 'push_sport', echeance: 'push_echeances', hebdo: 'push_hebdo', mensuel: 'push_mensuel' }
 
 // Tâche quotidienne. Renvoie { notifications, appareils, erreurs }
 export async function executerPushQuotidien({ admin, envoyerPush, maintenant, config }) {
@@ -116,12 +129,25 @@ export async function executerPushQuotidien({ admin, envoyerPush, maintenant, co
       .lt('debut', bornes.fin)
     const seancesDemain = seancesDesJours(seancesProches ?? [], [demain], config.fuseau)
 
+    // Échéances dont un rappel tombe aujourd'hui (J-30, J-7, la veille…)
+    const { data: echeances } = await admin.from('echeances').select('*').eq('espace_id', espace.id)
+    const rappels = rappelsDuJour(echeances ?? [], date.iso)
+
     for (const membre of membres) {
       const prefs = preferences.get(membre.user_id) ?? {}
       const aEnvoyer = []
       if (nomDiner) aEnvoyer.push({ type: 'diner', periode: date.iso, notification: notificationDiner(nomDiner) })
       if (seancesDemain.length) {
         aEnvoyer.push({ type: 'sport', periode: demain, notification: notificationSport(seancesDemain.map((x) => x.horaire)) })
+      }
+      for (const { echeance, jours } of rappels) {
+        // À la personne responsable, ou à tout le monde
+        if (echeance.responsable && echeance.responsable !== membre.user_id) continue
+        aEnvoyer.push({
+          type: 'echeance',
+          periode: `${echeance.id}:${echeance.date}:${jours}`,
+          notification: notificationEcheance(echeance, jours),
+        })
       }
       for (const e of planifies) {
         aEnvoyer.push({
