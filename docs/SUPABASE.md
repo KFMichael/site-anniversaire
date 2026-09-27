@@ -34,20 +34,45 @@ membres de l'espace.
 
 ## 2. Authentification
 
-**Authentication > URL Configuration**
-- *Site URL* : l'URL de production (ex. `https://nido.vercel.app`)
-- *Redirect URLs* : ajouter `https://<prod>/**` et `http://localhost:5173/**`
-  (le lien magique ramène sur la page demandée, ex. `/rejoindre/<code>`)
+**Authentication > URL Configuration** (indispensable)
+- *Site URL* : `https://nido.4sept.com` (par défaut `http://localhost:3000` :
+  les liens des emails de connexion renverraient vers localhost)
+- *Redirect URLs* : ajouter `https://nido.4sept.com/**`,
+  `https://*-km-d526.vercel.app/**` (aperçus Vercel) et
+  `http://localhost:5173/**`. Le lien magique ramène sur la page demandée
+  (ex. `/rejoindre/<code>`) ; une adresse absente de cette liste est
+  remplacée par la *Site URL*.
 
 **Authentication > Providers**
 - *Email* : activé (lien magique, aucun mot de passe)
-- *Google* : activer, puis renseigner le Client ID / Secret créés dans
-  Google Cloud Console (*APIs & Services > Credentials > OAuth client ID*,
-  type « Web application », URI de redirection autorisée :
-  `https://<projet>.supabase.co/auth/v1/callback`)
+- *Google* (facultatif) : activer, puis renseigner le Client ID / Secret
+  créés dans Google Cloud Console (*APIs & Services > Credentials > OAuth
+  client ID*, type « Web application », URI de redirection autorisée :
+  `https://<projet>.supabase.co/auth/v1/callback`). Ensuite seulement,
+  ajouter `VITE_CONNEXION_GOOGLE=true` dans Vercel et redéployer : le bouton
+  « Continuer avec Google » est masqué sans cette variable.
 
-**Authentication > Email Templates > Magic Link** (optionnel) : traduire le
-texte en français.
+**Authentication > Email Templates** (recommandé) : un nouveau membre reçoit
+« Confirm signup », un membre déjà inscrit « Magic Link ». Modèles en
+français, à coller dans chacun :
+
+- *Confirm signup* — sujet : `Bienvenue sur Nido : confirme ton adresse`
+
+  ```html
+  <h2>Bienvenue sur Nido 🪺</h2>
+  <p>Touche le bouton ci-dessous pour confirmer ton adresse et entrer dans ton espace.</p>
+  <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 24px;background:#0071EB;color:#FFFFFF;border-radius:999px;text-decoration:none;font-weight:600;">Confirmer et me connecter</a></p>
+  <p style="color:#6B6B70;font-size:13px;">Tu n'as rien demandé ? Ignore simplement cet email.</p>
+  ```
+
+- *Magic Link* — sujet : `Ton lien de connexion à Nido`
+
+  ```html
+  <h2>Connexion à Nido 🪺</h2>
+  <p>Touche le bouton ci-dessous pour te connecter. Le lien est valable une heure.</p>
+  <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 24px;background:#0071EB;color:#FFFFFF;border-radius:999px;text-decoration:none;font-weight:600;">Me connecter</a></p>
+  <p style="color:#6B6B70;font-size:13px;">Tu n'as rien demandé ? Ignore simplement cet email.</p>
+  ```
 
 > L'envoi d'emails intégré à Supabase est limité à quelques emails par
 > heure : suffisant pour tester, à remplacer par un SMTP (Resend…) avant

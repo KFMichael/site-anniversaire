@@ -5,6 +5,11 @@ import { NOM_APP } from '../../config'
 import { redirectionSure, useAuth } from './contexte'
 import Chargement from '../../components/Chargement'
 
+// Connexion Google : affichée seulement une fois le fournisseur activé dans
+// Supabase (sinon Supabase répond « provider is not enabled »). Voir
+// docs/SUPABASE.md, puis VITE_CONNEXION_GOOGLE=true dans Vercel.
+const GOOGLE_ACTIVE = import.meta.env.VITE_CONNEXION_GOOGLE === 'true'
+
 export default function Connexion() {
   const { utilisateur, chargement } = useAuth()
   const [params] = useSearchParams()
@@ -96,19 +101,23 @@ export default function Connexion() {
               </button>
             </form>
 
-            <div className="flex items-center gap-3 text-text-muted text-xs font-sans">
-              <span className="flex-1 h-px bg-separator" />
-              ou
-              <span className="flex-1 h-px bg-separator" />
-            </div>
+            {GOOGLE_ACTIVE && (
+              <>
+                <div className="flex items-center gap-3 text-text-muted text-xs font-sans">
+                  <span className="flex-1 h-px bg-separator" />
+                  ou
+                  <span className="flex-1 h-px bg-separator" />
+                </div>
 
-            <button
-              onClick={connexionGoogle}
-              className="font-sans w-full px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary font-medium flex items-center justify-center gap-2 transition-all duration-200 ease-spring active:scale-95"
-            >
-              <LogoGoogle />
-              Continuer avec Google
-            </button>
+                <button
+                  onClick={connexionGoogle}
+                  className="font-sans w-full px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary font-medium flex items-center justify-center gap-2 transition-all duration-200 ease-spring active:scale-95"
+                >
+                  <LogoGoogle />
+                  Continuer avec Google
+                </button>
+              </>
+            )}
           </div>
         )}
 
