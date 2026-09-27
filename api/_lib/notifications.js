@@ -1,9 +1,8 @@
 // Notifications sur le téléphone (Web Push) envoyées par la tâche
 // quotidienne : dîner du soir, séances de sport du lendemain et rappels
-// d'échéances (tous les
-// jours), récap court (dimanche), rappel de la charge mentale (le 1er). Indépendant de Vercel et de la
-// bibliothèque web-push (l'envoi est passé en paramètre) : testé par
-// notifications.test.js.
+// d'échéances (tous les jours), récap court (dimanche), rappel de la charge
+// mentale (le 1er). Indépendant de Vercel et de la bibliothèque web-push
+// (l'envoi est passé en paramètre) : testé par notifications.test.js.
 import { libelleMois } from '../../src/features/charge/calculs.js'
 import { decalerJours } from '../../src/features/menus/tirage.js'
 import { categorieEcheance, libelleDate, libelleDelai, rappelsDuJour } from '../../src/features/echeances/echeances.js'
