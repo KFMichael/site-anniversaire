@@ -41,3 +41,34 @@ export function periodeCouverte(iso, envois) {
   const mois = `${(lundi ?? iso).slice(0, 7)}-01`
   return { jours: lundi ? joursDeLaSemaine(lundi) : [], mois }
 }
+
+// « 18h30–19h15 » : horaire d'une séance de sport dans le fuseau du foyer
+export function horaireSeance(seance, fuseau) {
+  const debut = new Date(seance.debut)
+  const fin = new Date(debut.getTime() + seance.duree_minutes * 60000)
+  const heure = (d) =>
+    new Intl.DateTimeFormat('fr-FR', { timeZone: fuseau, hour: '2-digit', minute: '2-digit' }).format(d).replace(':', 'h')
+  return `${heure(debut)}–${heure(fin)}`
+}
+
+// Séances (non annulées) qui tombent sur l'un des jours donnés, dans l'ordre :
+// [{ jour: 'AAAA-MM-JJ', horaire: '18h30–19h15' }]
+export function seancesDesJours(seances, jours, fuseau) {
+  const voulus = new Set(jours)
+  return seances
+    .filter((s) => !s.annulee)
+    .map((s) => ({ debut: s.debut, jour: dateLocale(new Date(s.debut), fuseau).iso, horaire: horaireSeance(s, fuseau) }))
+    .filter((s) => voulus.has(s.jour))
+    .sort((a, b) => new Date(a.debut) - new Date(b.debut))
+    .map(({ jour, horaire }) => ({ jour, horaire }))
+}
+
+// Bornes UTC larges pour lire les séances de ces jours (le filtrage exact
+// par jour local est fait par seancesDesJours)
+export function bornesSeances(jours) {
+  const debut = new Date(`${jours[0]}T00:00:00Z`)
+  const fin = new Date(`${jours[jours.length - 1]}T00:00:00Z`)
+  debut.setUTCDate(debut.getUTCDate() - 1)
+  fin.setUTCDate(fin.getUTCDate() + 2)
+  return { debut: debut.toISOString(), fin: fin.toISOString() }
+}

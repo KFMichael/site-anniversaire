@@ -137,3 +137,24 @@ test('aperçu : envoyé au seul demandeur, limité dans le temps, refusé hors e
   assert.match(await envoyerApercu({ ...params, utilisateurId: 'intrus', espaceId: 'e1' }), /pas partie/)
   assert.equal(envoyes.length, 1)
 })
+
+test('récap : séances de sport de la semaine, jour local du foyer', async () => {
+  const tables = jeuDeDonnees()
+  tables.seances_sport = [
+    { espace_id: 'e1', debut: '2026-09-30T16:30:00Z', duree_minutes: 45, annulee: false }, // mercredi 30, 18h30
+    { espace_id: 'e1', debut: '2026-09-27T22:30:00Z', duree_minutes: 45, annulee: false }, // lundi 28, 0h30 à Paris
+    { espace_id: 'e1', debut: '2026-10-04T22:30:00Z', duree_minutes: 45, annulee: false }, // lundi 5 à Paris : hors semaine
+    { espace_id: 'e1', debut: '2026-10-01T16:30:00Z', duree_minutes: 45, annulee: true },
+  ]
+  const envoyes = []
+  await executerRecapQuotidien({ admin: fauxSupabase(tables), envoyer: async (e) => envoyes.push(e), maintenant: DIMANCHE, config: CONFIG })
+  const { texte, html } = envoyes[0]
+  assert.match(texte, /Sport \(2 séances\) :\n- Lundi 28 : 00h30–01h15\n- Mercredi 30 : 18h30–19h15\n/)
+  assert.match(html, /🏃 Sport \(2 séances\)/)
+
+  // Sans séance : invitation à planifier
+  const vide = []
+  await executerRecapQuotidien({ admin: fauxSupabase(jeuDeDonnees()), envoyer: async (e) => vide.push(e), maintenant: DIMANCHE, config: CONFIG })
+  assert.match(vide[0].texte, /Sport \(0 séance\) :\nAucune séance prévue/)
+  assert.match(vide[0].html, /href="https:\/\/nido.4sept.com\/sport"[^>]*>Planifier</)
+})

@@ -3,9 +3,16 @@
 | Notification | Quand | Écran ouvert au toucher |
 |---|---|---|
 | 🍽️ Ce soir : *plat* | tous les jours (tâche de 17 h UTC), s'il y a un dîner prévu | Menus |
-| 📋 Ta semaine est prête | le dimanche | Accueil |
+| 🏃 Demain : sport | tous les jours, s'il y a une séance le lendemain (la veille au soir) | Sport |
+| 📋 Ta semaine est prête (charges, dîners, séances, courses) | le dimanche | Accueil |
 | 🧠 *Mois* : choisis ta charge mentale | le 1er du mois | Charge |
 | 🛒 Léa a ajouté lait, pain et œufs | quelques secondes après une action d'un autre membre | Courses, Charge ou Menus |
+
+Le rappel juste avant une séance de sport vient de l'agenda : l'invitation
+envoyée depuis Nido contient une alarme 30 min avant, dans Google Agenda,
+Apple Calendrier ou Outlook, pour qui l'a acceptée. La tâche quotidienne de
+Vercel (offre gratuite) ne tourne qu'une fois par jour, d'où le rappel la
+veille au soir.
 
 Chaque membre active les notifications **par appareil** (Espace >
 Notifications) et peut couper chaque type. Un bouton envoie une

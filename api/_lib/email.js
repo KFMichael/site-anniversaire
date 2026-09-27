@@ -40,6 +40,7 @@ function listeHtml(elements) {
 //   types: ['hebdo' | 'mensuel'], jours: [iso], mois: 'AAAA-MM-01',
 //   mesCharges: [{ emoji, nom }], chargesLibres: [{ emoji, nom, lien? }],
 //   diners: { [iso]: { nom | null, lien? } },
+//   seances: [{ jour: iso, horaire: '18h30–19h15' }],
 //   courses: { aAcheter: [{ texte, lien? }], bientot: [{ texte, lien? }] }
 // }
 // Les `lien` sont les boutons d'action en un clic (api/action.js).
@@ -115,6 +116,19 @@ export function construireEmail(d) {
     html.push(section(`🍽️ Les dîners, ${echapper(libelleSemaine(d.jours[0]).toLowerCase())}`, listeHtml(lignes)))
     texte.push(`Les dîners, ${libelleSemaine(d.jours[0]).toLowerCase()} :`)
     texte.push(...d.jours.map((j) => `- ${libelleJour(j)} : ${d.diners[j]?.nom ?? 'rien de prévu'}`))
+    texte.push('')
+
+    const seances = d.seances ?? []
+    html.push(
+      section(
+        `🏃 Sport (${seances.length} séance${seances.length > 1 ? 's' : ''})`,
+        seances.length
+          ? listeHtml(seances.map((x) => `<strong>${echapper(libelleJour(x.jour))}</strong> : ${echapper(x.horaire)}`))
+          : `<p style="${STYLES.texte}">Aucune séance prévue pour l'instant.${d.lienApp ? action(`${d.lienApp}/sport`, 'Planifier') : ''}</p>`
+      )
+    )
+    texte.push(`Sport (${seances.length} séance${seances.length > 1 ? 's' : ''}) :`)
+    texte.push(...(seances.length ? seances.map((x) => `- ${libelleJour(x.jour)} : ${x.horaire}`) : ['Aucune séance prévue pour l’instant.']))
     texte.push('')
 
     const { aAcheter, bientot } = d.courses

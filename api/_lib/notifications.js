@@ -1,10 +1,11 @@
 // Notifications sur le téléphone (Web Push) envoyées par la tâche
-// quotidienne : dîner du soir (tous les jours), récap court (dimanche),
-// rappel de la charge mentale (le 1er). Indépendant de Vercel et de la
+// quotidienne : dîner du soir et séances de sport du lendemain (tous les
+// jours), récap court (dimanche), rappel de la charge mentale (le 1er). Indépendant de Vercel et de la
 // bibliothèque web-push (l'envoi est passé en paramètre) : testé par
 // notifications.test.js.
 import { libelleMois } from '../../src/features/charge/calculs.js'
-import { dateLocale, envoisDuJour, periodeCouverte } from './planning.js'
+import { decalerJours } from '../../src/features/menus/tirage.js'
+import { bornesSeances, dateLocale, envoisDuJour, periodeCouverte, seancesDesJours } from './planning.js'
 import { annulerReservation, donneesEspace, membresDe, reserver } from './recap.js'
 
 function pluriel(n, mot) {
@@ -17,12 +18,27 @@ export function notificationDiner(nomDiner) {
   return { titre: '🍽️ Ce soir', corps: nomDiner, url: '/menus', tag: 'diner' }
 }
 
-export function notificationHebdo({ charges, diners, courses }) {
+export function notificationHebdo({ charges, diners, seances = 0, courses }) {
   return {
     titre: '📋 Ta semaine est prête',
-    corps: `${pluriel(charges, 'charge')} · ${pluriel(diners, 'dîner')} prévu${diners > 1 ? 's' : ''} · ${pluriel(courses, 'article')} à acheter`,
+    corps: [
+      pluriel(charges, 'charge'),
+      `${pluriel(diners, 'dîner')} prévu${diners > 1 ? 's' : ''}`,
+      ...(seances ? [pluriel(seances, 'séance') + ' de sport'] : []),
+      `${pluriel(courses, 'article')} à acheter`,
+    ].join(' · '),
     url: '/',
     tag: 'hebdo',
+  }
+}
+
+// horaires : ['7h00–7h45', '18h30–19h15']
+export function notificationSport(horaires) {
+  return {
+    titre: '🏃 Demain : sport',
+    corps: horaires.length === 1 ? `Séance ${horaires[0]}` : `${horaires.length} séances : ${horaires.join(' et ')}`,
+    url: '/sport',
+    tag: 'sport',
   }
 }
 
@@ -57,7 +73,7 @@ export async function envoyerAuMembre(admin, envoyerPush, abonnements, notificat
   return atteints
 }
 
-const PREFERENCE = { diner: 'push_diner', hebdo: 'push_hebdo', mensuel: 'push_mensuel' }
+const PREFERENCE = { diner: 'push_diner', sport: 'push_sport', hebdo: 'push_hebdo', mensuel: 'push_mensuel' }
 
 // Tâche quotidienne. Renvoie { notifications, appareils, erreurs }
 export async function executerPushQuotidien({ admin, envoyerPush, maintenant, config }) {
@@ -87,12 +103,26 @@ export async function executerPushQuotidien({ admin, envoyerPush, maintenant, co
       .eq('espace_id', espace.id)
       .eq('jour', date.iso)
     const nomDiner = dinerDuJour?.[0]?.plats?.nom ?? dinerDuJour?.[0]?.texte ?? null
-    const donnees = planifies.length ? await donneesEspace(admin, espace.id, periode) : null
+    const donnees = planifies.length ? await donneesEspace(admin, espace.id, periode, config.fuseau) : null
+
+    // Séances de sport du lendemain (rappel la veille au soir)
+    const demain = decalerJours(date.iso, 1)
+    const bornes = bornesSeances([demain])
+    const { data: seancesProches } = await admin
+      .from('seances_sport')
+      .select('debut, duree_minutes, annulee')
+      .eq('espace_id', espace.id)
+      .gte('debut', bornes.debut)
+      .lt('debut', bornes.fin)
+    const seancesDemain = seancesDesJours(seancesProches ?? [], [demain], config.fuseau)
 
     for (const membre of membres) {
       const prefs = preferences.get(membre.user_id) ?? {}
       const aEnvoyer = []
       if (nomDiner) aEnvoyer.push({ type: 'diner', periode: date.iso, notification: notificationDiner(nomDiner) })
+      if (seancesDemain.length) {
+        aEnvoyer.push({ type: 'sport', periode: demain, notification: notificationSport(seancesDemain.map((x) => x.horaire)) })
+      }
       for (const e of planifies) {
         aEnvoyer.push({
           type: e.type,
@@ -102,6 +132,7 @@ export async function executerPushQuotidien({ admin, envoyerPush, maintenant, co
               ? notificationHebdo({
                   charges: donnees.charges.filter((c) => donnees.owners.get(c.id) === membre.user_id).length,
                   diners: periode.jours.filter((j) => donnees.diners[j]).length,
+                  seances: donnees.seances.length,
                   courses: donnees.courses.aAcheter.length + donnees.courses.bientot.length,
                 })
               : notificationMensuel(periode.mois, donnees.chargesLibres.length),

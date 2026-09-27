@@ -91,6 +91,43 @@ test('abonnement expiré supprimé ; erreur temporaire retentée plus tard', asy
 
 test('contenus', () => {
   assert.equal(notificationHebdo({ charges: 2, diners: 5, courses: 0 }).corps, '2 charges · 5 dîners prévus · 0 article à acheter')
+  assert.equal(notificationHebdo({ charges: 1, diners: 1, seances: 1, courses: 2 }).corps, '1 charge · 1 dîner prévu · 1 séance de sport · 2 articles à acheter')
   assert.equal(notificationMensuel('2026-10-01', 3).titre, '🧠 Octobre 2026')
   assert.match(notificationMensuel('2026-10-01', 0).corps, /Toutes les charges/)
+})
+
+// Séances de la semaine du 28 septembre (heure de Paris = UTC + 2)
+function avecSeances() {
+  const tables = donnees()
+  tables.seances_sport = [
+    { espace_id: 'e1', debut: '2026-09-28T16:30:00Z', duree_minutes: 45, annulee: false }, // lundi 18h30
+    { espace_id: 'e1', debut: '2026-09-28T05:00:00Z', duree_minutes: 45, annulee: false }, // lundi 7h00
+    { espace_id: 'e1', debut: '2026-09-28T10:00:00Z', duree_minutes: 45, annulee: true }, // annulée
+    { espace_id: 'e1', debut: '2026-09-30T16:30:00Z', duree_minutes: 45, annulee: false }, // mercredi
+    { espace_id: 'e2', debut: '2026-09-28T06:00:00Z', duree_minutes: 45, annulee: false }, // autre espace
+  ]
+  return tables
+}
+
+test('sport : rappel la veille au soir, dans l’ordre, sans les annulées', async () => {
+  const tables = avecSeances()
+  const { envois, envoyerPush } = capteur()
+  await executerPushQuotidien({ admin: fauxSupabase(tables), envoyerPush, maintenant: DIMANCHE, config: CONFIG })
+  const sport = envois.filter((e) => e.tag === 'sport')
+  assert.equal(sport.length, 3) // 3 appareils
+  assert.equal(sport[0].titre, '🏃 Demain : sport')
+  assert.equal(sport[0].corps, '2 séances : 07h00–07h45 et 18h30–19h15')
+  assert.equal(sport[0].url, '/sport')
+  // Le récap du dimanche compte les séances de la semaine
+  assert.match(envois.find((e) => e.tag === 'hebdo').corps, /· 3 séances de sport ·/)
+  assert.ok(tables.envois_recap.some((l) => l.type === 'push-sport' && l.periode === '2026-09-28'))
+
+  // Mardi soir : une seule séance le mercredi ; préférence coupée respectée
+  tables.preferences_notifications.push({ user_id: 'u1', push_sport: false })
+  const suite = capteur()
+  await executerPushQuotidien({ admin: fauxSupabase(tables), envoyerPush: suite.envoyerPush, maintenant: MARDI, config: CONFIG })
+  assert.deepEqual(
+    suite.envois.filter((e) => e.tag === 'sport').map((e) => [e.id, e.corps]),
+    [['ab3', 'Séance 18h30–19h15']]
+  )
 })
