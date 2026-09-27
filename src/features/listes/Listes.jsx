@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
+import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
 import Chargement from '../../components/Chargement'
 import { versIso } from '../menus/tirage'
 import { useListes } from './useListes'
@@ -40,10 +40,16 @@ export default function Listes() {
   const liste = l.listes.find((x) => x.id === choisie) ?? l.listes[0]
 
   if (l.chargement) return <Chargement plein />
+  if (l.erreur) {
+    return (
+      <Page retour={{ vers: '/', label: 'Accueil' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
+        <EtatErreur message={l.erreur} />
+      </Page>
+    )
+  }
 
   return (
-    <Page titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
-      {l.erreur && <p className="font-sans text-sm text-text-muted italic px-1">{l.erreur}</p>}
+    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Listes">
         {l.listes.map((x) => {

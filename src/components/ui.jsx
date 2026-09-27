@@ -1,10 +1,39 @@
 // Petites briques d'interface partagées par toutes les pages, pour garder
 // le même rendu iOS partout (cartes, titres, boutons).
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { NOM_APP } from '../config'
 
-export function Page({ titre, sousTitre, children }) {
+// retour : bouton « ‹ Accueil » façon iOS en haut des écrans qui ne sont pas
+// dans la barre d'onglets ({ vers: '/', label: 'Accueil' }, ou { onClick,
+// label } pour un sous-écran). Le titre de l'onglet du navigateur suit la page.
+export function Page({ titre, sousTitre, retour, children }) {
+  useEffect(() => {
+    document.title = titre ? `${titre.replace(/\s*👋$/, '')} · ${NOM_APP}` : NOM_APP
+  }, [titre])
+
+  const classesRetour =
+    'self-start -ml-1 -mb-3 min-h-11 inline-flex items-center gap-1 px-1 font-sans text-base text-accent-text transition-transform duration-200 ease-spring active:scale-95'
+
   return (
     <main className="min-h-screen bg-bg-base px-4 pt-8 pb-28 md:pt-12">
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
+        {retour &&
+          (retour.vers ? (
+            <Link to={retour.vers} className={classesRetour}>
+              <span aria-hidden="true" className="text-2xl leading-none">
+                ‹
+              </span>
+              {retour.label}
+            </Link>
+          ) : (
+            <button type="button" onClick={retour.onClick} className={classesRetour}>
+              <span aria-hidden="true" className="text-2xl leading-none">
+                ‹
+              </span>
+              {retour.label}
+            </button>
+          ))}
         {titre && (
           <header className="flex flex-col gap-1 px-1">
             <h1 className="font-sans text-3xl font-bold text-text-primary">{titre}</h1>
@@ -84,5 +113,22 @@ export function Interrupteur({ label, detail, actif, onChange }) {
         />
       </button>
     </div>
+  )
+}
+
+// État d'erreur d'un écran dont les données n'ont pas pu être chargées :
+// message et « Réessayer », à la place du contenu (et de formulaires qui
+// échoueraient de toute façon)
+export function EtatErreur({ message }) {
+  return (
+    <section role="alert" className="p-5 rounded-3xl bg-bg-elevated shadow-soft flex flex-col gap-3">
+      <p className="text-3xl" aria-hidden="true">
+        ⚠️
+      </p>
+      <p className="font-sans text-text-primary">{message}</p>
+      <Bouton variante="secondaire" onClick={() => window.location.reload()}>
+        Réessayer
+      </Bouton>
+    </section>
   )
 }

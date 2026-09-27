@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMembres } from '../espace/useMembres'
-import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
+import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
 import Chargement from '../../components/Chargement'
 import { versIso } from '../menus/tirage'
 import {
@@ -41,6 +41,13 @@ export default function Echeances() {
   }
 
   if (e.chargement) return <Chargement plein />
+  if (e.erreur) {
+    return (
+      <Page retour={{ vers: '/', label: 'Accueil' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
+        <EtatErreur message={e.erreur} />
+      </Page>
+    )
+  }
 
   const liste = (titre, elements, id) =>
     elements.length > 0 && (
@@ -66,8 +73,7 @@ export default function Echeances() {
     )
 
   return (
-    <Page titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
-      {e.erreur && <p className="font-sans text-sm text-text-muted italic px-1">{e.erreur}</p>}
+    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
 
       {edition ? (
         <FormulaireEcheance

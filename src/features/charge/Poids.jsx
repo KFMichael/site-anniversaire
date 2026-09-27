@@ -1,10 +1,10 @@
 import { POIDS } from './calculs'
 
 // ●●○ : le poids d'une charge en un coup d'œil
-export function PoidsPastilles({ poids }) {
+export function PoidsPastilles({ poids, couleur = 'text-text-muted' }) {
   const label = POIDS.find((p) => p.valeur === poids)?.label
   return (
-    <span className="font-sans text-xs text-text-muted whitespace-nowrap" title={`Poids : ${label}`}>
+    <span className={`font-sans text-xs whitespace-nowrap ${couleur}`} title={`Poids : ${label}`}>
       <span aria-hidden="true">{'●'.repeat(poids)}{'○'.repeat(3 - poids)}</span>
       <span className="sr-only">Poids : {label}</span>
     </span>
@@ -21,7 +21,7 @@ export function ChoixPoids({ valeur, onChange }) {
           role="radio"
           aria-checked={valeur === p.valeur}
           onClick={() => onChange(p.valeur)}
-          className={`font-sans text-xs px-3 py-1.5 rounded-full transition-all duration-200 ease-spring ${
+          className={`cible-44 font-sans text-xs px-3 py-1.5 rounded-full transition-all duration-200 ease-spring ${
             valeur === p.valeur ? 'bg-bg-elevated text-text-primary shadow-soft' : 'text-text-muted'
           }`}
         >
