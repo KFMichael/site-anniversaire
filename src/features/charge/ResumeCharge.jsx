@@ -30,7 +30,7 @@ export default function ResumeCharge() {
   if (!resume) return null
 
   return (
-    <Link to="/charge" className="block transition-transform duration-200 ease-spring active:scale-[0.98]">
+    <Link to={resume.miennes.length ? '/charge?vue=mes' : '/charge?vue=choisir'} className="block transition-transform duration-200 ease-spring active:scale-[0.98]">
       <Carte titre={`${libelleMois(mois)} · tu gères`}>
         {resume.miennes.length === 0 ? (
           <p className="font-sans text-sm text-text-secondary">

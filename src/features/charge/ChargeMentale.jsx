@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/contexte'
 import { useMembres } from '../espace/useMembres'
 import { Bouton, Carte, Page } from '../../components/ui'
@@ -21,7 +22,12 @@ export default function ChargeMentale() {
   const { utilisateur } = useAuth()
   const [mois, setMois] = useState(() => moisDe())
   const [gestion, setGestion] = useState(false)
+  // Sans aucune charge active dans l'espace, on arrive directement sur la
+  // modification de la liste (catalogue ouvert), une fois par visite
+  const [aucuneChargeVue, setAucuneChargeVue] = useState(false)
   const [message, setMessage] = useState('')
+  const [params] = useSearchParams()
+  const [vueChoisie, setVueChoisie] = useState(() => (['mes', 'choisir'].includes(params.get('vue')) ? params.get('vue') : null))
   const { membres } = useMembres()
   const donnees = useChargeMentale(mois)
   const { charges, attributions, chargement, erreur } = donnees
@@ -61,14 +67,84 @@ export default function ChargeMentale() {
     const n = await donnees.reprendreMoisPrecedent()
     setMessage(
       n === 0
-        ? `Aucune de tes charges de ${libelleMois(decalerMois(mois, -1)).toLowerCase()} n'est libre.`
+        ? `Aucune de tes charges ${moisPrecedent} n'est libre.`
         : `${n} charge${n > 1 ? 's' : ''} reprise${n > 1 ? 's' : ''} ✓`
     )
   }
 
+  const miennes = chargesAffichees.filter((c) => ownerParCharge.get(c.id) === utilisateur.id)
+  const libres = chargesAffichees.filter((c) => !ownerParCharge.has(c.id))
+  const prises = chargesAffichees.filter((c) => ownerParCharge.has(c.id) && ownerParCharge.get(c.id) !== utilisateur.id)
+  const pointsMiens = miennes.reduce((t, c) => t + c.poids, 0)
+  // « de septembre », « d'août », « d'octobre »
+  const nomMoisPrecedent = libelleMois(decalerMois(mois, -1)).split(' ')[0].toLowerCase()
+  const moisPrecedent = /^[aeiouyâéè]/.test(nomMoisPrecedent) ? `d'${nomMoisPrecedent}` : `de ${nomMoisPrecedent}`
+  // Onglet : « Mes charges » si j'en ai déjà, sinon « Choisir » ; fixé au
+  // premier chargement (prendre une charge ne change pas d'onglet)
+  const vue = vueChoisie ?? (miennes.length > 0 ? 'mes' : 'choisir')
+  useEffect(() => {
+    if (!chargement && vueChoisie === null) setVueChoisie(miennes.length > 0 ? 'mes' : 'choisir')
+  }, [chargement, vueChoisie, miennes.length])
+  const setVue = (v) => {
+    setVueChoisie(v)
+    setMessage('')
+  }
+
+  const ligne = (charge) => {
+    const owner = ownerParCharge.get(charge.id)
+    const index = indexMembre(owner)
+    const membre = membres[index]
+    const aMoi = owner === utilisateur.id
+    return (
+      <li
+        key={charge.id}
+        className="p-4 rounded-3xl bg-bg-elevated shadow-soft flex items-center gap-3"
+        style={membre ? { boxShadow: `inset 4px 0 0 ${couleurMembre(index)}` } : undefined}
+      >
+        <span className="text-2xl w-10 h-10 shrink-0 rounded-xl bg-bg-base flex items-center justify-center" aria-hidden="true">
+          {charge.emoji}
+        </span>
+        <div className="flex flex-col flex-1 min-w-0">
+          <span className="font-sans font-medium text-text-primary">{charge.nom}</span>
+          <span className="flex items-center gap-2">
+            <PoidsPastilles poids={charge.poids} />
+            <span className="font-sans text-xs text-text-muted truncate">
+              {membre ? (aMoi ? 'Toi' : membre.prenom) : owner ? 'Ancien membre' : 'Libre'}
+            </span>
+          </span>
+        </div>
+        {modifiable &&
+          (aMoi ? (
+            <Bouton variante="secondaire" className="!px-4 !py-2 min-h-11 text-sm shrink-0" onClick={() => action(donnees.relacher(charge.id))}>
+              Relâcher
+            </Bouton>
+          ) : !owner ? (
+            <Bouton
+              className="!px-4 !py-2 min-h-11 text-sm shrink-0"
+              onClick={async () => {
+                setMessage('')
+                const erreur = await donnees.prendre(charge.id)
+                setMessage(erreur ?? `✓ « ${charge.nom} » ajoutée à tes charges`)
+              }}
+            >
+              Je prends
+            </Bouton>
+          ) : null)}
+      </li>
+    )
+  }
+
+  const sansCharges = !chargement && !erreur && charges.every((c) => c.archivee)
+  useEffect(() => {
+    if (sansCharges && !aucuneChargeVue) {
+      setGestion(true)
+      setAucuneChargeVue(true)
+    }
+  }, [sansCharges, aucuneChargeVue])
+
   if (chargement) return <Chargement plein />
 
-  if (gestion) {
+  if (gestion || (sansCharges && !aucuneChargeVue)) {
     return <GestionCharges donnees={donnees} onFermer={() => setGestion(false)} />
   }
 
@@ -100,78 +176,101 @@ export default function ChargeMentale() {
         </button>
       </div>
 
-      <Carte titre="Équilibre">
-        <Jauge repartition={repartition} membres={membres} />
-        {modifiable && repartition.libres.nombre > 0 && (
-          <p className="font-sans text-sm text-text-secondary">
-            ⚠️ {repartition.libres.nombre} charge{repartition.libres.nombre > 1 ? 's' : ''} sans
-            responsable
-          </p>
-        )}
-        {modifiable && repartition.libres.nombre === 0 && repartition.total > 0 && (
-          <p className="font-sans text-sm text-text-secondary">✅ Toutes les charges ont un responsable.</p>
-        )}
-      </Carte>
+      <div role="tablist" aria-label="Affichage" className="flex p-1 rounded-full bg-bg-elevated shadow-soft">
+        {[
+          { id: 'mes', label: `Mes charges (${miennes.length})` },
+          { id: 'choisir', label: modifiable && libres.length ? `Choisir (${libres.length} libre${libres.length > 1 ? 's' : ''})` : 'Toutes' },
+        ].map((o) => (
+          <button
+            key={o.id}
+            role="tab"
+            aria-selected={vue === o.id}
+            onClick={() => setVue(o.id)}
+            className={`cible-44 font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
+              vue === o.id ? 'bg-accent text-white font-medium' : 'text-text-muted'
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
 
-      {message && <p className="font-sans text-sm text-text-muted italic px-1">{message}</p>}
 
-      <ul className="flex flex-col gap-2">
-        {chargesAffichees.map((charge) => {
-          const owner = ownerParCharge.get(charge.id)
-          const index = indexMembre(owner)
-          const membre = membres[index]
-          const aMoi = owner === utilisateur.id
-
-          return (
-            <li
-              key={charge.id}
-              className="p-4 rounded-3xl bg-bg-elevated shadow-soft flex items-center gap-3"
-              style={membre ? { boxShadow: `inset 4px 0 0 ${couleurMembre(index)}` } : undefined}
-            >
-              <span className="text-2xl w-10 h-10 shrink-0 rounded-xl bg-bg-base flex items-center justify-center" aria-hidden="true">
-                {charge.emoji}
-              </span>
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="font-sans font-medium text-text-primary">{charge.nom}</span>
-                <span className="flex items-center gap-2">
-                  <PoidsPastilles poids={charge.poids} />
-                  <span className="font-sans text-xs text-text-muted truncate">
-                    {membre ? (aMoi ? 'Toi' : membre.prenom) : owner ? 'Ancien membre' : 'Libre'}
-                  </span>
-                </span>
-              </div>
-              {modifiable &&
-                (aMoi ? (
-                  <Bouton
-                    variante="secondaire"
-                    className="!px-4 !py-2 text-sm shrink-0"
-                    onClick={() => action(donnees.relacher(charge.id))}
-                  >
-                    Relâcher
-                  </Bouton>
-                ) : !owner ? (
-                  <Bouton
-                    className="!px-4 !py-2 text-sm shrink-0"
-                    onClick={() => action(donnees.prendre(charge.id))}
-                  >
-                    Je prends
-                  </Bouton>
-                ) : null)}
-            </li>
-          )
-        })}
-      </ul>
-
-      {modifiable && (
-        <div className="flex flex-wrap gap-3 justify-center">
-          <Bouton variante="secondaire" onClick={reprendre}>
-            Reprendre mes charges de {libelleMois(decalerMois(mois, -1)).split(' ')[0].toLowerCase()}
-          </Bouton>
-          <Bouton variante="discret" onClick={() => setGestion(true)}>
-            Gérer les charges
-          </Bouton>
-        </div>
+      {message && (
+        <p role="status" className="font-sans text-sm text-text-secondary px-1">
+          {message}
+        </p>
       )}
+
+      {vue === 'mes' ? (
+        <section aria-label="Mes charges" className="flex flex-col gap-3">
+          {miennes.length === 0 ? (
+            <Carte>
+              <p className="font-sans text-text-primary">
+                {modifiable ? "Tu n'as encore aucune charge ce mois-ci." : "Tu n'avais aucune charge ce mois-là."}
+              </p>
+              {modifiable && (
+                <>
+                  <Bouton onClick={() => setVue('choisir')}>Choisir mes charges</Bouton>
+                  <Bouton variante="secondaire" onClick={reprendre}>
+                    Reprendre mes charges {moisPrecedent}
+                  </Bouton>
+                </>
+              )}
+            </Carte>
+          ) : (
+            <>
+              <p className="font-sans text-sm text-text-secondary px-1">
+                {miennes.length} charge{miennes.length > 1 ? 's' : ''} · {pointsMiens} point{pointsMiens > 1 ? 's' : ''} sur{' '}
+                {repartition.total}
+              </p>
+              <ul className="flex flex-col gap-2">{miennes.map(ligne)}</ul>
+              {modifiable && (
+                <Bouton variante="secondaire" onClick={() => setVue('choisir')}>
+                  + Prendre une autre charge
+                </Bouton>
+              )}
+            </>
+          )}
+        </section>
+      ) : (
+        <section aria-label="Choisir" className="flex flex-col gap-4">
+          <Carte titre="Équilibre">
+            <Jauge repartition={repartition} membres={membres} />
+            {modifiable && repartition.libres.nombre === 0 && repartition.total > 0 && (
+              <p className="font-sans text-sm text-text-secondary">✅ Toutes les charges ont un responsable.</p>
+            )}
+          </Carte>
+
+          {libres.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">
+                {modifiable ? `Libres (${libres.length})` : `Sans responsable (${libres.length})`}
+              </h2>
+              <ul className="flex flex-col gap-2">{libres.map(ligne)}</ul>
+            </div>
+          )}
+          {prises.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-1">Déjà prises ({prises.length})</h2>
+              <ul className="flex flex-col gap-2">{prises.map(ligne)}</ul>
+            </div>
+          )}
+          {chargesAffichees.length === 0 && (
+            <p className="font-sans text-sm text-text-muted px-1">Aucune charge dans l'espace pour l'instant.</p>
+          )}
+
+          {modifiable && (
+            <Bouton variante="secondaire" onClick={reprendre}>
+              Reprendre mes charges {moisPrecedent}
+            </Bouton>
+          )}
+        </section>
+      )}
+
+      <Bouton variante="secondaire" onClick={() => setGestion(true)}>
+        ✏️ Modifier la liste des charges
+      </Bouton>
     </Page>
   )
 }
