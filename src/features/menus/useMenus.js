@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { signalerActivite } from '../../lib/activite'
 import { supabase } from '../../lib/supabase'
 import { useTempsReel } from '../../lib/useTempsReel'
 import { useEspace } from '../espace/contexte'
@@ -91,6 +92,7 @@ export function useMenus(lundi) {
         lignes.map((l) => ({ espace_id: espace.id, updated_at: new Date().toISOString(), ...l })),
         { onConflict: 'espace_id,jour' }
       )
+      if (!error) signalerActivite(espace.id)
       await chargerDiners()
       return error ? "Le menu n'a pas pu être enregistré." : null
     },
@@ -229,6 +231,7 @@ export function useMenus(lundi) {
               .insert(ponctuels.map((nom) => ({ espace_id: espace.id, nom })))
           : { error: null },
       ])
+      signalerActivite(espace.id)
       return resultats.some((r) => r.error) ? "Une partie des ingrédients n'a pas été ajoutée." : null
     },
     [espace.id]

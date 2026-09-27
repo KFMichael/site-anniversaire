@@ -14,6 +14,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 8. `supabase/migrations/0008_quantites.sql` — quantités sur la liste de courses
 9. `supabase/migrations/0009_notifications.sql` — notifications sur le téléphone : appareils abonnés et préférences (mise en place : `docs/NOTIFICATIONS.md`)
 10. `supabase/migrations/0010_sport.sql` — séances de sport de la semaine et suivi des invitations envoyées
+11. `supabase/migrations/0011_activite.sql` — journal des actions (ajouts à la liste, courses faites, charges prises, dîners prévus) pour les notifications aux autres membres
 
 > Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
 > l'ajout de Face ID), la supprimer d'abord :

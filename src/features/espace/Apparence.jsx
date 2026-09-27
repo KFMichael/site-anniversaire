@@ -20,7 +20,7 @@ export default function Apparence() {
             role="radio"
             aria-checked={theme === t.id}
             onClick={() => changer(t.id)}
-            className={`font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
+            className={`cible-44 font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
               theme === t.id ? 'bg-bg-elevated text-text-primary font-medium shadow-soft' : 'text-text-muted'
             }`}
           >
