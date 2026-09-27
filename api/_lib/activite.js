@@ -43,6 +43,17 @@ const TEXTES = {
     corps: noms.length === 1 ? `${prenom} prend « ${noms[0]} »` : `${prenom} prend ${noms.length} charges : ${enumerer(noms)}`,
     url: '/charge',
   }),
+  // libellés « Films à voir › Dune »
+  ajout_liste_partagee: (prenom, libelles) => {
+    const elements = libelles.map((l) => {
+      const [liste, ...texte] = l.split(' › ')
+      return { liste, texte: texte.join(' › ') || liste }
+    })
+    const listes = [...new Set(elements.map((e) => e.liste))]
+    return listes.length === 1
+      ? { titre: `📝 ${listes[0]}`, corps: `${prenom} a ajouté ${enumerer(elements.map((e) => e.texte))}`, url: '/listes' }
+      : { titre: '📝 Listes', corps: `${prenom} a ajouté ${enumerer(elements.map((e) => `${e.texte} (${e.liste})`))}`, url: '/listes' }
+  },
   diner: (prenom, noms) => ({
     titre: '🍽️ Menus',
     corps: `${prenom} a prévu ${enumerer(noms)}`,

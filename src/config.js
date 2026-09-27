@@ -34,6 +34,20 @@ export const MODULES = [
     route: '/sport',
   },
   {
+    id: 'echeances',
+    titre: 'Échéances',
+    description: 'Impôts, assurances… avec rappels',
+    emoji: '📅',
+    route: '/echeances',
+  },
+  {
+    id: 'listes',
+    titre: 'Listes',
+    description: 'Films à voir, choses à faire',
+    emoji: '📝',
+    route: '/listes',
+  },
+  {
     id: 'activites',
     titre: 'Activités',
     description: 'Idées de sorties, carnet, voyages',

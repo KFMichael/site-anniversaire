@@ -5,6 +5,7 @@ import { Page } from '../../components/ui'
 import ResumeCharge from '../charge/ResumeCharge'
 import ResumeCourses from '../courses/ResumeCourses'
 import ResumeMenus from '../menus/ResumeMenus'
+import ResumeEcheances from '../echeances/ResumeEcheances'
 
 export default function TableauDeBord() {
   const { espace, profil } = useEspace()
@@ -12,6 +13,7 @@ export default function TableauDeBord() {
   return (
     <Page titre={`Bonjour${profil?.prenom ? ` ${profil.prenom}` : ''} 👋`} sousTitre={espace.nom}>
       <ResumeMenus />
+      <ResumeEcheances />
       <ResumeCharge />
       <ResumeCourses />
       <div className="grid grid-cols-2 gap-3">

@@ -12,6 +12,7 @@ import { Bouton, Carte, Interrupteur } from '../../components/ui'
 
 const TYPES = [
   { champ: 'push_diner', label: 'Dîner du soir', detail: '« Ce soir : Garba », en fin d’après-midi' },
+  { champ: 'push_echeances', label: 'Rappels d’échéances', detail: 'Impôts, assurances… selon les rappels choisis' },
   { champ: 'push_sport', label: 'Sport du lendemain', detail: '« Demain : sport », la veille au soir' },
   { champ: 'push_hebdo', label: 'Récap du dimanche', detail: 'Charges, dîners et courses de la semaine' },
   { champ: 'push_mensuel', label: 'Rappel du 1er du mois', detail: 'Choisir sa charge mentale' },
@@ -21,7 +22,7 @@ const TYPES = [
 export default function Notifications() {
   const { session, utilisateur } = useAuth()
   const [etat, setEtat] = useState(null)
-  const [preferences, setPreferences] = useState({ push_diner: true, push_hebdo: true, push_mensuel: true, push_activite: true, push_sport: true })
+  const [preferences, setPreferences] = useState({ push_diner: true, push_hebdo: true, push_mensuel: true, push_activite: true, push_sport: true, push_echeances: true })
   const [enCours, setEnCours] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -30,7 +31,7 @@ export default function Notifications() {
     etatNotifications().then(setEtat)
     supabase
       .from('preferences_notifications')
-      .select('push_diner, push_hebdo, push_mensuel, push_activite, push_sport')
+      .select('push_diner, push_hebdo, push_mensuel, push_activite, push_sport, push_echeances')
       .eq('user_id', utilisateur.id)
       .maybeSingle()
       .then(({ data }) => {

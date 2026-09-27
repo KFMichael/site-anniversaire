@@ -158,3 +158,19 @@ test('récap : séances de sport de la semaine, jour local du foyer', async () =
   assert.match(vide[0].texte, /Sport \(0 séance\) :\nAucune séance prévue/)
   assert.match(vide[0].html, /href="https:\/\/nido.4sept.com\/sport"[^>]*>Planifier</)
 })
+
+test('récap : échéances en retard et dans les 30 jours, les faites et lointaines exclues', async () => {
+  const tables = jeuDeDonnees()
+  tables.echeances = [
+    { espace_id: 'e1', titre: 'Taxe foncière', categorie: 'impots', date: '2026-10-15', faite_le: null },
+    { espace_id: 'e1', titre: 'Assurance <auto>', categorie: 'assurance', date: '2026-09-25', faite_le: null },
+    { espace_id: 'e1', titre: 'Impôts', categorie: 'impots', date: '2027-05-21', faite_le: null },
+    { espace_id: 'e1', titre: 'Loyer', categorie: 'logement', date: '2026-10-01', faite_le: '2026-09-26T10:00:00Z' },
+  ]
+  const envoyes = []
+  await executerRecapQuotidien({ admin: fauxSupabase(tables), envoyer: async (e) => envoyes.push(e), maintenant: DIMANCHE, config: CONFIG })
+  const { texte, html } = envoyes[0]
+  assert.match(texte, /Échéances à venir :\n- Assurance <auto> : vendredi 25 septembre 2026 \(en retard de 2 jours\)\n- Taxe foncière : jeudi 15 octobre 2026 \(dans 18 jours\)\n/)
+  assert.match(html, /Assurance &lt;auto&gt;/)
+  assert.doesNotMatch(texte, /Impôts|Loyer/)
+})

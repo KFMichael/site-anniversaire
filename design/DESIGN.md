@@ -23,7 +23,7 @@ les mêmes classes (`bg-bg-base`, `text-text-primary`, etc.).
 |-----------------------------|-------------------------------|--------------------------------|
 | `--color-bg-base`           | `#F2F2F7`                     | `#000000`                      |
 | `--color-bg-elevated`       | `#FFFFFF`                     | `#1C1C1E`                      |
-| `--color-bg-elevated-glass` | `rgb(255 255 255 / 0.72)`     | `rgb(28 28 30 / 0.72)`         |
+| `--color-bg-elevated-glass` | `rgb(255 255 255 / 0.9)`      | `rgb(28 28 30 / 0.9)`          |
 | `--color-text-primary`      | `#000000`                     | `#FFFFFF`                      |
 | `--color-text-secondary`    | `#48484A`                     | `#C7C7CC`                      |
 | `--color-text-muted`        | `#6B6B70`                     | `#98989E`                      |

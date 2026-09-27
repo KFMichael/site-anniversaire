@@ -5,6 +5,11 @@ import { NOM_APP } from '../../config'
 import { redirectionSure, useAuth } from './contexte'
 import Chargement from '../../components/Chargement'
 
+// Connexion Google : affichée seulement une fois le fournisseur activé dans
+// Supabase (sinon Supabase répond « provider is not enabled »). Voir
+// docs/SUPABASE.md, puis VITE_CONNEXION_GOOGLE=true dans Vercel.
+const GOOGLE_ACTIVE = import.meta.env.VITE_CONNEXION_GOOGLE === 'true'
+
 export default function Connexion() {
   const { utilisateur, chargement } = useAuth()
   const [params] = useSearchParams()
@@ -13,6 +18,9 @@ export default function Connexion() {
   const [email, setEmail] = useState('')
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [lienEnvoye, setLienEnvoye] = useState(false)
+  const [code, setCode] = useState('')
+  const [verification, setVerification] = useState(false)
+  const [renvoye, setRenvoye] = useState(false)
   const [erreur, setErreur] = useState('')
 
   if (chargement) return <Chargement plein />
@@ -23,8 +31,11 @@ export default function Connexion() {
   // Authentication > URL Configuration > Redirect URLs.
   const urlRetour = window.location.origin + redirection
 
+  // Un seul email contient le code à 6 chiffres et le lien : le code se tape
+  // ici, ce qui marche aussi dans Nido installé sur l'écran d'accueil (où le
+  // lien, lui, s'ouvre dans Safari)
   async function envoyerLien(e) {
-    e.preventDefault()
+    e?.preventDefault()
     setErreur('')
     setEnvoiEnCours(true)
     const { error } = await supabase.auth.signInWithOtp({
@@ -33,10 +44,31 @@ export default function Connexion() {
     })
     setEnvoiEnCours(false)
     if (error) {
-      setErreur("Impossible d'envoyer le lien. Vérifie l'adresse et réessaie.")
-    } else {
-      setLienEnvoye(true)
+      setErreur(
+        error.status === 429
+          ? 'Trop de demandes pour le moment : attends quelques minutes avant de redemander un code.'
+          : "Impossible d'envoyer le code. Vérifie l'adresse et réessaie."
+      )
+      return false
     }
+    setLienEnvoye(true)
+    return true
+  }
+
+  async function verifierCode(e) {
+    e.preventDefault()
+    setErreur('')
+    setVerification(true)
+    const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' })
+    setVerification(false)
+    // En cas de succès, la session arrive par AuthProvider et on est redirigé
+    if (error) setErreur('Ce code est incorrect ou a expiré. Vérifie-le, ou demande un nouveau code.')
+  }
+
+  async function renvoyer() {
+    setRenvoye(false)
+    setCode('')
+    if (await envoyerLien()) setRenvoye(true)
   }
 
   async function connexionGoogle() {
@@ -57,19 +89,68 @@ export default function Connexion() {
         </div>
 
         {lienEnvoye ? (
-          <div className="w-full p-6 rounded-3xl bg-bg-elevated shadow-soft flex flex-col gap-3">
-            <p className="text-3xl">📬</p>
-            <p className="font-sans text-text-primary font-medium">Lien envoyé !</p>
-            <p className="font-sans text-sm text-text-secondary">
-              Ouvre l'email reçu à <strong>{email.trim()}</strong> et clique sur le lien
-              pour te connecter.
+          <div className="w-full p-6 rounded-3xl bg-bg-elevated shadow-soft flex flex-col gap-4">
+            <p className="text-3xl" aria-hidden="true">
+              📬
             </p>
-            <button
-              onClick={() => setLienEnvoye(false)}
-              className="font-sans text-sm text-text-muted underline mt-2"
-            >
-              Utiliser une autre adresse
-            </button>
+            <p className="font-sans text-text-primary font-medium">Code envoyé !</p>
+            <p className="font-sans text-sm text-text-secondary">
+              Tape le code reçu par email à <strong>{email.trim()}</strong>.
+            </p>
+            <form onSubmit={verifierCode} className="flex flex-col gap-3">
+              <label htmlFor="code" className="sr-only">
+                Code de connexion
+              </label>
+              <input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]{6,10}"
+                maxLength={10}
+                placeholder="123456"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                className="font-sans w-full px-4 py-3 rounded-2xl border border-separator bg-bg-base text-text-primary text-center text-2xl tracking-[0.3em] tabular-nums focus:outline-none focus:border-accent"
+              />
+              <button
+                type="submit"
+                disabled={verification || code.length < 6}
+                className="font-sans w-full px-6 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-40"
+              >
+                {verification ? 'Vérification…' : 'Me connecter'}
+              </button>
+            </form>
+            <p className="font-sans text-xs text-text-muted">
+              Tu peux aussi toucher le lien de l'email. Rien reçu ? Regarde dans les spams.
+            </p>
+            {renvoye && (
+              <p role="status" className="font-sans text-sm text-text-secondary">
+                Nouveau code envoyé ✓
+              </p>
+            )}
+            <div className="flex justify-center gap-4">
+              <button
+                type="button"
+                onClick={renvoyer}
+                disabled={envoiEnCours}
+                className="cible-44 font-sans text-sm text-accent-text underline disabled:opacity-40"
+              >
+                Renvoyer un code
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLienEnvoye(false)
+                  setCode('')
+                  setErreur('')
+                  setRenvoye(false)
+                }}
+                className="cible-44 font-sans text-sm text-text-muted underline"
+              >
+                Autre adresse
+              </button>
+            </div>
           </div>
         ) : (
           <div className="w-full flex flex-col gap-4">
@@ -92,27 +173,35 @@ export default function Connexion() {
                 disabled={envoiEnCours || !email.trim()}
                 className="font-sans w-full px-6 py-3 rounded-full bg-accent text-white font-medium transition-all duration-200 ease-spring hover:opacity-90 active:scale-95 disabled:opacity-40"
               >
-                {envoiEnCours ? 'Envoi…' : 'Recevoir un lien de connexion'}
+                {envoiEnCours ? 'Envoi…' : 'Recevoir un code de connexion'}
               </button>
             </form>
 
-            <div className="flex items-center gap-3 text-text-muted text-xs font-sans">
-              <span className="flex-1 h-px bg-separator" />
-              ou
-              <span className="flex-1 h-px bg-separator" />
-            </div>
+            {GOOGLE_ACTIVE && (
+              <>
+                <div className="flex items-center gap-3 text-text-muted text-xs font-sans">
+                  <span className="flex-1 h-px bg-separator" />
+                  ou
+                  <span className="flex-1 h-px bg-separator" />
+                </div>
 
-            <button
-              onClick={connexionGoogle}
-              className="font-sans w-full px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary font-medium flex items-center justify-center gap-2 transition-all duration-200 ease-spring active:scale-95"
-            >
-              <LogoGoogle />
-              Continuer avec Google
-            </button>
+                <button
+                  onClick={connexionGoogle}
+                  className="font-sans w-full px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary font-medium flex items-center justify-center gap-2 transition-all duration-200 ease-spring active:scale-95"
+                >
+                  <LogoGoogle />
+                  Continuer avec Google
+                </button>
+              </>
+            )}
           </div>
         )}
 
-        {erreur && <p className="font-sans text-sm text-text-muted italic">{erreur}</p>}
+        {erreur && (
+          <p role="status" className="font-sans text-sm text-text-primary">
+            {erreur}
+          </p>
+        )}
       </div>
     </main>
   )

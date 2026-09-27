@@ -120,3 +120,23 @@ test('préférence coupée, appareil expiré, non-membre', async () => {
   const refus = await envoyerActivite({ admin: fauxSupabase(donnees()), envoyerPush: expire, utilisateurId: 'u3', espaceId: 'e1', maintenant: MAINTENANT })
   assert.ok(refus.erreur)
 })
+
+test('listes partagées : groupées par liste', () => {
+  const prenoms = new Map([['u2', 'Léa']])
+  const [une] = resumerActivite(
+    [
+      { auteur: 'u2', type: 'ajout_liste_partagee', libelle: 'Films à voir › Dune' },
+      { auteur: 'u2', type: 'ajout_liste_partagee', libelle: 'Films à voir › Past Lives' },
+    ],
+    prenoms
+  )
+  assert.deepEqual(une.notification, { titre: '📝 Films à voir', corps: 'Léa a ajouté Dune et Past Lives', url: '/listes' })
+  const [deux] = resumerActivite(
+    [
+      { auteur: 'u2', type: 'ajout_liste_partagee', libelle: 'Films à voir › Dune' },
+      { auteur: 'u2', type: 'ajout_liste_partagee', libelle: 'Choses à faire › Réparer › le vélo' },
+    ],
+    prenoms
+  )
+  assert.equal(deux.notification.corps, 'Léa a ajouté Dune (Films à voir) et Réparer › le vélo (Choses à faire)')
+})

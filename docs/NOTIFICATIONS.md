@@ -3,6 +3,7 @@
 | Notification | Quand | Écran ouvert au toucher |
 |---|---|---|
 | 🍽️ Ce soir : *plat* | tous les jours (tâche de 17 h UTC), s'il y a un dîner prévu | Menus |
+| 🧾 *Échéance* : dans 7 jours | selon les rappels choisis (1 mois, 1 semaine, la veille, le jour même), à la personne concernée ou à tous | Échéances |
 | 🏃 Demain : sport | tous les jours, s'il y a une séance le lendemain (la veille au soir) | Sport |
 | 📋 Ta semaine est prête (charges, dîners, séances, courses) | le dimanche | Accueil |
 | 🧠 *Mois* : choisis ta charge mentale | le 1er du mois | Charge |
