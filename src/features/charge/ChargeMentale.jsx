@@ -22,6 +22,9 @@ export default function ChargeMentale() {
   const { utilisateur } = useAuth()
   const [mois, setMois] = useState(() => moisDe())
   const [gestion, setGestion] = useState(false)
+  // Sans aucune charge active dans l'espace, on arrive directement sur la
+  // modification de la liste (catalogue ouvert), une fois par visite
+  const [aucuneChargeVue, setAucuneChargeVue] = useState(false)
   const [message, setMessage] = useState('')
   const [params] = useSearchParams()
   const [vueChoisie, setVueChoisie] = useState(() => (['mes', 'choisir'].includes(params.get('vue')) ? params.get('vue') : null))
@@ -131,9 +134,17 @@ export default function ChargeMentale() {
     )
   }
 
+  const sansCharges = !chargement && !erreur && charges.every((c) => c.archivee)
+  useEffect(() => {
+    if (sansCharges && !aucuneChargeVue) {
+      setGestion(true)
+      setAucuneChargeVue(true)
+    }
+  }, [sansCharges, aucuneChargeVue])
+
   if (chargement) return <Chargement plein />
 
-  if (gestion) {
+  if (gestion || (sansCharges && !aucuneChargeVue)) {
     return <GestionCharges donnees={donnees} onFermer={() => setGestion(false)} />
   }
 
@@ -250,17 +261,16 @@ export default function ChargeMentale() {
           )}
 
           {modifiable && (
-            <div className="flex flex-col gap-2">
-              <Bouton variante="secondaire" onClick={reprendre}>
-                Reprendre mes charges {moisPrecedent}
-              </Bouton>
-              <Bouton variante="discret" onClick={() => setGestion(true)}>
-                Gérer les charges (ajouter depuis la liste…)
-              </Bouton>
-            </div>
+            <Bouton variante="secondaire" onClick={reprendre}>
+              Reprendre mes charges {moisPrecedent}
+            </Bouton>
           )}
         </section>
       )}
+
+      <Bouton variante="secondaire" onClick={() => setGestion(true)}>
+        ✏️ Modifier la liste des charges
+      </Bouton>
     </Page>
   )
 }
