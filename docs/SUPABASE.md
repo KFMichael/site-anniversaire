@@ -52,27 +52,26 @@ membres de l'espace.
   ajouter `VITE_CONNEXION_GOOGLE=true` dans Vercel et redéployer : le bouton
   « Continuer avec Google » est masqué sans cette variable.
 
-**Authentication > Email Templates** (recommandé) : un nouveau membre reçoit
-« Confirm signup », un membre déjà inscrit « Magic Link ». Modèles en
-français, à coller dans chacun :
+**Authentication > Email Templates** (indispensable pour la connexion par
+code) : l'appli demande le **code à 6 chiffres** reçu par email (il marche
+aussi dans Nido installé sur l'écran d'accueil, où un lien s'ouvrirait dans
+Safari). Les modèles par défaut de Supabase ne contiennent que le lien :
+coller ceux-ci. Un nouveau membre reçoit « Confirm signup », un membre déjà
+inscrit « Magic Link ».
 
-- *Confirm signup* — sujet : `Bienvenue sur Nido : confirme ton adresse`
+- *Confirm signup* — sujet : `Ton code Nido : {{ .Token }}`
 
   ```html
   <h2>Bienvenue sur Nido 🪺</h2>
-  <p>Touche le bouton ci-dessous pour confirmer ton adresse et entrer dans ton espace.</p>
-  <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 24px;background:#0071EB;color:#FFFFFF;border-radius:999px;text-decoration:none;font-weight:600;">Confirmer et me connecter</a></p>
-  <p style="color:#6B6B70;font-size:13px;">Tu n'as rien demandé ? Ignore simplement cet email.</p>
-  ```
-
-- *Magic Link* — sujet : `Ton lien de connexion à Nido`
-
-  ```html
-  <h2>Connexion à Nido 🪺</h2>
-  <p>Touche le bouton ci-dessous pour te connecter. Le lien est valable une heure.</p>
+  <p>Ton code de connexion :</p>
+  <p style="font-size:32px;font-weight:700;letter-spacing:6px;margin:8px 0 16px;">{{ .Token }}</p>
+  <p>Tape-le dans Nido. Tu peux aussi toucher ce bouton :</p>
   <p><a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:12px 24px;background:#0071EB;color:#FFFFFF;border-radius:999px;text-decoration:none;font-weight:600;">Me connecter</a></p>
-  <p style="color:#6B6B70;font-size:13px;">Tu n'as rien demandé ? Ignore simplement cet email.</p>
+  <p style="color:#6B6B70;font-size:13px;">Le code est valable une heure. Tu n'as rien demandé ? Ignore simplement cet email.</p>
   ```
+
+- *Magic Link* — même sujet et même contenu, avec « Connexion à Nido 🪺 »
+  comme titre.
 
 > L'envoi d'emails intégré à Supabase est limité à quelques emails par
 > heure : suffisant pour tester, à remplacer par un SMTP (Resend…) avant
