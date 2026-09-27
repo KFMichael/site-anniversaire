@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { signalerActivite } from '../../lib/activite'
 import { supabase } from '../../lib/supabase'
 import { useTempsReel } from '../../lib/useTempsReel'
 import { useAuth } from '../auth/contexte'
@@ -120,6 +121,7 @@ export function useSport(lundi) {
     const { error } = await supabase
       .from('attributions')
       .insert({ charge_id: chargeSport.id, mois, espace_id: espace.id, user_id: utilisateur.id })
+    if (!error) signalerActivite(espace.id)
     await charger()
     return error ? "Quelqu'un vient de prendre cette charge." : null
   }, [chargeSport, mois, espace.id, utilisateur.id, charger])

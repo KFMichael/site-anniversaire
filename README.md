@@ -90,6 +90,7 @@ api/recap.js                 # Fonction Vercel : récap par email (tâche planif
 api/action.js                # Fonction Vercel : boutons d'action de l'email (jetons signés)
 api/sport.js                 # Fonction Vercel : invitations d'agenda (.ics) des séances de sport
 api/notifications.js         # Fonction Vercel : notification de test (les envois planifiés passent par api/recap.js)
+api/activite.js              # Fonction Vercel : notifications des actions des autres membres
 public/sw.js                 # Service worker : réception des notifications
 api/_lib/                    # Planning, contenu de l'email, envoi (testés)
 supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre

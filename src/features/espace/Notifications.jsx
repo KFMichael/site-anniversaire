@@ -14,12 +14,13 @@ const TYPES = [
   { champ: 'push_diner', label: 'Dîner du soir', detail: '« Ce soir : Garba », en fin d’après-midi' },
   { champ: 'push_hebdo', label: 'Récap du dimanche', detail: 'Charges, dîners et courses de la semaine' },
   { champ: 'push_mensuel', label: 'Rappel du 1er du mois', detail: 'Choisir sa charge mentale' },
+  { champ: 'push_activite', label: 'Actions des autres', detail: '« Léa a ajouté lait à la liste », charges prises, dîners prévus' },
 ]
 
 export default function Notifications() {
   const { session, utilisateur } = useAuth()
   const [etat, setEtat] = useState(null)
-  const [preferences, setPreferences] = useState({ push_diner: true, push_hebdo: true, push_mensuel: true })
+  const [preferences, setPreferences] = useState({ push_diner: true, push_hebdo: true, push_mensuel: true, push_activite: true })
   const [enCours, setEnCours] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -28,7 +29,7 @@ export default function Notifications() {
     etatNotifications().then(setEtat)
     supabase
       .from('preferences_notifications')
-      .select('push_diner, push_hebdo, push_mensuel')
+      .select('push_diner, push_hebdo, push_mensuel, push_activite')
       .eq('user_id', utilisateur.id)
       .maybeSingle()
       .then(({ data }) => {

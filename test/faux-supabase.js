@@ -1,7 +1,7 @@
 // Faux PostgREST en mémoire pour les tests de api/ : un vrai client
 // supabase-js dont le `fetch` lit et écrit dans des tableaux JavaScript.
 // Couvre ce que le code utilise : select (avec jointure simple), filtres
-// eq/neq/gte/lte/lt/ilike/in, insert (clé primaire → erreur 23505), upsert, update
+// eq/neq/gte/lte/lt/ilike/in/is, insert (clé primaire → erreur 23505), upsert, update
 // et delete avec renvoi des lignes touchées.
 import { createClient } from '@supabase/supabase-js'
 
@@ -37,6 +37,7 @@ export function fauxSupabase(tables) {
           const motif = new RegExp(`^${val.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/[%*]/g, '.*')}$`, 'i')
           return motif.test(x)
         }
+        if (op === 'is') return val === 'null' ? l[k] == null : String(l[k]) === val
         if (op === 'in') return val.slice(1, -1).split(',').map((v) => v.replace(/^"|"$/g, '')).includes(x)
         return { eq: x === val, neq: x !== val, gte: x >= val, lte: x <= val, lt: x < val }[op]
       })

@@ -5,6 +5,7 @@
 | 🍽️ Ce soir : *plat* | tous les jours (tâche de 17 h UTC), s'il y a un dîner prévu | Menus |
 | 📋 Ta semaine est prête | le dimanche | Accueil |
 | 🧠 *Mois* : choisis ta charge mentale | le 1er du mois | Charge |
+| 🛒 Léa a ajouté lait, pain et œufs | quelques secondes après une action d'un autre membre | Courses, Charge ou Menus |
 
 Chaque membre active les notifications **par appareil** (Espace >
 Notifications) et peut couper chaque type. Un bouton envoie une
@@ -44,3 +45,24 @@ L'appli affiche ces instructions quand ce n'est pas le cas.
   quotidienne `api/recap.js` ; journal anti-doublon partagé avec les
   emails (`envois_recap`, types `push-…`) ; abonnements expirés supprimés.
 - `api/notifications.js` : notification de test.
+
+## Actions des autres membres
+
+Quand un membre ajoute quelque chose à la liste, termine les courses, prend
+une charge ou prévoit un dîner, les autres membres reçoivent une
+notification : « Léa a ajouté lait, pain et œufs », « Léa a acheté… »,
+« Léa prend « Finances » », « Léa a prévu Garba ». On ne reçoit jamais ses
+propres actions. Chacun peut les couper (« Actions des autres »).
+
+- Des déclencheurs SQL (`0011_activite.sql`) notent chaque action dans
+  `evenements`. Seuls ces déclencheurs y écrivent : un membre ne peut pas
+  fabriquer un événement.
+- Après une action, l'appli attend 15 s sans nouvelle action (ou que
+  l'appli passe en arrière-plan), puis appelle `api/activite.js`.
+- `api/_lib/activite.js` réclame les événements pas encore notifiés de
+  l'espace (un seul envoi même si deux appareils appellent en même temps),
+  les regroupe par auteur et par type, écarte ce qui n'est plus sur la
+  liste ou date de plus de 2 h, et supprime ceux de plus de 30 jours.
+
+Rien à configurer en plus : les mêmes clés VAPID que ci-dessus, et la
+migration `0011_activite.sql`.

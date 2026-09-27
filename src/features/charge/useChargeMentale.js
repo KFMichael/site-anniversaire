@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { signalerActivite } from '../../lib/activite'
 import { supabase } from '../../lib/supabase'
 import { useTempsReel } from '../../lib/useTempsReel'
 import { useAuth } from '../auth/contexte'
@@ -50,7 +51,10 @@ export function useChargeMentale(mois) {
         .from('attributions')
         .insert({ charge_id: chargeId, mois, espace_id: espace.id, user_id: utilisateur.id })
       await chargerAttributions()
-      if (!error) return null
+      if (!error) {
+        signalerActivite(espace.id)
+        return null
+      }
       return error.code === DOUBLON
         ? "Trop tard : quelqu'un vient de la prendre."
         : 'Impossible de prendre cette charge.'
@@ -93,6 +97,7 @@ export function useChargeMentale(mois) {
         .insert({ charge_id: chargeId, mois, espace_id: espace.id, user_id: utilisateur.id })
       if (!error) reprises += 1
     }
+    if (reprises) signalerActivite(espace.id)
     await chargerAttributions()
     return reprises
   }, [mois, espace.id, utilisateur.id, attributions, charges, chargerAttributions])

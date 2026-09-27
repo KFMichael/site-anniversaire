@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { signalerActivite } from '../../lib/activite'
 import { supabase } from '../../lib/supabase'
 import { useTempsReel } from '../../lib/useTempsReel'
 import { useEspace } from '../espace/contexte'
@@ -55,12 +56,13 @@ export function useCourses() {
       const modifications = { etat, updated_at: new Date().toISOString() }
       if (etat === 'ok') Object.assign(modifications, { dans_panier: false, quantite: null })
       setProduits((liste) => liste.map((p) => (p.id === id ? { ...p, ...modifications } : p)))
+      if (etat !== 'ok') signalerActivite(espace.id)
       return persister(
         supabase.from('produits').update(modifications).eq('id', id),
         "L'état n'a pas pu être enregistré."
       )
     },
-    [persister]
+    [persister, espace.id]
   )
 
   const basculerPanier = useCallback(
@@ -91,6 +93,7 @@ export function useCourses() {
         const modifications = { etat: 'fini', updated_at: new Date().toISOString() }
         if (quantite) modifications.quantite = quantite
         setProduits((liste) => liste.map((p) => (p.id === existant.id ? { ...p, ...modifications } : p)))
+        signalerActivite(espace.id)
         return persister(
           supabase.from('produits').update(modifications).eq('id', existant.id),
           "L'article n'a pas pu être ajouté."
@@ -99,6 +102,7 @@ export function useCourses() {
       const { error } = await supabase
         .from('articles_courses')
         .insert({ espace_id: espace.id, nom, quantite, rayon: rayonChoisi })
+      if (!error) signalerActivite(espace.id)
       await recharger()
       return error ? "L'article n'a pas pu être ajouté." : null
     },
@@ -150,9 +154,10 @@ export function useCourses() {
         ? supabase.from('articles_courses').delete().in('id', articlesAchetes)
         : { error: null },
     ])
+    signalerActivite(espace.id)
     await recharger()
     return resultats.some((r) => r.error) ? 'Une partie des achats n’a pas été enregistrée.' : null
-  }, [produits, articles, recharger])
+  }, [produits, articles, espace.id, recharger])
 
   const ajouterProduit = useCallback(
     async (nom, rayonChoisi) => {
