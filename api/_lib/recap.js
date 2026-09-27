@@ -3,7 +3,7 @@
 // client Supabase et la fonction d'envoi sont passés en paramètre), ce qui
 // permet de le tester (recap.test.js).
 import { construireEmail } from './email.js'
-import { dateLocale, envoisDuJour, periodeCouverte } from './planning.js'
+import { bornesSeances, dateLocale, envoisDuJour, periodeCouverte, seancesDesJours } from './planning.js'
 import { creerJeton } from './jetons.js'
 import { afficherQuantite } from '../../src/features/courses/liste.js'
 
@@ -21,9 +21,11 @@ async function lire(requete) {
 }
 
 // Données d'un espace pour une période : charges et attributions du mois,
-// dîners des jours, courses. Communes à tous les membres de l'espace.
-export async function donneesEspace(admin, espaceId, { jours, mois }) {
-  const [charges, attributions, produits, articles, diners] = await Promise.all([
+// dîners et séances de sport des jours, courses. Communes à tous les
+// membres de l'espace.
+export async function donneesEspace(admin, espaceId, { jours, mois }, fuseau = 'Europe/Paris') {
+  const bornes = jours.length ? bornesSeances(jours) : null
+  const [charges, attributions, produits, articles, diners, seances] = await Promise.all([
     lire(admin.from('charges').select('id, nom, emoji, ordre, archivee').eq('espace_id', espaceId)),
     lire(admin.from('attributions').select('charge_id, user_id').eq('espace_id', espaceId).eq('mois', mois)),
     lire(admin.from('produits').select('id, nom, etat, quantite').eq('espace_id', espaceId).neq('etat', 'ok')),
@@ -38,6 +40,16 @@ export async function donneesEspace(admin, espaceId, { jours, mois }) {
             .lte('jour', jours[jours.length - 1])
         )
       : [],
+    bornes
+      ? lire(
+          admin
+            .from('seances_sport')
+            .select('debut, duree_minutes, annulee')
+            .eq('espace_id', espaceId)
+            .gte('debut', bornes.debut)
+            .lt('debut', bornes.fin)
+        )
+      : [],
   ])
   const owners = new Map(attributions.map((a) => [a.charge_id, a.user_id]))
   const tri = (a, b) => a.ordre - b.ordre
@@ -48,6 +60,7 @@ export async function donneesEspace(admin, espaceId, { jours, mois }) {
     owners,
     chargesLibres: charges.filter((c) => !c.archivee && !owners.has(c.id)).sort(tri),
     diners: Object.fromEntries(diners.map((d) => [d.jour, d.plats?.nom ?? d.texte ?? null])),
+    seances: seancesDesJours(seances, jours, fuseau),
     courses: {
       aAcheter: [
         ...produits.filter((p) => p.etat === 'fini').map(article('p')),
@@ -85,6 +98,7 @@ function emailPour(membre, espace, donnees, types, periode, config) {
         { nom: donnees.diners[jour] ?? null, lien: lien({ a: 'autre', c: jour, n: donnees.diners[jour] ?? jour }) },
       ])
     ),
+    seances: donnees.seances,
     courses: {
       aAcheter: donnees.courses.aAcheter.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
       bientot: donnees.courses.bientot.map(avecLien((x) => ({ a: 'achete', c: x.id, t: x.type, n: x.nom }))),
@@ -136,7 +150,7 @@ export async function executerRecapQuotidien({ admin, envoyer, maintenant, confi
   for (const espace of espaces) {
     const membres = await membresDe(admin, espace.id)
     if (membres.length === 0) continue
-    const donnees = await donneesEspace(admin, espace.id, periode)
+    const donnees = await donneesEspace(admin, espace.id, periode, config.fuseau)
 
     for (const membre of membres) {
       const prefs = preferences.get(membre.user_id)
@@ -192,7 +206,7 @@ export async function envoyerApercu({ admin, envoyer, maintenant, config, utilis
   const envois = [{ type: 'hebdo', periode: lundi.toISOString().slice(0, 10) }]
   const periode = periodeCouverte(date.iso, envois)
 
-  const donnees = await donneesEspace(admin, espaceId, periode)
+  const donnees = await donneesEspace(admin, espaceId, periode, config.fuseau)
   const email = emailPour(membre, espace, donnees, ['hebdo', 'mensuel'], periode, config)
   try {
     await envoyer({ a: membre.email, ...email, sujet: `[Aperçu] ${email.sujet}` })

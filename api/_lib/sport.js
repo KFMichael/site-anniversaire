@@ -2,18 +2,17 @@
 // de Resend : testé par sport.test.js.
 import { echapper } from './email.js'
 import { invitationIcs } from './ics.js'
+import { horaireSeance } from './planning.js'
 import { membresDe } from './recap.js'
 
 const DUREE_OUBLI_MS = 24 * 3600 * 1000
 
 // « lundi 28 septembre, 18h30–19h15 » dans le fuseau du foyer
 export function libelleSeance(seance, fuseau) {
-  const debut = new Date(seance.debut)
-  const fin = new Date(debut.getTime() + seance.duree_minutes * 60000)
-  const jour = new Intl.DateTimeFormat('fr-FR', { timeZone: fuseau, weekday: 'long', day: 'numeric', month: 'long' }).format(debut)
-  const heure = (d) =>
-    new Intl.DateTimeFormat('fr-FR', { timeZone: fuseau, hour: '2-digit', minute: '2-digit' }).format(d).replace(':', 'h')
-  return `${jour}, ${heure(debut)}–${heure(fin)}`
+  const jour = new Intl.DateTimeFormat('fr-FR', { timeZone: fuseau, weekday: 'long', day: 'numeric', month: 'long' }).format(
+    new Date(seance.debut)
+  )
+  return `${jour}, ${horaireSeance(seance, fuseau)}`
 }
 
 // Lien « Ajouter à Google Agenda » (événement prérempli)

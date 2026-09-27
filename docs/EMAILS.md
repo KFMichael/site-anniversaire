@@ -49,6 +49,10 @@ La tâche planifiée (`vercel.json`) appelle `/api/recap` tous les jours à
 17 h UTC (19 h à Paris l'été, 18 h l'hiver) : elle envoie le récap le
 dimanche et le rappel le 1er du mois, et ne fait rien les autres jours.
 
+Le récap du dimanche contient, pour la semaine à venir : tes charges du
+mois, les dîners, les séances de sport (heure du foyer, séances annulées
+exclues ; « Planifier » s'il n'y en a pas) et la liste de courses.
+
 ### Boutons d'action dans l'email
 
 Le récap contient des boutons en un clic : **Je prends** (charge sans

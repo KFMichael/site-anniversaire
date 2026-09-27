@@ -17,43 +17,12 @@ Le site anniversaire d'origine est archivé sur la branche
 | Connexion | Lien magique par email + Google |
 | Charge mentale | Chacun coche librement ; **un seul owner par charge** ; poids de chaque charge représenté visuellement |
 | Courses | « Presque fini » ajoute le produit à la liste avec une couleur spécifique ; « Fini » l'ajoute normalement |
-| Sport | Séances **ensemble**, synchronisées avec **Google Calendar** |
+| Sport | Séances **ensemble** ; invitations d'agenda (.ics) ; Google Calendar (créneaux libres) plus tard |
 | Mots de passe | Coffre chiffré côté navigateur avec une **phrase secrète** partagée ; le serveur ne voit jamais les mots de passe en clair |
-| Menus | **Dîner uniquement**, tirage aléatoire avec règles |
+| Menus | **Dîner uniquement**, tirage aléatoire avec règles (pas deux fois le même plat, pas celui de la semaine précédente, au plus N par catégorie, plats rapides en semaine, jours verrouillés) |
+| Charges | 3 poids (léger, moyen, lourd), liste par défaut modifiable par espace |
+| Récap | Email le dimanche (charges, dîners, sport, courses) et rappel le 1er du mois ; notifications push en complément |
 | Nom | **Nido** (provisoire, modifiable dans `src/config.js`) |
-
-## Propositions à valider
-
-**Poids des charges** — 3 niveaux, affichés en jauge par personne (total de
-points de chacun sur le mois) :
-
-| Charge | Poids |
-|---|---|
-| Gérer les finances | ●●● lourd |
-| Faire le menu de la semaine | ●● moyen |
-| Aller faire les courses | ●● moyen |
-| Faire la lessive | ●● moyen |
-| Faire la liste des courses | ● léger |
-| Gérer la femme de ménage | ● léger |
-| Trouver les activités à faire | ● léger |
-| Prévoir les séances de sport | ● léger |
-
-Chaque espace peut modifier les charges et leur poids.
-
-**Règles du tirage des menus** (chacune activable) :
-- pas deux fois le même plat dans la semaine ;
-- pas un plat servi la semaine précédente ;
-- au plus N plats d'une même catégorie (pâtes, poisson, viande…) par semaine ;
-- plats « rapides » du lundi au jeudi, plats « longs » possibles le week-end ;
-- un jour verrouillé n'est pas re-tiré.
-
-**Récap hebdo** — email le **dimanche à 19h** (réglable par espace), puis
-notification push en phase 7. Contenu personnalisé par membre :
-1. tes charges du mois ;
-2. les dîners de la semaine ;
-3. les séances de sport prévues ;
-4. la liste de courses en cours (avec les « presque fini ») ;
-5. le 1er du mois : rappel « choisis tes charges », avec les charges sans owner.
 
 ## Phases
 
@@ -107,7 +76,8 @@ notification push en phase 7. Contenu personnalisé par membre :
 - [x] « Envoyer l'invitation » : un email par séance à chaque membre, avec invitation d'agenda (.ics) acceptée par Google Agenda, Apple Calendrier et Outlook (`api/sport.js`)
 - [x] Modification → mise à jour de l'événement (même UID, séquence +1) ; suppression d'une séance envoyée → annulation dans les agendas ; statut par séance (envoyée, à envoyer, modifiée)
 - [ ] Connexion Google Calendar de chaque membre (OAuth) et suggestion des créneaux libres (API free/busy)
-- [ ] Rappel push avant la séance
+- [x] Rappel push la veille au soir (« Demain : sport ») ; le rappel 30 min avant vient de l'alarme de l'invitation d'agenda
+- [x] Séances de la semaine dans le récap du dimanche (email et notification)
 
 ### Phase 6 — Coffre à mots de passe ✅ (réalisée en premier)
 - [x] Phrase secrète de l'espace → clé dérivée dans le navigateur (PBKDF2-SHA256 600 000 itérations, AES-GCM 256 via WebCrypto)
