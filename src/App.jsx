@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { supabaseConfigure } from './lib/supabase'
 import AuthProvider from './features/auth/AuthProvider'
 import RequiertConnexion from './features/auth/RequiertConnexion'
@@ -105,6 +106,7 @@ function App() {
             </Routes>
           </Suspense>
         </BrowserRouter>
+        <Analytics />
       </AuthProvider>
     </LimiteErreur>
   )
