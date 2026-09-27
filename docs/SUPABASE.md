@@ -17,6 +17,18 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 11. `supabase/migrations/0011_activite.sql` — journal des actions (ajouts à la liste, courses faites, charges prises, dîners prévus) pour les notifications aux autres membres
 12. `supabase/migrations/0012_rappel_sport.sql` — préférence du rappel de sport la veille au soir
 13. `supabase/migrations/0013_echeances_listes.sql` — échéances avec rappels, listes partagées et invitations, préférence des rappels d'échéances
+14. `supabase/migrations/0014_reparer_charges.sql` — réparation de la charge mentale si 0004 s'est arrêtée en cours de route (0 charge visible, « 403 » à l'ajout) ; sans effet sinon, peut être relancée
+
+> **Vérifier les règles d'accès** : cette requête liste les tables dont la
+> sécurité (RLS) est activée mais sans aucune règle, donc inutilisables
+> depuis l'appli. Elle doit renvoyer une liste vide.
+>
+> ```sql
+> select c.relname as table_sans_regle
+> from pg_class c join pg_namespace n on n.oid = c.relnamespace
+> where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity
+>   and not exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = c.relname);
+> ```
 
 > Si une première version de `0003_coffre.sql` a déjà été exécutée (avant
 > l'ajout de Face ID), la supprimer d'abord :
