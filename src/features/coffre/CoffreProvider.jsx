@@ -27,6 +27,8 @@ import {
 // activé : le rouvrir ne coûte qu'un regard.
 const DELAI_VERROUILLAGE_MS = 5 * 60 * 1000
 const DELAI_VERROUILLAGE_BIOMETRIE_MS = 60 * 1000
+// Import CSV : nombre d'entrées chiffrées et envoyées à la fois
+const TAILLE_LOT = 25
 
 // Monté au niveau de l'espace (et remonté à chaque changement d'espace) :
 // la clé survit à la navigation entre onglets, mais uniquement en mémoire —
@@ -200,21 +202,26 @@ export default function CoffreProvider({ children }) {
     [espace.id]
   )
 
+  // Si le coffre a été réinitialisé (puis recréé) depuis l'ouverture, notre
+  // clé est périmée : écrire avec rendrait les entrées illisibles. Renvoie
+  // un message d'erreur dans ce cas, sinon null.
+  const verifierCleAJour = useCallback(async () => {
+    const { data: actuel } = await supabase
+      .from('coffres')
+      .select('created_at')
+      .eq('espace_id', espace.id)
+      .maybeSingle()
+    if (actuel && actuel.created_at === coffre?.created_at) return null
+    verrouiller()
+    await chargerCoffre()
+    return 'Le coffre a été réinitialisé entretemps : rouvre-le.'
+  }, [coffre, espace.id, verrouiller, chargerCoffre])
+
   // Renvoie null si tout va bien, sinon un message d'erreur
   const enregistrer = useCallback(
     async (id, contenu) => {
-      // Si le coffre a été réinitialisé (puis recréé) depuis l'ouverture,
-      // notre clé est périmée : écrire avec rendrait l'entrée illisible
-      const { data: actuel } = await supabase
-        .from('coffres')
-        .select('created_at')
-        .eq('espace_id', espace.id)
-        .maybeSingle()
-      if (!actuel || actuel.created_at !== coffre?.created_at) {
-        verrouiller()
-        await chargerCoffre()
-        return 'Le coffre a été réinitialisé entretemps : rouvre-le.'
-      }
+      const perimee = await verifierCleAJour()
+      if (perimee) return perimee
 
       const ligne = await chiffrerEntree(cle, espace.id, contenu)
       const requete = id
@@ -228,7 +235,33 @@ export default function CoffreProvider({ children }) {
       await chargerEntrees(cle)
       return null
     },
-    [cle, coffre, espace.id, verrouiller, chargerCoffre, chargerEntrees]
+    [cle, espace.id, verifierCleAJour, chargerEntrees]
+  )
+
+  // Import d'un fichier CSV : chaque entrée est chiffrée ici, puis envoyée
+  // par lots. surProgression(nombreEnregistrees) après chaque lot.
+  // Renvoie { importees, erreur }.
+  const importer = useCallback(
+    async (contenus, surProgression) => {
+      const perimee = await verifierCleAJour()
+      if (perimee) return { importees: 0, erreur: perimee }
+      let importees = 0
+      for (let i = 0; i < contenus.length; i += TAILLE_LOT) {
+        const lignes = await Promise.all(
+          contenus.slice(i, i + TAILLE_LOT).map(async (c) => ({ espace_id: espace.id, ...(await chiffrerEntree(cle, espace.id, c)) }))
+        )
+        const { error } = await supabase.from('entrees_coffre').insert(lignes)
+        if (error) {
+          await chargerEntrees(cle)
+          return { importees, erreur: `L'import s'est arrêté après ${importees} entrée${importees > 1 ? 's' : ''}. Réessaie avec le même fichier : les entrées déjà importées seront repérées comme doublons.` }
+        }
+        importees += lignes.length
+        surProgression?.(importees)
+      }
+      await chargerEntrees(cle)
+      return { importees, erreur: null }
+    },
+    [cle, espace.id, verifierCleAJour, chargerEntrees]
   )
 
   const supprimer = useCallback(async (id) => {
@@ -306,6 +339,7 @@ export default function CoffreProvider({ children }) {
       retirerAppareil,
       verrouiller,
       enregistrer,
+      importer,
       supprimer,
       changerPhrase,
       reinitialiser,
@@ -326,6 +360,7 @@ export default function CoffreProvider({ children }) {
       retirerAppareil,
       verrouiller,
       enregistrer,
+      importer,
       supprimer,
       changerPhrase,
       reinitialiser,

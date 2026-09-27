@@ -88,7 +88,7 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Verrouillage automatique (5 min d'inactivité, 1 min avec Face ID, rechargement de la page, changement d'espace)
 - [x] Changement de phrase secrète
 - [x] Réinitialisation du coffre (phrase oubliée), réservée aux admins
-- [ ] Import depuis un export CSV (navigateur, Bitwarden…)
+- [x] Import d'un export CSV (Apple Mots de passe, Chrome, Edge, Firefox, Bitwarden, 1Password, LastPass, KeePass, Dashlane), lu et chiffré dans le navigateur : aperçu, doublons décochés, catégorie devinée ; modèle CSV à télécharger sur ordinateur
 - [ ] Rotation de la clé maîtresse (après le départ d'un membre qui a pu la conserver)
 
 ### Qualité — iPhone, accessibilité, erreurs ✅
