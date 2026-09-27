@@ -26,6 +26,12 @@ Supabase ne stocke que du chiffré : ni la phrase, ni la clé, ni même le nom
 des entrées. Une phrase oubliée est irrécupérable (le coffre peut seulement
 être réinitialisé par un admin).
 
+**Import CSV** (`src/features/coffre/import-csv.js`) : l'export d'un
+gestionnaire (Apple Mots de passe, Chrome, Firefox, Bitwarden, 1Password,
+LastPass, KeePass, Dashlane) ou le modèle proposé sur ordinateur est lu dans
+le navigateur, puis chaque entrée est chiffrée avant l'envoi : le fichier ne
+quitte jamais l'appareil.
+
 > Les passkeys sont liées au nom de domaine : celles créées sur une URL de
 > prévisualisation Vercel ne fonctionnent pas en production. Activer Face ID
 > sur le domaine définitif.

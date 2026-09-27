@@ -3,6 +3,7 @@ import { CATEGORIES, useCoffre } from './contexte'
 import { Bouton, Page } from '../../components/ui'
 import EntreeCoffre from './EntreeCoffre'
 import FormulaireEntree from './FormulaireEntree'
+import ImportCsv from './ImportCsv'
 import ReglagesCoffre from './ReglagesCoffre'
 
 function normaliser(texte) {
@@ -17,6 +18,7 @@ export default function ContenuCoffre() {
   const [recherche, setRecherche] = useState('')
   const [filtre, setFiltre] = useState(null)
   const [ajout, setAjout] = useState(false)
+  const [importation, setImportation] = useState(false)
 
   // Catégories réellement utilisées, pour ne pas afficher de filtres vides
   const categoriesPresentes = useMemo(
@@ -53,7 +55,7 @@ export default function ContenuCoffre() {
       </div>
 
       {categoriesPresentes.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto -mx-4 px-4 pb-1">
+        <div className="flex gap-2 overflow-x-auto -mx-4 px-4 py-1.5 -my-1.5">
           <Filtre actif={!filtre} onClick={() => setFiltre(null)}>
             Tout
           </Filtre>
@@ -69,15 +71,20 @@ export default function ContenuCoffre() {
         </div>
       )}
 
-      {ajout ? (
-        <FormulaireEntree onFermer={() => setAjout(false)} />
-      ) : (
-        <Bouton onClick={() => setAjout(true)}>+ Ajouter un mot de passe</Bouton>
+      {ajout && <FormulaireEntree onFermer={() => setAjout(false)} />}
+      {importation && <ImportCsv onFermer={() => setImportation(false)} />}
+      {!ajout && !importation && (
+        <div className="flex flex-col gap-2">
+          <Bouton onClick={() => setAjout(true)}>+ Ajouter un mot de passe</Bouton>
+          <Bouton variante="secondaire" onClick={() => setImportation(true)}>
+            Importer depuis un fichier CSV
+          </Bouton>
+        </div>
       )}
 
-      {entrees.length === 0 && !ajout && (
+      {entrees.length === 0 && !ajout && !importation && (
         <p className="font-sans text-center text-sm text-text-muted">
-          Le coffre est vide. Commence par le Wi-Fi de la maison ?
+          Le coffre est vide. Commence par le Wi-Fi de la maison, ou importe les mots de passe de ton navigateur.
         </p>
       )}
       {entrees.length > 0 && visibles.length === 0 && (
@@ -102,7 +109,7 @@ function Filtre({ actif, children, ...props }) {
     <button
       {...props}
       aria-pressed={actif}
-      className={`font-sans text-sm whitespace-nowrap px-3.5 py-1.5 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
+      className={`cible-44 font-sans text-sm whitespace-nowrap px-3.5 py-1.5 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
         actif ? 'bg-accent text-white' : 'bg-bg-elevated text-text-muted'
       }`}
     >
