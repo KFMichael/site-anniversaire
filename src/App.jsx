@@ -26,6 +26,8 @@ import Listes from './features/listes/Listes'
 
 // Partie Activités (ex-site anniversaire) chargée à la demande : Leaflet et
 // le quiz n'alourdissent pas le premier affichage de l'application.
+const Finances = lazy(() => import('./features/finances/Finances'))
+const Equilibre = lazy(() => import('./features/charge/Equilibre'))
 const Drive = lazy(() => import('./features/courses/Drive'))
 const Activites = lazy(() => import('./features/activites/Activites'))
 const Quiz = lazy(() => import('./features/activites/Quiz'))
@@ -87,12 +89,14 @@ function App() {
                         <Route index element={<TableauDeBord />} />
                         <Route path="/espace" element={<ReglagesEspace />} />
                         <Route path="/charge" element={<ChargeMentale />} />
+                        <Route path="/charge/equilibre" element={<Equilibre />} />
                         <Route path="/courses" element={<Courses />} />
                         <Route path="/courses/drive" element={<Drive />} />
                         <Route path="/menus" element={<Menus />} />
                         <Route path="/sport" element={<Sport />} />
                         <Route path="/echeances" element={<Echeances />} />
                         <Route path="/listes" element={<Listes />} />
+                        <Route path="/finances" element={<Finances />} />
                         <Route path="/coffre" element={<Coffre />} />
                         <Route path="/activites" element={<Activites />}>
                           <Route index element={<Navigate to="idees" replace />} />

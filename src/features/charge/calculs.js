@@ -70,3 +70,33 @@ const COULEURS = ['#0071EB', '#FF9500', '#34C759', '#AF52DE', '#FF2D55', '#00B8D
 export function couleurMembre(index) {
   return COULEURS[index % COULEURS.length]
 }
+
+// Répartition de chaque mois de `moisListe`, avec les mêmes règles que
+// l'écran du mois : pour un mois passé, pas de charges créées après lui.
+// attributions : [{ charge_id, user_id, mois }]
+export function historiqueCharge(charges, attributions, membres, moisListe, courant = moisDe()) {
+  return moisListe.map((mois) => {
+    const duMois = attributions.filter((a) => a.mois === mois)
+    let chargesMois = chargesDuMois(charges, duMois)
+    if (mois < courant) chargesMois = chargesMois.filter((c) => !c.created_at || c.created_at < decalerMois(mois, 1))
+    return { mois, repartition: calculerRepartition(chargesMois, duMois, membres) }
+  })
+}
+
+// Bilan de la période : points et part de chacun (charges prises seulement),
+// au format de calculerRepartition pour réutiliser la jauge
+export function bilanCharge(historique, membres) {
+  const parMembre = membres.map((m) => ({ user_id: m.user_id, points: 0, nombre: 0 }))
+  for (const { repartition } of historique) {
+    repartition.parMembre.forEach((p, i) => {
+      parMembre[i].points += p.points
+      parMembre[i].nombre += p.nombre
+    })
+  }
+  const total = parMembre.reduce((t, p) => t + p.points, 0)
+  return {
+    parMembre: parMembre.map((p) => ({ ...p, part: total ? Math.round((p.points / total) * 100) : 0 })),
+    libres: { points: 0, nombre: 0 },
+    total,
+  }
+}

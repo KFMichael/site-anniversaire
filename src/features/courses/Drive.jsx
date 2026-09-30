@@ -91,7 +91,7 @@ function Commande({ courses, drive, message, onMessage, onChanger }) {
       state: {
         message: `Commande notée ✓ ${panier.length} produit${panier.length > 1 ? 's' : ''} commandé${panier.length > 1 ? 's' : ''}, ${
           reste ? `il reste ${reste} produit${reste > 1 ? 's' : ''} à acheter.` : 'plus rien à acheter 🎉'
-        }`,
+        }${estimationPanier.total ? ` ${formaterPrix(estimationPanier.total)} ajoutés aux finances (modifiable).` : ''}`,
       },
     })
   }

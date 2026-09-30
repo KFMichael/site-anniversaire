@@ -48,6 +48,13 @@ export const MODULES = [
     route: '/listes',
   },
   {
+    id: 'finances',
+    titre: 'Finances',
+    description: 'Où part notre argent, poste par poste',
+    emoji: '💶',
+    route: '/finances',
+  },
+  {
     id: 'activites',
     titre: 'Activités',
     description: 'Idées de sorties, carnet, voyages',

@@ -77,8 +77,20 @@ export function useDrive() {
       const { error } = await supabase
         .from('commandes_drive')
         .insert({ espace_id: espace.id, enseigne, nb_articles: nbArticles, montant_centimes: montantCentimes || null })
-      if (!error) signalerActivite(espace.id)
-      return error ? "La commande n'a pas pu être notée." : null
+      if (error) return "La commande n'a pas pu être notée."
+      signalerActivite(espace.id)
+      // Montant estimé reporté dans les finances (sans bloquer la commande
+      // si la migration 0016 n'est pas encore passée)
+      if (montantCentimes > 0) {
+        await supabase.from('depenses').insert({
+          espace_id: espace.id,
+          categorie: 'courses',
+          montant_centimes: montantCentimes,
+          libelle: `Commande ${enseigne === 'carrefour' ? 'Carrefour' : 'Leclerc'} Drive`,
+          source: 'drive',
+        })
+      }
+      return null
     },
     [espace.id, enseigne]
   )
