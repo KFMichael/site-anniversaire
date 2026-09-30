@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Bouton } from '../../components/ui'
 import { afficherQuantite, compterListe, construireListe, grouperParRayon } from './liste'
 import { COULEURS_ETAT, RAYONS } from './rayons'
@@ -58,6 +59,16 @@ export default function ListeCourses({ courses, onMessage }) {
           +
         </Bouton>
       </form>
+
+      {liste.length > 0 && (
+        <Link
+          to="/courses/drive"
+          className="font-sans min-h-11 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary transition-all duration-200 ease-spring active:scale-95"
+        >
+          <span aria-hidden="true">🚗</span>
+          Commander au drive
+        </Link>
+      )}
 
       {liste.length === 0 && (
         <p className="font-sans text-center text-text-muted py-8">

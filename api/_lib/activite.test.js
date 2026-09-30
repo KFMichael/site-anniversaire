@@ -140,3 +140,15 @@ test('listes partagées : groupées par liste', () => {
   )
   assert.equal(deux.notification.corps, 'Léa a ajouté Dune (Films à voir) et Réparer › le vélo (Choses à faire)')
 })
+
+test('commande au drive : la dernière commande est annoncée', () => {
+  const [une] = resumerActivite(
+    [{ auteur: 'u2', type: 'commande_drive', libelle: 'Carrefour Drive · 12 articles · 45,20 €' }],
+    new Map([['u2', 'Léa']])
+  )
+  assert.deepEqual(une.notification, {
+    titre: '🚗 Commande au drive',
+    corps: 'Léa a passé la commande : Carrefour Drive · 12 articles · 45,20 €',
+    url: '/courses',
+  })
+})

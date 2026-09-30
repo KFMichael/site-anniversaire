@@ -103,6 +103,12 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Listes partagées (films à voir, choses à faire, restos, idées cadeaux…), cochées en temps réel, « Léa a ajouté Dune à Films à voir »
 - [x] « 📅 Proposer » un élément : invitation d'agenda (.ics) à tous les membres, mise à jour ou annulation
 
+### Phase 9 — Commande au drive ✅
+- [x] Une enseigne pour l'espace : Carrefour Drive ou Leclerc Drive (adresse du drive du magasin)
+- [x] « Commander au drive » depuis la liste : chaque produit manquant ouvre la recherche du site, ou la fiche mémorisée (« Mon produit »)
+- [x] Prix constaté par produit et estimation du panier ; « Commande passée » notifie les autres membres
+- [ ] Panier rempli automatiquement : impossible sans API publique des enseignes (seulement par partenariat commercial)
+
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
 - [x] Notifications push : dîner du soir, récap du dimanche, rappel du 1er ; par appareil, types désactivables, test (`docs/NOTIFICATIONS.md`)

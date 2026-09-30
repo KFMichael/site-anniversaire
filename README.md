@@ -74,7 +74,7 @@ src/
     ├── tableau-de-bord/     # Accueil : modules de l'espace
     ├── menus/               # Dîners de la semaine, bibliothèque de plats
     │   └── tirage.js        # Semaines et tirage au sort avec règles (testé par tirage.test.js)
-    ├── courses/             # Stock de la maison et liste de courses générée
+    ├── courses/             # Stock de la maison, liste de courses générée, commande au drive
     │   └── liste.js         # Construction de la liste par rayon (testé par liste.test.js)
     ├── charge/              # Charge mentale : qui gère quoi chaque mois
     │   └── calculs.js       # Mois, répartition des points (testé par calculs.test.js)
@@ -116,6 +116,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/` | Tableau de bord |
 | `/espace` | Membres, invitation, profil, changement d'espace |
 | `/courses` | Liste de courses et stock de la maison |
+| `/courses/drive` | Commander au drive (Carrefour, Leclerc) : liens produits, prix, commande passée |
 | `/menus` | Dîners de la semaine et bibliothèque de plats |
 | `/charge` | Charge mentale du mois |
 | `/coffre` | Coffre à mots de passe |
