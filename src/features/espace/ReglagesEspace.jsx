@@ -15,7 +15,11 @@ export default function ReglagesEspace() {
   const nouvelEspace = location.state?.nouvelEspace
 
   return (
-    <Page titre={espace.nom} sousTitre="Réglages de l'espace">
+    <Page
+      titre={espace.nom}
+      sousTitre="Réglages de l'espace"
+      retour={location.state?.depuis === 'plus' ? { vers: '/plus', label: 'Plus' } : { vers: '/', label: "Aujourd'hui" }}
+    >
       {nouvelEspace && (
         <Carte>
           <p className="font-sans text-text-secondary">

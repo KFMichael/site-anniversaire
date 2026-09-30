@@ -43,7 +43,7 @@ export default function Echeances() {
   if (e.chargement) return <Chargement plein />
   if (e.erreur) {
     return (
-      <Page retour={{ vers: '/', label: 'Accueil' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
+      <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
         <EtatErreur message={e.erreur} />
       </Page>
     )
@@ -73,7 +73,7 @@ export default function Echeances() {
     )
 
   return (
-    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
+    <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
 
       {edition ? (
         <FormulaireEcheance

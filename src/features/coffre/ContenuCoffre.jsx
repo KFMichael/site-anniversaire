@@ -39,7 +39,7 @@ export default function ContenuCoffre() {
   }, [entrees, recherche, filtre])
 
   return (
-    <Page titre="Mots de passe" sousTitre={`${entrees.length} dans le coffre`}>
+    <Page titre="Mots de passe" retour={{ vers: '/plus', label: 'Plus' }} sousTitre={`${entrees.length} dans le coffre`}>
       <div className="flex gap-2">
         <input
           type="search"

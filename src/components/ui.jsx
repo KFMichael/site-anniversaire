@@ -4,10 +4,11 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { NOM_APP } from '../config'
 
-// retour : bouton « ‹ Accueil » façon iOS en haut des écrans qui ne sont pas
-// dans la barre d'onglets ({ vers: '/', label: 'Accueil' }, ou { onClick,
-// label } pour un sous-écran). Le titre de l'onglet du navigateur suit la page.
-export function Page({ titre, sousTitre, retour, children }) {
+// retour : bouton « ‹ Plus » façon iOS en haut des écrans qui ne sont pas
+// dans la barre d'onglets ({ vers: '/plus', label: 'Plus' }, ou { onClick,
+// label } pour un sous-écran). action : bouton à droite du grand titre.
+// Le titre de l'onglet du navigateur suit la page.
+export function Page({ titre, sousTitre, retour, action, children }) {
   useEffect(() => {
     document.title = titre ? `${titre.replace(/\s*👋$/, '')} · ${NOM_APP}` : NOM_APP
   }, [titre])
@@ -35,9 +36,12 @@ export function Page({ titre, sousTitre, retour, children }) {
             </button>
           ))}
         {titre && (
-          <header className="flex flex-col gap-1 px-1">
-            <h1 className="font-sans text-3xl font-bold text-text-primary">{titre}</h1>
-            {sousTitre && <p className="font-sans text-text-muted">{sousTitre}</p>}
+          <header className="flex items-start gap-3 px-1">
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <h1 className="font-sans text-3xl font-bold text-text-primary">{titre}</h1>
+              {sousTitre && <p className="font-sans text-text-muted">{sousTitre}</p>}
+            </div>
+            {action}
           </header>
         )}
         {children}

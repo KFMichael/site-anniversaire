@@ -1,23 +1,31 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 
-// Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus.
-// Les autres modules (Activités…) s'ouvrent depuis le tableau de bord.
+// Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus,
+// pour ce qui sert chaque jour. Les autres modules sont dans « Plus ».
 const ONGLETS = [
-  { to: '/', label: 'Accueil', Icone: IconeMaison, fin: true },
+  { to: '/', label: "Aujourd'hui", Icone: IconeMaison },
   { to: '/courses', label: 'Courses', Icone: IconePanier },
+  { to: '/menus', label: 'Menus', Icone: IconeCouverts },
   { to: '/charge', label: 'Charge', Icone: IconeListe },
-  { to: '/coffre', label: 'Coffre', Icone: IconeCadenas },
-  { to: '/espace', label: 'Espace', Icone: IconeGroupe },
+  { to: '/plus', label: 'Plus', Icone: IconePlus },
 ]
 
-// Modules ouverts depuis l'accueil : l'onglet Accueil reste allumé
-// pour qu'on sache toujours où l'on est
-const MODULES_ACCUEIL = ['/menus', '/sport', '/echeances', '/listes', '/finances', '/activites']
+// Modules ouverts depuis « Plus » : l'onglet Plus reste allumé pour qu'on
+// sache toujours où l'on est. Les réglages de l'espace s'ouvrent depuis
+// l'avatar d'« Aujourd'hui » ou depuis « Plus » (onglet de provenance).
+const MODULES_PLUS = ['/plus', '/finances', '/listes', '/echeances', '/sport', '/activites', '/coffre']
+
+function ongletActif(pathname, depuis) {
+  const dans = (m) => pathname === m || pathname.startsWith(`${m}/`)
+  if (MODULES_PLUS.some(dans) || (dans('/espace') && depuis === 'plus')) return '/plus'
+  if (dans('/espace')) return '/'
+  return ONGLETS.find((o) => o.to !== '/' && dans(o.to))?.to ?? (pathname === '/' ? '/' : null)
+}
 
 export default function Structure() {
-  const { pathname } = useLocation()
-  const depuisAccueil = MODULES_ACCUEIL.some((m) => pathname === m || pathname.startsWith(`${m}/`))
+  const { pathname, state } = useLocation()
+  const actif = ongletActif(pathname, state?.depuis)
 
   // Chaque nouvel écran s'ouvre en haut de page
   useEffect(() => {
@@ -32,20 +40,18 @@ export default function Structure() {
         className="fixed bottom-0 inset-x-0 z-20 bg-bg-elevated-glass backdrop-blur-xl border-t border-separator pb-[env(safe-area-inset-bottom)]"
       >
         <ul className="max-w-md mx-auto flex justify-around">
-          {ONGLETS.map(({ to, label, Icone, fin }) => (
+          {ONGLETS.map(({ to, label, Icone }) => (
             <li key={to}>
-              <NavLink
+              <Link
                 to={to}
-                end={fin}
-                className={({ isActive }) =>
-                  `font-sans flex flex-col items-center gap-0.5 px-3 py-2 text-[11px] transition-colors duration-200 ease-spring ${
-                    isActive || (to === '/' && depuisAccueil) ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
-                  }`
-                }
+                aria-current={actif === to ? 'page' : undefined}
+                className={`font-sans min-w-16 flex flex-col items-center gap-0.5 px-2 py-2 text-[11px] transition-colors duration-200 ease-spring ${
+                  actif === to ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
+                }`}
               >
                 <Icone />
                 {label}
-              </NavLink>
+              </Link>
             </li>
           ))}
         </ul>
@@ -77,16 +83,6 @@ function IconeListe() {
   )
 }
 
-function IconeCadenas() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" />
-      <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
-      <path d="M12 14.5v2" />
-    </svg>
-  )
-}
-
 function IconePanier() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -97,13 +93,24 @@ function IconePanier() {
   )
 }
 
-function IconeGroupe() {
+function IconeCouverts() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="9" cy="8" r="3.5" />
-      <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" />
-      <path d="M16 4.8a3.5 3.5 0 0 1 0 6.4" />
-      <path d="M18.5 14.4c1.9.8 3 2.9 3 5.6" />
+      <path d="M6 3v7a2 2 0 0 0 2 2v9" />
+      <path d="M10 3v7a2 2 0 0 1-2 2" />
+      <path d="M8 3v5" />
+      <path d="M17.5 21V3c-2 1-3.5 3.5-3.5 7 0 2 1 3 3.5 3" />
+    </svg>
+  )
+}
+
+function IconePlus() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="7" height="7" rx="2" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="2" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="2" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="2" />
     </svg>
   )
 }

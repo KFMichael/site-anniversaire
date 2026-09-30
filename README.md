@@ -82,6 +82,7 @@ src/
     ├── echeances/           # Échéances du foyer (impôts, assurances…) et rappels
     ├── listes/              # Listes partagées (films à voir, choses à faire…), invitations
     ├── finances/            # Dépenses du compte commun par poste
+    ├── plus/                # Onglet « Plus » (modules hors barre d'onglets)
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
     │   ├── crypto.js        # Clé maîtresse, enveloppes phrase/PRF (WebCrypto), testé par crypto.test.js
     │   ├── biometrie.js     # Face ID / Touch ID : passkey WebAuthn + extension PRF
@@ -114,7 +115,8 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/connexion` | Lien magique / Google |
 | `/bienvenue` | Créer ou rejoindre un espace |
 | `/rejoindre/:code` | Accepter une invitation |
-| `/` | Tableau de bord |
+| `/` | Aujourd'hui : dîner du soir, prochaine échéance, charges, courses, dépenses du mois ; avatar vers les réglages |
+| `/plus` | Onglet « Plus » : Finances, Échéances, Listes, Sport, Activités, Mots de passe, Réglages |
 | `/espace` | Membres, invitation, profil, changement d'espace |
 | `/courses` | Liste de courses et stock de la maison |
 | `/finances` | Dépenses du mois par poste, comparaison avec le mois précédent |

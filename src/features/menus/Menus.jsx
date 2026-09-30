@@ -14,7 +14,7 @@ export default function Menus() {
   if (menus.chargement) return <Chargement plein />
 
   return (
-    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Menus" sousTitre="Les dîners de la semaine">
+    <Page titre="Menus" sousTitre="Les dîners de la semaine">
       {menus.erreur && <p className="font-sans text-sm text-text-muted italic px-1">{menus.erreur}</p>}
 
       <div role="tablist" className="flex p-1 rounded-full bg-bg-elevated shadow-soft">

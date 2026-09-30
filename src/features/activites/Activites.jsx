@@ -18,13 +18,13 @@ export default function Activites() {
       <nav aria-label="Rubriques des activités" className="sticky top-0 z-10 bg-bg-elevated-glass backdrop-blur-xl border-b border-separator pt-[env(safe-area-inset-top)]">
         <div className="max-w-2xl mx-auto px-3 pt-1">
           <Link
-            to="/"
+            to="/plus"
             className="min-h-11 inline-flex items-center gap-1 px-1 font-sans text-base text-accent-text transition-transform duration-200 ease-spring active:scale-95"
           >
             <span aria-hidden="true" className="text-2xl leading-none">
               ‹
             </span>
-            Accueil
+            Plus
           </Link>
         </div>
         <ul className="flex flex-wrap justify-center gap-1 md:gap-4 py-3 px-4 text-sm font-sans">
