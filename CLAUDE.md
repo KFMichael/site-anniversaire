@@ -37,8 +37,11 @@ npm run build   # doit passer (avec VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY f
   mise à jour optimiste de l'écran puis enregistrement ; jamais de clic
   sans réaction visible.
 - **Rien qui dépende du survol** (`hover:` seulement en complément).
-- **Navigation** : barre d'onglets en bas (5 onglets au plus), grands titres
-  de page, actions principales à portée de pouce (bas de l'écran).
+- **Navigation** : barre d'onglets en bas (5 onglets au plus : Aujourd'hui,
+  Courses, Menus, Charge, Plus), grands titres de page, actions principales à
+  portée de pouce. Tout écran passe par `Page` (`src/components/ui.jsx`) :
+  grand titre qui se replie au défilement, `retour` (bouton « ‹ » et geste
+  « glisser depuis le bord gauche » dans l'appli installée), transitions.
 - **Zones de sécurité** : respecter `env(safe-area-inset-*)` pour tout
   élément fixé en haut ou en bas.
 - **Police système** (SF Pro), tailles lisibles (texte courant ≥ 15 px,
