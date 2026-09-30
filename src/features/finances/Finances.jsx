@@ -38,7 +38,7 @@ export default function Finances() {
     setMessage('')
   }
 
-  const retour = { vers: '/', label: 'Accueil' }
+  const retour = { vers: '/plus', label: 'Plus' }
   if (f.chargement) return <Chargement plein />
   if (f.erreur) {
     return (

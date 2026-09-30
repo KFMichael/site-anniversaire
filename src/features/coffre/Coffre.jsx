@@ -15,7 +15,7 @@ export default function Coffre() {
 
   if (coffre === undefined) {
     return erreur ? (
-      <Page titre="Mots de passe">
+      <Page titre="Mots de passe" retour={{ vers: '/plus', label: 'Plus' }}>
         <p className="font-sans text-text-muted px-1">
           {erreur} La migration <code>0003_coffre.sql</code> a-t-elle été exécutée ?
         </p>

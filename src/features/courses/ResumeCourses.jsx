@@ -22,18 +22,21 @@ export default function ResumeCourses() {
     })
   }, [espace.id])
 
-  if (!compte || compte.total === 0) return null
+  if (!compte) return null
 
   return (
     <Link to="/courses" className="block transition-transform duration-200 ease-spring active:scale-[0.98]">
       <Carte>
-        <p className="font-sans text-text-primary">
-          🛒 <strong>{compte.total}</strong> article{compte.total > 1 ? 's' : ''} sur la liste de
-          courses
-          {compte.bientot > 0 && (
-            <span className="text-text-muted"> · dont {compte.bientot} presque fini{compte.bientot > 1 ? 's' : ''}</span>
-          )}
-        </p>
+        {compte.total === 0 ? (
+          <p className="font-sans text-text-secondary">🛒 Rien à acheter pour l'instant 🎉</p>
+        ) : (
+          <p className="font-sans text-text-primary">
+            🛒 <strong>{compte.total}</strong> article{compte.total > 1 ? 's' : ''} sur la liste de courses
+            {compte.bientot > 0 && (
+              <span className="text-text-muted"> · dont {compte.bientot} presque fini{compte.bientot > 1 ? 's' : ''}</span>
+            )}
+          </p>
+        )}
       </Carte>
     </Link>
   )

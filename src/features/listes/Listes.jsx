@@ -42,14 +42,14 @@ export default function Listes() {
   if (l.chargement) return <Chargement plein />
   if (l.erreur) {
     return (
-      <Page retour={{ vers: '/', label: 'Accueil' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
+      <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
         <EtatErreur message={l.erreur} />
       </Page>
     )
   }
 
   return (
-    <Page retour={{ vers: '/', label: 'Accueil' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
+    <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Listes">
         {l.listes.map((x) => {

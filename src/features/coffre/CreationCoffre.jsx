@@ -26,7 +26,7 @@ export default function CreationCoffre() {
   }
 
   return (
-    <Page titre="Mots de passe" sousTitre="Le coffre-fort partagé de l'espace">
+    <Page titre="Mots de passe" retour={{ vers: '/plus', label: 'Plus' }} sousTitre="Le coffre-fort partagé de l'espace">
       <Carte titre="🔐 Créer le coffre">
         <p className="font-sans text-sm text-text-secondary">
           Choisis une <strong>phrase secrète</strong> que tu partageras de vive voix avec

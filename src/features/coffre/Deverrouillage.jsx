@@ -38,7 +38,7 @@ export default function Deverrouillage() {
   const minutes = Math.round(delaiVerrouillage / 60000)
 
   return (
-    <Page titre="Mots de passe" sousTitre="Le coffre-fort partagé de l'espace">
+    <Page titre="Mots de passe" retour={{ vers: '/plus', label: 'Plus' }} sousTitre="Le coffre-fort partagé de l'espace">
       <Carte titre="🔒 Coffre verrouillé">
         {biometrieIci && (
           <Bouton onClick={biometrie} disabled={enCours}>
