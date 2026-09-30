@@ -63,3 +63,29 @@ test('les charges archivées restent dans l’historique si elles avaient un own
   const ids = chargesDuMois(charges, [{ charge_id: 'b' }]).map((c) => c.id)
   assert.deepEqual(ids, ['b', 'a'])
 })
+
+test('historique et bilan de la charge sur plusieurs mois', async () => {
+  const { historiqueCharge, bilanCharge } = await import('./calculs.js')
+  const membres = [{ user_id: 'u1' }, { user_id: 'u2' }]
+  const charges = [
+    { id: 'a', nom: 'Finances', poids: 3, ordre: 0, archivee: false, created_at: '2026-01-01T00:00:00Z' },
+    { id: 'b', nom: 'Courses', poids: 2, ordre: 1, archivee: false, created_at: '2026-01-01T00:00:00Z' },
+    { id: 'c', nom: 'Linge', poids: 1, ordre: 2, archivee: false, created_at: '2026-09-15T00:00:00Z' },
+  ]
+  const attributions = [
+    { charge_id: 'a', user_id: 'u1', mois: '2026-08-01' },
+    { charge_id: 'b', user_id: 'u2', mois: '2026-08-01' },
+    { charge_id: 'a', user_id: 'u2', mois: '2026-09-01' },
+    { charge_id: 'c', user_id: 'u2', mois: '2026-09-01' },
+  ]
+  const h = historiqueCharge(charges, attributions, membres, ['2026-09-01', '2026-08-01'], '2026-09-01')
+  // Août : « Linge » (créée en septembre) n'existait pas encore
+  assert.deepEqual(h[1].repartition.parMembre.map((p) => p.points), [3, 2])
+  assert.equal(h[1].repartition.total, 5)
+  // Septembre : « Courses » reste libre
+  assert.deepEqual(h[0].repartition.parMembre.map((p) => p.points), [0, 4])
+  assert.deepEqual(h[0].repartition.libres, { points: 2, nombre: 1 })
+  const bilan = bilanCharge(h, membres)
+  assert.deepEqual(bilan.parMembre.map((p) => [p.points, p.nombre, p.part]), [[3, 1, 33], [6, 3, 67]])
+  assert.equal(bilan.total, 9)
+})

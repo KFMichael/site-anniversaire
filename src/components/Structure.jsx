@@ -13,7 +13,7 @@ const ONGLETS = [
 
 // Modules ouverts depuis l'accueil : l'onglet Accueil reste allumé
 // pour qu'on sache toujours où l'on est
-const MODULES_ACCUEIL = ['/menus', '/sport', '/echeances', '/listes', '/activites']
+const MODULES_ACCUEIL = ['/menus', '/sport', '/echeances', '/listes', '/finances', '/activites']
 
 export default function Structure() {
   const { pathname } = useLocation()

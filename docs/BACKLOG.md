@@ -109,9 +109,16 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Prix constaté par produit et estimation du panier ; « Commande passée » notifie les autres membres, sort les produits commandés de la liste (stock à jour) et ramène à la liste de ce qui manque encore
 - [ ] Panier rempli automatiquement : impossible sans API publique des enseignes (seulement par partenariat commercial)
 
+### Phase 10 — Finances ✅
+- [x] Dépenses du compte commun par poste (courses, restaurants, activités et sorties, maison, transport, santé, abonnements, vacances, cadeaux, autre), poste deviné depuis le libellé
+- [x] Total du mois, comparaison avec le mois précédent, répartition par poste, historique mois par mois
+- [x] Montant estimé d'une commande au drive ajouté automatiquement (modifiable)
+- [ ] Budget par poste avec alerte en cas de dépassement
+- [ ] Dépenses partagées (qui doit combien à qui) : inutile avec un compte commun, à revoir pour une colocation
+
 ### Phase 7 — Finitions
 - [x] Réglage du thème dans les paramètres : clair / sombre / système (Espace > Apparence, par appareil)
 - [x] Notifications push : dîner du soir, récap du dimanche, rappel du 1er ; par appareil, types désactivables, test (`docs/NOTIFICATIONS.md`)
 - [x] Notifications en temps réel des actions des autres (« Léa a ajouté lait à la liste », courses faites, charge prise, dîners prévus) : déclencheurs SQL + `api/activite.js`, sans webhook à configurer
-- [ ] Statistiques d'équilibre de la charge sur plusieurs mois
+- [x] Statistiques d'équilibre de la charge sur plusieurs mois (Charge mentale › « Voir l'équilibre sur 6 mois »)
 - [ ] Voyages de la carte en base (aujourd'hui dans `src/features/activites/data/voyages.js`, commun à tous les espaces)

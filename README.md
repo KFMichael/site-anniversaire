@@ -81,6 +81,7 @@ src/
     ├── sport/               # Séances de la semaine, envoi des invitations d'agenda
     ├── echeances/           # Échéances du foyer (impôts, assurances…) et rappels
     ├── listes/              # Listes partagées (films à voir, choses à faire…), invitations
+    ├── finances/            # Dépenses du compte commun par poste
     ├── coffre/              # Mots de passe partagés, chiffrés de bout en bout
     │   ├── crypto.js        # Clé maîtresse, enveloppes phrase/PRF (WebCrypto), testé par crypto.test.js
     │   ├── biometrie.js     # Face ID / Touch ID : passkey WebAuthn + extension PRF
@@ -116,6 +117,8 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/` | Tableau de bord |
 | `/espace` | Membres, invitation, profil, changement d'espace |
 | `/courses` | Liste de courses et stock de la maison |
+| `/finances` | Dépenses du mois par poste, comparaison avec le mois précédent |
+| `/charge/equilibre` | Équilibre de la charge mentale sur 6 mois |
 | `/courses/drive` | Commander au drive (Carrefour, Leclerc) : liens produits, prix, commande passée |
 | `/menus` | Dîners de la semaine et bibliothèque de plats |
 | `/charge` | Charge mentale du mois |

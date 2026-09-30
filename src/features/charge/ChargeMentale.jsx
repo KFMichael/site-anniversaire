@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/contexte'
 import { useMembres } from '../espace/useMembres'
 import { Bouton, Carte, Page } from '../../components/ui'
@@ -268,6 +268,13 @@ export default function ChargeMentale() {
         </section>
       )}
 
+      <Link
+        to="/charge/equilibre"
+        className="font-sans min-h-11 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-separator bg-bg-elevated text-text-primary transition-all duration-200 ease-spring active:scale-95"
+      >
+        <span aria-hidden="true">📊</span>
+        Voir l'équilibre sur 6 mois
+      </Link>
       <Bouton variante="secondaire" onClick={() => setGestion(true)}>
         ✏️ Modifier la liste des charges
       </Bouton>
