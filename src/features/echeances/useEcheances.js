@@ -80,6 +80,25 @@ export function useEcheances() {
     [persister]
   )
 
+  // « Annuler » après une suppression : la ligne revient telle quelle
+  const restaurer = useCallback(
+    (echeance) => persister(supabase.from('echeances').insert(echeance), "L'échéance n'a pas pu être restaurée."),
+    [persister]
+  )
+
+  // « Annuler » après « Fait » : date et état d'avant
+  const annulerFaite = useCallback(
+    (echeance) =>
+      persister(
+        supabase
+          .from('echeances')
+          .update({ date: echeance.date, faite_le: echeance.faite_le, updated_at: new Date().toISOString() })
+          .eq('id', echeance.id),
+        "L'échéance n'a pas pu être remise comme avant."
+      ),
+    [persister]
+  )
+
   const rappeler = useCallback(
     async (echeance) => {
       try {
@@ -98,5 +117,5 @@ export function useEcheances() {
     [session]
   )
 
-  return { echeances, chargement, erreur, enregistrer, faite, rouvrir, supprimer, rappeler }
+  return { echeances, chargement, erreur, enregistrer, faite, rouvrir, supprimer, restaurer, annulerFaite, rappeler }
 }

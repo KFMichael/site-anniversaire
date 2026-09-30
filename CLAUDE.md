@@ -21,7 +21,11 @@ npm run build   # doit passer (avec VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY f
   (calculs, dates, parsing) dans un fichier `.js` sans React, testé à côté
   (`*.test.js`).
 - Composants d'interface partagés : `src/components/ui.jsx` (Page, Carte,
-  Bouton, ChampTexte). Couleurs uniquement via les tokens (`bg-bg-base`,
+  Bouton, ChampTexte, Segmente pour les onglets d'un écran, BoutonAjouter pour
+  le « + » à droite du titre, Feuille pour les formulaires en feuille modale)
+  et `useMessages()` (`src/components/messages-contexte.js`) pour les messages
+  temporaires, avec « Annuler » après une suppression plutôt qu'une
+  confirmation. Actions destructrices en rouge : `variante="danger"`. Couleurs uniquement via les tokens (`bg-bg-base`,
   `text-text-primary`…), jamais de couleur en dur pour du texte.
 
 ## 1. iPhone d'abord (Human Interface Guidelines d'Apple)

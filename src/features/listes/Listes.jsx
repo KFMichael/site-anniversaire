@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
+import { Bouton, BoutonAjouter, Carte, ChampTexte, EtatErreur, Feuille, Page } from '../../components/ui'
+import { useMessages } from '../../components/messages-contexte'
 import Chargement from '../../components/Chargement'
 import { versIso } from '../menus/tirage'
 import { useListes } from './useListes'
@@ -36,8 +37,17 @@ export default function Listes() {
   const l = useListes()
   const [choisie, setChoisie] = useState(null)
   const [creation, setCreation] = useState(false)
-  const [message, setMessage] = useState('')
+  const { annoncer } = useMessages()
   const liste = l.listes.find((x) => x.id === choisie) ?? l.listes[0]
+
+  const creer = async (nom, emoji) => {
+    const { id, erreur } = await l.creerListe(nom, emoji)
+    if (erreur) return erreur
+    setChoisie(id)
+    setCreation(false)
+    annoncer(`Liste « ${nom.trim()} » créée ✓`)
+    return null
+  }
 
   if (l.chargement) return <Chargement plein />
   if (l.erreur) {
@@ -49,19 +59,22 @@ export default function Listes() {
   }
 
   return (
-    <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Listes" sousTitre="Films à voir, choses à faire… à plusieurs">
-
+    <Page
+      retour={{ vers: '/plus', label: 'Plus' }}
+      titre="Listes"
+      sousTitre="Films à voir, choses à faire… à plusieurs"
+      action={liste && <BoutonAjouter label="Nouvelle liste" onClick={() => setCreation(true)} />}
+    >
       <div className="flex flex-wrap gap-2" role="group" aria-label="Listes">
         {l.listes.map((x) => {
           const restants = l.elements.filter((e) => e.liste_id === x.id && !e.fait).length
-          const active = liste?.id === x.id && !creation
+          const active = liste?.id === x.id
           return (
             <button
               key={x.id}
               onClick={() => {
                 setChoisie(x.id)
-                setCreation(false)
-                setMessage('')
+                annoncer('')
               }}
               aria-pressed={active}
               className={`font-sans text-sm min-h-11 px-4 rounded-full transition-all duration-200 ease-spring active:scale-95 ${
@@ -73,48 +86,30 @@ export default function Listes() {
             </button>
           )
         })}
-        <button
-          onClick={() => setCreation(true)}
-          aria-pressed={creation}
-          className="font-sans text-sm min-h-11 px-4 rounded-full border border-dashed border-separator text-text-primary active:scale-95 transition-all duration-200 ease-spring"
-        >
-          + Nouvelle liste
-        </button>
       </div>
 
-      {message && (
-        <p role="status" className="font-sans text-sm text-text-secondary px-1">
-          {message}
-        </p>
-      )}
+      <Feuille ouverte={creation && Boolean(liste)} titre="Nouvelle liste" onFermer={() => setCreation(false)}>
+        <NouvelleListe existantes={l.listes.map((x) => x.nom)} onAnnuler={() => setCreation(false)} onCreer={creer} />
+      </Feuille>
 
-      {creation || !liste ? (
-        <NouvelleListe
-          existantes={l.listes.map((x) => x.nom)}
-          premiere={!liste}
-          onAnnuler={liste ? () => setCreation(false) : null}
-          onCreer={async (nom, emoji) => {
-            const { id, erreur } = await l.creerListe(nom, emoji)
-            if (erreur) return erreur
-            setChoisie(id)
-            setCreation(false)
-            return null
-          }}
-        />
-      ) : (
+      {liste ? (
         <ContenuListe
           key={liste.id}
           liste={liste}
           elements={l.elements.filter((e) => e.liste_id === liste.id)}
           actions={l}
-          setMessage={setMessage}
+          setMessage={annoncer}
         />
+      ) : (
+        <Carte titre="Crée votre première liste">
+          <NouvelleListe existantes={[]} onCreer={creer} />
+        </Carte>
       )}
     </Page>
   )
 }
 
-function NouvelleListe({ existantes, premiere, onAnnuler, onCreer }) {
+function NouvelleListe({ existantes, onAnnuler, onCreer }) {
   const [nom, setNom] = useState('')
   const [erreur, setErreur] = useState('')
   const [enCours, setEnCours] = useState(false)
@@ -129,7 +124,7 @@ function NouvelleListe({ existantes, premiere, onAnnuler, onCreer }) {
   }
 
   return (
-    <Carte titre={premiere ? 'Crée votre première liste' : 'Nouvelle liste'}>
+    <>
       {proposees.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           {proposees.map((s) => (
@@ -162,7 +157,7 @@ function NouvelleListe({ existantes, premiere, onAnnuler, onCreer }) {
           {erreur}
         </p>
       )}
-    </Carte>
+    </>
   )
 }
 
@@ -270,13 +265,17 @@ function ContenuListe({ liste, elements, actions, setMessage }) {
             <Bouton variante="secondaire" onClick={() => setConfirmation(false)} className="!px-3">
               Garder
             </Bouton>
-            <Bouton onClick={() => actions.supprimerListe(liste).then((e) => e && setMessage(e))} className="!px-3">
+            <Bouton
+              variante="danger"
+              onClick={() => actions.supprimerListe(liste).then((e) => setMessage(e ?? `Liste « ${liste.nom} » supprimée`))}
+              className="!px-3 border border-separator"
+            >
               Supprimer
             </Bouton>
           </div>
         </div>
       ) : (
-        <Bouton variante="discret" onClick={() => setConfirmation(true)}>
+        <Bouton variante="danger" onClick={() => setConfirmation(true)}>
           Supprimer la liste
         </Bouton>
       )}

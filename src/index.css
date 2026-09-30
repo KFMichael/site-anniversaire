@@ -15,6 +15,8 @@
   --color-accent: #0071EB;
   /* Bleu pour du texte sur fond de page ou de carte (contraste ≥ 4.5:1) */
   --color-accent-text: #0062CC;
+  /* Rouge des actions destructrices (texte) : ≥ 4.5:1 sur les fonds */
+  --color-danger: #D70015;
   /* Piste d'un interrupteur désactivé (contraste ≥ 3:1, WCAG 1.4.11) */
   --color-interrupteur-off: #86868B;
 
@@ -62,6 +64,7 @@
   --color-text-muted: #98989E;
   --color-separator: rgb(255 255 255 / 0.15);
   --color-accent-text: #409CFF;
+  --color-danger: #FF6961;
   --color-interrupteur-off: #7C7C80;
 
   --shadow-color-soft: rgb(0 0 0 / 0.4);
@@ -79,6 +82,7 @@
     --color-text-muted: #98989E;
     --color-separator: rgb(255 255 255 / 0.15);
     --color-accent-text: #409CFF;
+  --color-danger: #FF6961;
     --color-interrupteur-off: #7C7C80;
 
     --shadow-color-soft: rgb(0 0 0 / 0.4);
@@ -225,4 +229,42 @@ select:focus-visible {
 }
 .animate-entree-fondu {
   animation: entree-fondu 160ms ease-out;
+}
+
+/* Feuille modale (composant Feuille) : collée en bas, coins arrondis en
+   haut, fond assombri ; monte depuis le bas à l'ouverture */
+dialog.feuille {
+  margin: auto auto 0;
+  width: 100%;
+  max-width: 42rem;
+  max-height: 92dvh;
+  padding: 0;
+  border: 0;
+  border-radius: 1.75rem 1.75rem 0 0;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+dialog.feuille[open] {
+  animation: feuille-monte 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+dialog.feuille::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+@keyframes feuille-monte {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+/* Message temporaire (Messages.jsx) : apparaît en montant légèrement */
+@keyframes message-apparait {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+.animate-message {
+  animation: message-apparait 200ms ease-out;
 }

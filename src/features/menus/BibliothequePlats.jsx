@@ -181,7 +181,7 @@ function FormulairePlat({ plat, onEnregistrer, onAnnuler, onSupprimer }) {
             Annuler
           </Bouton>
           {onSupprimer && (
-            <Bouton type="button" variante="discret" onClick={onSupprimer} className="ml-auto">
+            <Bouton type="button" variante="danger" onClick={onSupprimer} className="ml-auto">
               Supprimer
             </Bouton>
           )}

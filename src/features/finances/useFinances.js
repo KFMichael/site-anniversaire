@@ -54,5 +54,15 @@ export function useFinances(mois) {
     [charger]
   )
 
-  return { depenses, chargement, erreur, enregistrer, supprimer }
+  // « Annuler » après une suppression : la dépense revient telle quelle
+  const restaurer = useCallback(
+    async (depense) => {
+      const { error } = await supabase.from('depenses').insert(depense)
+      await charger()
+      return error ? "La dépense n'a pas pu être restaurée." : null
+    },
+    [charger]
+  )
+
+  return { depenses, chargement, erreur, enregistrer, supprimer, restaurer }
 }
