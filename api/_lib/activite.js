@@ -54,6 +54,12 @@ const TEXTES = {
       ? { titre: `📝 ${listes[0]}`, corps: `${prenom} a ajouté ${enumerer(elements.map((e) => e.texte))}`, url: '/listes' }
       : { titre: '📝 Listes', corps: `${prenom} a ajouté ${enumerer(elements.map((e) => `${e.texte} (${e.liste})`))}`, url: '/listes' }
   },
+  // libellé « Carrefour Drive · 12 articles · 45,20 € » : la dernière commande
+  commande_drive: (prenom, libelles) => ({
+    titre: '🚗 Commande au drive',
+    corps: `${prenom} a passé la commande : ${libelles.at(-1)}`,
+    url: '/courses',
+  }),
   diner: (prenom, noms) => ({
     titre: '🍽️ Menus',
     corps: `${prenom} a prévu ${enumerer(noms)}`,

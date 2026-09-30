@@ -18,6 +18,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 12. `supabase/migrations/0012_rappel_sport.sql` — préférence du rappel de sport la veille au soir
 13. `supabase/migrations/0013_echeances_listes.sql` — échéances avec rappels, listes partagées et invitations, préférence des rappels d'échéances
 14. `supabase/migrations/0014_reparer_charges.sql` — réparation de la charge mentale si 0004 s'est arrêtée en cours de route (0 charge visible, « 403 » à l'ajout) ; sans effet sinon, peut être relancée
+15. `supabase/migrations/0015_drive.sql` — commande au drive : enseigne de l'espace (Carrefour ou Leclerc), lien et prix de « mon produit », commandes passées annoncées aux autres membres
 
 > **Vérifier les règles d'accès** : cette requête liste les tables dont la
 > sécurité (RLS) est activée mais sans aucune règle, donc inutilisables
