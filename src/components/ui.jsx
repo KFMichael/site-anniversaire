@@ -1,52 +1,121 @@
 // Petites briques d'interface partagées par toutes les pages, pour garder
 // le même rendu iOS partout (cartes, titres, boutons).
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
 import { NOM_APP } from '../config'
+import { useGesteRetour } from '../lib/useGesteRetour'
 
-// retour : bouton « ‹ Plus » façon iOS en haut des écrans qui ne sont pas
-// dans la barre d'onglets ({ vers: '/plus', label: 'Plus' }, ou { onClick,
-// label } pour un sous-écran). action : bouton à droite du grand titre.
+// Pas d'animation d'entrée pour le tout premier écran affiché
+let premierEcran = true
+
+// Écran façon iOS :
+// - grand titre qui, au défilement, se replie en petit titre centré dans une
+//   barre fixe en haut (avec le bouton retour) ;
+// - retour : bouton « ‹ Plus » en haut des écrans qui ne sont pas dans la
+//   barre d'onglets ({ vers: '/plus', label: 'Plus' }, ou { onClick, label }
+//   pour un sous-écran) ; dans l'appli installée, glisser depuis le bord
+//   gauche fait de même ;
+// - entrée en glissé depuis la droite (écran suivant), depuis la gauche
+//   (retour) ou en fondu (onglet) ;
+// - action : bouton à droite du grand titre.
 // Le titre de l'onglet du navigateur suit la page.
 export function Page({ titre, sousTitre, retour, action, children }) {
+  const navigate = useNavigate()
+  const { state } = useLocation()
+  const navigation = useNavigationType()
+  const pageRef = useRef(null)
+  const titreRef = useRef(null)
+  const [replie, setReplie] = useState(false)
+  const [entree] = useState(() => {
+    if (premierEcran) return ''
+    if (state?.sens === 'retour' || navigation === 'POP') return 'animate-entree-gauche'
+    return retour ? 'animate-entree-droite' : 'animate-entree-fondu'
+  })
+
   useEffect(() => {
+    premierEcran = false
     document.title = titre ? `${titre.replace(/\s*👋$/, '')} · ${NOM_APP}` : NOM_APP
   }, [titre])
 
+  // Le grand titre sort de l'écran par le haut : barre compacte
+  useEffect(() => {
+    const h1 = titreRef.current
+    if (!h1 || !('IntersectionObserver' in window)) return
+    const observateur = new IntersectionObserver(([e]) => setReplie(!e.isIntersecting && e.boundingClientRect.top < 0))
+    observateur.observe(h1)
+    return () => observateur.disconnect()
+  }, [titre])
+
+  const vers = retour?.vers
+  const onClick = retour?.onClick
+  const revenir = useCallback(() => {
+    if (vers) navigate(vers, { state: { sens: 'retour' } })
+    else onClick?.()
+  }, [vers, onClick, navigate])
+  useGesteRetour(pageRef, retour ? revenir : null)
+
   const classesRetour =
     'self-start -ml-1 -mb-3 min-h-11 inline-flex items-center gap-1 px-1 font-sans text-base text-accent-text transition-transform duration-200 ease-spring active:scale-95'
+  const chevron = (
+    <span aria-hidden="true" className="text-2xl leading-none">
+      ‹
+    </span>
+  )
 
   return (
-    <main className="min-h-screen bg-bg-base px-4 pt-8 pb-28 md:pt-12">
-      <div className="max-w-2xl mx-auto flex flex-col gap-6">
-        {retour &&
-          (retour.vers ? (
-            <Link to={retour.vers} className={classesRetour}>
-              <span aria-hidden="true" className="text-2xl leading-none">
-                ‹
-              </span>
-              {retour.label}
-            </Link>
-          ) : (
-            <button type="button" onClick={retour.onClick} className={classesRetour}>
-              <span aria-hidden="true" className="text-2xl leading-none">
-                ‹
-              </span>
-              {retour.label}
-            </button>
-          ))}
-        {titre && (
-          <header className="flex items-start gap-3 px-1">
-            <div className="flex-1 min-w-0 flex flex-col gap-1">
-              <h1 className="font-sans text-3xl font-bold text-text-primary">{titre}</h1>
-              {sousTitre && <p className="font-sans text-text-muted">{sousTitre}</p>}
+    <>
+      {titre && (
+        // Doublon visuel du titre et du retour : masqué aux lecteurs d'écran
+        // et hors du parcours clavier (les originaux restent dans la page)
+        <div
+          aria-hidden="true"
+          className={`fixed top-0 inset-x-0 z-20 bg-bg-elevated-glass backdrop-blur-xl border-b border-separator pt-[env(safe-area-inset-top)] transition-transform duration-200 ease-spring ${
+            replie ? 'translate-y-0' : '-translate-y-full invisible'
+          }`}
+        >
+          <div className="max-w-2xl mx-auto h-11 px-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <div className="min-w-0">
+              {retour && (
+                <button type="button" tabIndex={-1} onClick={revenir} className="min-h-11 max-w-full inline-flex items-center gap-1 px-1 font-sans text-base text-accent-text truncate">
+                  {chevron}
+                  <span className="truncate">{retour.label}</span>
+                </button>
+              )}
             </div>
-            {action}
-          </header>
-        )}
-        {children}
-      </div>
-    </main>
+            <span className="font-sans text-[17px] font-semibold text-text-primary truncate max-w-[50vw]">{titre}</span>
+            <div />
+          </div>
+        </div>
+      )}
+      <main ref={pageRef} className="min-h-screen bg-bg-base px-4 pt-8 pb-28 md:pt-12">
+        <div className={`max-w-2xl mx-auto flex flex-col gap-6 ${entree}`}>
+          {retour &&
+            (retour.vers ? (
+              <Link to={retour.vers} state={{ sens: 'retour' }} className={classesRetour}>
+                {chevron}
+                {retour.label}
+              </Link>
+            ) : (
+              <button type="button" onClick={retour.onClick} className={classesRetour}>
+                {chevron}
+                {retour.label}
+              </button>
+            ))}
+          {titre && (
+            <header className="flex items-start gap-3 px-1">
+              <div className="flex-1 min-w-0 flex flex-col gap-1">
+                <h1 ref={titreRef} className="font-sans text-3xl font-bold text-text-primary">
+                  {titre}
+                </h1>
+                {sousTitre && <p className="font-sans text-text-muted">{sousTitre}</p>}
+              </div>
+              {action}
+            </header>
+          )}
+          {children}
+        </div>
+      </main>
+    </>
   )
 }
 

@@ -196,3 +196,33 @@ select:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* Entrée d'écran façon iOS : glissé depuis la droite (écran suivant),
+   depuis la gauche (retour) ou fondu (changement d'onglet). Courtes, et
+   coupées par « Réduire les animations » (règle ci-dessus). */
+@keyframes entree-droite {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+}
+@keyframes entree-gauche {
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+}
+@keyframes entree-fondu {
+  from {
+    opacity: 0;
+  }
+}
+.animate-entree-droite {
+  animation: entree-droite 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-entree-gauche {
+  animation: entree-gauche 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.animate-entree-fondu {
+  animation: entree-fondu 160ms ease-out;
+}

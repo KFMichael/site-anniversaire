@@ -111,7 +111,7 @@ Le site anniversaire d'origine est archivé sur la branche
 
 ### Phase 11 — Navigation et UI iOS (audit du 30/09)
 - [x] Lot 1 — Barre d'onglets Aujourd'hui · Courses · Menus · Charge · Plus ; onglet « Plus » en listes groupées ; accueil « Aujourd'hui » compact ; avatar vers les réglages
-- [ ] Lot 2 — Gestes iOS : grand titre qui se replie en barre compacte, glisser depuis le bord pour revenir, transitions de page
+- [x] Lot 2 — Gestes iOS : grand titre qui se replie en barre compacte, glisser depuis le bord pour revenir, transitions de page
 - [ ] Lot 3 — Cohérence : composant d'onglets unique, « + » en haut à droite, feuilles modales pour les formulaires, messages temporaires avec « Annuler », rouge pour les actions destructrices
 - [ ] Lot 4 — Écrans : Menus compact, dates courtes, rayon deviné, réglages façon iOS, pastilles sur les onglets
 
