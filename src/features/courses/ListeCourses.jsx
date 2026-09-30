@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bouton } from '../../components/ui'
-import { afficherQuantite, compterListe, construireListe, grouperParRayon } from './liste'
-import { COULEURS_ETAT, RAYONS } from './rayons'
+import { afficherQuantite, compterListe, construireListe, grouperParRayon, lireArticle } from './liste'
+import { COULEURS_ETAT, RAYONS, devinerRayon } from './rayons'
 
 export default function ListeCourses({ courses, onMessage }) {
   const { produits, articles } = courses
   const [nom, setNom] = useState('')
-  const [rayonChoisi, setRayonChoisi] = useState('autre')
+  // Rayon choisi à la main ; sinon deviné depuis le nom saisi
+  const [rayonChoisi, setRayonChoisi] = useState(null)
+  const rayonEffectif = rayonChoisi ?? devinerRayon(lireArticle(nom).nom)
   const [confirmation, setConfirmation] = useState(false)
 
   const liste = useMemo(() => construireListe(produits, articles), [produits, articles])
@@ -17,8 +19,9 @@ export default function ListeCourses({ courses, onMessage }) {
   async function ajouter(e) {
     e.preventDefault()
     if (!nom.trim()) return
-    onMessage(await courses.ajouterALaListe(nom, rayonChoisi))
+    onMessage(await courses.ajouterALaListe(nom, rayonEffectif))
     setNom('')
+    setRayonChoisi(null)
   }
 
   async function terminer() {
@@ -45,7 +48,8 @@ export default function ListeCourses({ courses, onMessage }) {
         </label>
         <select
           id="article-rayon"
-          value={rayonChoisi}
+          value={rayonEffectif}
+          title={`Rayon : ${RAYONS.find((r) => r.id === rayonEffectif)?.label}`}
           onChange={(e) => setRayonChoisi(e.target.value)}
           className="font-sans w-14 px-2 rounded-2xl border border-separator bg-bg-elevated text-text-primary focus:outline-none focus:border-accent"
         >

@@ -1,14 +1,15 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { MessagesProvider } from './Messages'
+import { usePastilles } from './usePastilles'
 
 // Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus,
 // pour ce qui sert chaque jour. Les autres modules sont dans « Plus ».
 const ONGLETS = [
   { to: '/', label: "Aujourd'hui", Icone: IconeMaison },
-  { to: '/courses', label: 'Courses', Icone: IconePanier },
+  { to: '/courses', label: 'Courses', Icone: IconePanier, pastille: 'courses', detail: 'à acheter' },
   { to: '/menus', label: 'Menus', Icone: IconeCouverts },
-  { to: '/charge', label: 'Charge', Icone: IconeListe },
+  { to: '/charge', label: 'Charge', Icone: IconeListe, pastille: 'charge', detail: 'sans responsable' },
   { to: '/plus', label: 'Plus', Icone: IconePlus },
 ]
 
@@ -27,6 +28,7 @@ function ongletActif(pathname, depuis) {
 export default function Structure() {
   const { pathname, state } = useLocation()
   const actif = ongletActif(pathname, state?.depuis)
+  const pastilles = usePastilles(pathname)
 
   // Chaque nouvel écran s'ouvre en haut de page
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function Structure() {
         className="fixed bottom-0 inset-x-0 z-20 bg-bg-elevated-glass backdrop-blur-xl border-t border-separator pb-[env(safe-area-inset-bottom)]"
       >
         <ul className="max-w-md mx-auto flex justify-around">
-          {ONGLETS.map(({ to, label, Icone }) => (
+          {ONGLETS.map(({ to, label, Icone, pastille, detail }) => (
             <li key={to}>
               <Link
                 to={to}
@@ -50,8 +52,23 @@ export default function Structure() {
                   actif === to ? 'text-accent-text' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
-                <Icone />
+                <span className="relative">
+                  <Icone />
+                  {pastilles[pastille] > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-1.5 left-3.5 min-w-[18px] h-[18px] px-1 rounded-full bg-pastille text-white text-[11px] font-semibold leading-[18px] text-center tabular-nums"
+                    >
+                      {pastilles[pastille] > 99 ? '99+' : pastilles[pastille]}
+                    </span>
+                  )}
+                </span>
                 {label}
+                {pastilles[pastille] > 0 && (
+                  <span className="sr-only">
+                    , {pastilles[pastille]} {detail}
+                  </span>
+                )}
               </Link>
             </li>
           ))}

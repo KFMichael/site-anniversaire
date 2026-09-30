@@ -17,6 +17,8 @@
   --color-accent-text: #0062CC;
   /* Rouge des actions destructrices (texte) : ≥ 4.5:1 sur les fonds */
   --color-danger: #D70015;
+  /* Fond des pastilles de la barre d'onglets (chiffre blanc, ≥ 4.5:1) */
+  --color-pastille: #D70015;
   /* Piste d'un interrupteur désactivé (contraste ≥ 3:1, WCAG 1.4.11) */
   --color-interrupteur-off: #86868B;
 

@@ -102,3 +102,10 @@ test('ingrédients sans doublon', () => {
   )
   assert.deepEqual(liste, ['Pâtes', 'Œufs', 'Fromage', 'Salade'])
 })
+
+test('libellé court de la semaine', async () => {
+  const { libelleSemaineCourte } = await import('./tirage.js')
+  assert.equal(libelleSemaineCourte('2026-09-28'), '28 sept. – 4 oct.')
+  assert.equal(libelleSemaineCourte('2026-06-01'), '1er – 7 juin')
+  assert.equal(libelleSemaineCourte('2026-12-28'), '28 déc. – 3 janv.')
+})

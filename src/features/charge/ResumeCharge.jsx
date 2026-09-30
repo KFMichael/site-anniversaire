@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from '../espace/contexte'
 import { Carte } from '../../components/ui'
-import { libelleMois, moisDe } from './calculs'
+import { moisDe } from './calculs'
 
 // Encadré du tableau de bord : mes charges du mois et celles sans responsable
 export default function ResumeCharge() {
@@ -31,7 +31,7 @@ export default function ResumeCharge() {
 
   return (
     <Link to={resume.miennes.length ? '/charge?vue=mes' : '/charge?vue=choisir'} className="block transition-transform duration-200 ease-spring active:scale-[0.98]">
-      <Carte titre={`${libelleMois(mois)} · tu gères`}>
+      <Carte titre="Ce mois-ci, tu gères">
         {resume.miennes.length === 0 ? (
           <p className="font-sans text-sm text-text-secondary">
             Rien pour l'instant. Choisis ta charge mentale du mois ›

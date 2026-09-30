@@ -113,7 +113,9 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Lot 1 — Barre d'onglets Aujourd'hui · Courses · Menus · Charge · Plus ; onglet « Plus » en listes groupées ; accueil « Aujourd'hui » compact ; avatar vers les réglages
 - [x] Lot 2 — Gestes iOS : grand titre qui se replie en barre compacte, glisser depuis le bord pour revenir, transitions de page
 - [x] Lot 3 — Cohérence : composant d'onglets unique, « + » en haut à droite, feuilles modales pour les formulaires, messages temporaires avec « Annuler », rouge pour les actions destructrices
-- [ ] Lot 4 — Écrans : Menus compact, dates courtes, rayon deviné, réglages façon iOS, pastilles sur les onglets
+- [x] Lot 4 — Écrans : Menus compact (une ligne par soir, feuille pour choisir), dates courtes, rayon deviné, pastilles sur les onglets
+- [ ] Réglages de l'espace en listes groupées façon Réglages iOS
+- [ ] Activités : même gabarit que les autres écrans (grand titre, contrôle segmenté)
 
 ### Phase 10 — Finances ✅
 - [x] Dépenses du compte commun par poste (courses, restaurants, activités et sorties, maison, transport, santé, abonnements, vacances, cadeaux, autre), poste deviné depuis le libellé
