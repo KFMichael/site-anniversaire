@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bouton, Carte, Interrupteur } from '../../components/ui'
+import { Bouton, Carte, Feuille, Interrupteur } from '../../components/ui'
 import { CATEGORIES_PLATS, categoriePlat } from './categories'
-import { decalerJours, libelleJour, libelleSemaine, lundiDe, versIso } from './tirage'
+import { decalerJours, libelleJour, libelleSemaineCourte, lundiDe, versIso } from './tirage'
 
 const TEXTE_LIBRE = '__texte'
 
@@ -10,6 +10,7 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
   const { jours, semaine } = menus
   const [message, setMessage] = useState('')
   const [panneau, setPanneau] = useState(null) // 'ingredients' | 'reglages'
+  const [jourOuvert, setJourOuvert] = useState(null)
   const aujourdhui = versIso(new Date())
   const joursVides = jours.filter((j) => !semaine[j].plat && !semaine[j].texte)
 
@@ -39,7 +40,7 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
           ‹
         </button>
         <div className="flex flex-col items-center">
-          <span className="font-sans font-semibold text-text-primary">{libelleSemaine(lundi)}</span>
+          <span className="font-sans font-semibold text-text-primary">{libelleSemaineCourte(lundi)}</span>
           {lundi === lundiDe() && <span className="font-sans text-xs text-text-muted">Cette semaine</span>}
         </div>
         <button
@@ -56,7 +57,7 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
           className="flex-1"
           onClick={() => tirer(joursVides.length ? joursVides : jours)}
         >
-          🎲 {joursVides.length ? `Remplir les ${joursVides.length} soirs vides` : 'Tout re-tirer'}
+          🎲 {joursVides.length ? `Remplir ${joursVides.length} soir${joursVides.length > 1 ? 's' : ''}` : 'Tout re-tirer'}
         </Bouton>
         {joursVides.length > 0 && joursVides.length < 7 && (
           <Bouton variante="secondaire" onClick={() => tirer(jours)}>
@@ -70,19 +71,31 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
 
       {message && <p className="font-sans text-sm text-text-muted italic px-1">{message}</p>}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="rounded-3xl bg-bg-elevated shadow-soft divide-y divide-separator overflow-hidden">
         {jours.map((jour) => (
-          <CarteJour
-            key={jour}
-            jour={semaine[jour]}
-            estAujourdhui={jour === aujourdhui}
-            plats={menus.plats}
-            onChoisir={async (valeur) => setMessage((await menus.choisir(jour, valeur)) ?? '')}
-            onVerrou={async () => setMessage((await menus.basculerVerrou(jour)) ?? '')}
-            onTirer={() => tirer([jour])}
-          />
+          <LigneJour key={jour} jour={semaine[jour]} estAujourdhui={jour === aujourdhui} onOuvrir={() => setJourOuvert(jour)} />
         ))}
       </ul>
+
+      <Feuille
+        ouverte={Boolean(jourOuvert)}
+        titre={jourOuvert ? `${libelleJour(jourOuvert)}${jourOuvert === aujourdhui ? ' · ce soir' : ''}` : ''}
+        onFermer={() => setJourOuvert(null)}
+      >
+        {jourOuvert && (
+          <ChoixDuJour
+            jour={semaine[jourOuvert]}
+            plats={menus.plats}
+            onChoisir={async (valeur) => {
+              const erreur = await menus.choisir(jourOuvert, valeur)
+              setMessage(erreur ?? '')
+              if (!erreur) setJourOuvert(null)
+            }}
+            onVerrou={async () => setMessage((await menus.basculerVerrou(jourOuvert)) ?? '')}
+            onTirer={() => tirer([jourOuvert])}
+          />
+        )}
+      </Feuille>
 
       <div className="flex gap-2 flex-wrap justify-center">
         <Bouton
@@ -105,7 +118,53 @@ export default function Semaine({ menus, lundi, onChangerSemaine }) {
   )
 }
 
-function CarteJour({ jour, estAujourdhui, plats, onChoisir, onVerrou, onTirer }) {
+// Une ligne par soir : jour, dîner prévu, verrou ; toucher ouvre la feuille
+function LigneJour({ jour, estAujourdhui, onOuvrir }) {
+  const date = new Date(`${jour.jour}T12:00:00`)
+  const jourCourt = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' }).format(date).replace('.', '')
+  const categorie = jour.plat ? categoriePlat(jour.plat.categorie) : null
+  const nom = jour.plat?.nom ?? jour.texte
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onOuvrir}
+        aria-label={`${libelleJour(jour.jour)}${estAujourdhui ? ', ce soir' : ''} : ${nom ?? 'rien de prévu'}${jour.verrouille ? ', verrouillé' : ''}. Modifier`}
+        className="w-full min-h-16 flex items-center gap-3 px-4 py-3 text-left active:bg-bg-base transition-colors duration-200"
+      >
+        <span className={`w-11 shrink-0 flex flex-col items-center leading-tight ${estAujourdhui ? 'text-accent-text' : 'text-text-muted'}`}>
+          <span className="font-sans text-xs uppercase">{jourCourt}</span>
+          <span className="font-sans text-xl font-semibold">{date.getDate()}</span>
+        </span>
+        <span className="flex-1 min-w-0 flex flex-col">
+          {nom ? (
+            <span className="font-sans text-text-primary font-medium truncate">
+              <span aria-hidden="true">{categorie ? categorie.emoji : '📝'} </span>
+              {nom}
+            </span>
+          ) : (
+            <span className="font-sans text-text-muted">Rien de prévu</span>
+          )}
+          {(estAujourdhui || jour.plat?.rapide) && (
+            <span className="font-sans text-xs text-text-muted">
+              {estAujourdhui && <span className="text-accent-text font-medium">Ce soir</span>}
+              {estAujourdhui && jour.plat?.rapide && ' · '}
+              {jour.plat?.rapide && '⚡ rapide'}
+            </span>
+          )}
+        </span>
+        {jour.verrouille && <span aria-hidden="true">🔒</span>}
+        <span className="font-sans text-xl text-text-muted" aria-hidden="true">
+          ›
+        </span>
+      </button>
+    </li>
+  )
+}
+
+// Contenu de la feuille d'un soir : plat, texte libre, tirage, verrou
+function ChoixDuJour({ jour, plats, onChoisir, onVerrou, onTirer }) {
   const [saisieLibre, setSaisieLibre] = useState(false)
   const [texte, setTexte] = useState(jour.texte ?? '')
   const categorie = jour.plat ? categoriePlat(jour.plat.categorie) : null
@@ -128,73 +187,46 @@ function CarteJour({ jour, estAujourdhui, plats, onChoisir, onVerrou, onTirer })
   }
 
   return (
-    <li
-      className={`p-4 rounded-3xl bg-bg-elevated shadow-soft flex flex-col gap-2 ${
-        estAujourdhui ? 'outline-2 outline-accent' : ''
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        <span className="font-sans text-sm font-medium text-text-muted flex-1">
-          {libelleJour(jour.jour)}
-          {estAujourdhui && <span className="text-accent-text"> · ce soir</span>}
-        </span>
-        <button
-          onClick={onTirer}
-          disabled={jour.verrouille}
-          aria-label={`Tirer au sort le ${libelleJour(jour.jour)}`}
-          className="cible-44 w-9 h-9 rounded-full bg-bg-base active:scale-90 transition-transform duration-200 ease-spring disabled:opacity-30"
-        >
-          🎲
-        </button>
-        <button
-          onClick={onVerrou}
-          aria-pressed={jour.verrouille}
-          aria-label={jour.verrouille ? 'Déverrouiller ce soir' : 'Verrouiller ce soir'}
-          className={`cible-44 w-9 h-9 rounded-full active:scale-90 transition-transform duration-200 ease-spring ${
-            jour.verrouille ? 'bg-accent/15' : 'bg-bg-base opacity-60'
-          }`}
-        >
-          {jour.verrouille ? '🔒' : '🔓'}
-        </button>
+    <div className="flex flex-col gap-4">
+      <div className="p-4 rounded-2xl bg-bg-base">
+        {jour.plat ? (
+          <p className="font-sans text-lg font-semibold text-text-primary">
+            <span aria-hidden="true">{categorie.emoji}</span> {jour.plat.nom}
+            {jour.plat.rapide && <span className="font-sans text-xs font-normal text-text-muted"> · ⚡ rapide</span>}
+          </p>
+        ) : jour.texte ? (
+          <p className="font-sans text-lg font-semibold text-text-primary">📝 {jour.texte}</p>
+        ) : (
+          <p className="font-sans text-text-muted">Rien de prévu</p>
+        )}
       </div>
 
-      {jour.plat ? (
-        <p className="font-sans text-lg font-semibold text-text-primary">
-          <span aria-hidden="true">{categorie.emoji}</span> {jour.plat.nom}
-          {jour.plat.rapide && (
-            <span className="font-sans text-xs font-normal text-text-muted"> · ⚡ rapide</span>
-          )}
-        </p>
-      ) : jour.texte ? (
-        <p className="font-sans text-lg font-semibold text-text-primary">📝 {jour.texte}</p>
-      ) : (
-        <p className="font-sans text-text-muted">Rien de prévu</p>
-      )}
-
-      <label className="sr-only" htmlFor={`plat-${jour.jour}`}>
-        Choisir le dîner du {libelleJour(jour.jour)}
-      </label>
-      <select
-        id={`plat-${jour.jour}`}
-        value={valeurSelect}
-        onChange={changer}
-        className="font-sans text-sm w-full px-3 py-2 rounded-2xl border border-separator bg-bg-base text-text-secondary focus:outline-none focus:border-accent"
-      >
-        <option value="">— Rien de prévu —</option>
-        {CATEGORIES_PLATS.map((c) => {
-          const duGroupe = plats.filter((p) => p.categorie === c.id)
-          return duGroupe.length ? (
-            <optgroup key={c.id} label={`${c.emoji} ${c.label}`}>
-              {duGroupe.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nom}
-                </option>
-              ))}
-            </optgroup>
-          ) : null
-        })}
-        <option value={TEXTE_LIBRE}>✏️ Autre (resto, restes…)</option>
-      </select>
+      <div className="flex flex-col gap-1.5">
+        <label className="font-sans text-sm text-text-muted px-1" htmlFor={`plat-${jour.jour}`}>
+          Choisir le dîner
+        </label>
+        <select
+          id={`plat-${jour.jour}`}
+          value={valeurSelect}
+          onChange={changer}
+          className="font-sans w-full min-h-11 px-4 py-2.5 rounded-2xl border border-separator bg-bg-base text-text-primary focus:outline-none focus:border-accent"
+        >
+          <option value="">— Rien de prévu —</option>
+          {CATEGORIES_PLATS.map((c) => {
+            const duGroupe = plats.filter((p) => p.categorie === c.id)
+            return duGroupe.length ? (
+              <optgroup key={c.id} label={`${c.emoji} ${c.label}`}>
+                {duGroupe.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nom}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null
+          })}
+          <option value={TEXTE_LIBRE}>✏️ Autre (resto, restes…)</option>
+        </select>
+      </div>
 
       {saisieLibre && (
         <form onSubmit={validerTexte} className="flex gap-2">
@@ -205,14 +237,24 @@ function CarteJour({ jour, estAujourdhui, plats, onChoisir, onVerrou, onTirer })
             placeholder="Resto, restes, invités…"
             value={texte}
             onChange={(e) => setTexte(e.target.value)}
-            className="font-sans text-sm flex-1 min-w-0 px-3 py-2 rounded-2xl border border-separator bg-bg-base text-text-primary focus:outline-none focus:border-accent"
+            className="font-sans flex-1 min-w-0 px-4 py-2.5 rounded-2xl border border-separator bg-bg-base text-text-primary focus:outline-none focus:border-accent"
           />
-          <Bouton type="submit" className="!px-4 !py-2 text-sm" disabled={!texte.trim()}>
+          <Bouton type="submit" className="!px-5 !py-2.5" disabled={!texte.trim()}>
             OK
           </Bouton>
         </form>
       )}
-    </li>
+
+      <Bouton variante="secondaire" onClick={onTirer} disabled={jour.verrouille}>
+        🎲 Tirer au sort
+      </Bouton>
+      <Interrupteur
+        label="Verrouiller ce soir"
+        detail="Un soir verrouillé n'est jamais re-tiré"
+        actif={jour.verrouille}
+        onChange={onVerrou}
+      />
+    </div>
   )
 }
 

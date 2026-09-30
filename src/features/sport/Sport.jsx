@@ -3,7 +3,7 @@ import { useAuth } from '../auth/contexte'
 import { useMembres } from '../espace/useMembres'
 import { Bouton, Carte, Page } from '../../components/ui'
 import Chargement from '../../components/Chargement'
-import { decalerJours, joursDeLaSemaine, libelleJour, libelleSemaine, lundiDe, versIso } from '../menus/tirage'
+import { decalerJours, joursDeLaSemaine, libelleJour, libelleSemaineCourte, lundiDe, versIso } from '../menus/tirage'
 import { DUREE_SEANCE, SEANCES_PAR_SEMAINE, statutSeance, useSport } from './useSport'
 
 const STATUTS = {
@@ -62,7 +62,7 @@ export default function Sport() {
           ‹
         </button>
         <div className="flex flex-col items-center text-center">
-          <span className="font-sans font-semibold text-text-primary">{libelleSemaine(lundi)}</span>
+          <span className="font-sans font-semibold text-text-primary">{libelleSemaineCourte(lundi)}</span>
           {lundi === lundiDe() && <span className="font-sans text-xs text-text-muted">Cette semaine</span>}
         </div>
         <button

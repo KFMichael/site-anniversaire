@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Bouton, Carte, ChampTexte } from '../../components/ui'
 import { grouperParRayon, normaliser } from './liste'
-import { RAYONS } from './rayons'
+import { RAYONS, devinerRayon } from './rayons'
 import ChoixEtat from './ChoixEtat'
 
 export default function Stock({ courses, onMessage }) {
@@ -133,12 +133,14 @@ function LigneEdition({ produit, courses, onMessage }) {
 
 function NouveauProduit({ onAjouter }) {
   const [nom, setNom] = useState('')
-  const [rayonChoisi, setRayonChoisi] = useState('epicerie')
+  const [rayonChoisi, setRayonChoisi] = useState(null)
+  const rayonEffectif = rayonChoisi ?? (nom.trim() ? devinerRayon(nom) : 'epicerie')
 
   async function soumettre(e) {
     e.preventDefault()
-    await onAjouter(nom, rayonChoisi)
+    await onAjouter(nom, rayonEffectif)
     setNom('')
+    setRayonChoisi(null)
   }
 
   return (
@@ -159,7 +161,7 @@ function NouveauProduit({ onAjouter }) {
           </label>
           <select
             id="nouveau-produit-rayon"
-            value={rayonChoisi}
+            value={rayonEffectif}
             onChange={(e) => setRayonChoisi(e.target.value)}
             className="font-sans w-full px-4 py-3 rounded-2xl border border-separator bg-bg-base text-text-primary focus:outline-none focus:border-accent"
           >

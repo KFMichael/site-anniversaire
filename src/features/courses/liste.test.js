@@ -65,3 +65,15 @@ test('affichage des quantités', () => {
   assert.equal(afficherQuantite('500 g'), '500 g')
   assert.equal(afficherQuantite('3 paquets'), '3 paquets')
 })
+
+test('rayon deviné depuis le nom saisi', async () => {
+  const { devinerRayon } = await import('./rayons.js')
+  assert.equal(devinerRayon('2 bananes'), 'fruits-legumes')
+  assert.equal(devinerRayon('Œufs'), 'frais')
+  assert.equal(devinerRayon('papier toilette'), 'hygiene')
+  assert.equal(devinerRayon('Thon'), 'epicerie')
+  assert.equal(devinerRayon('Pâtes'), 'epicerie')
+  assert.equal(devinerRayon('Liquide vaisselle'), 'entretien')
+  assert.equal(devinerRayon('Bougies'), 'autre')
+  assert.equal(devinerRayon(''), 'autre')
+})

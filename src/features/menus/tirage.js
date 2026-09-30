@@ -49,6 +49,17 @@ export function libelleSemaine(lundi) {
   return `Du ${format.format(depuisIso(lundi))} au ${format.format(depuisIso(decalerJours(lundi, 6)))}`
 }
 
+// Version courte pour l'écran : « 28 sept. – 4 oct. », « 1er – 7 sept. »
+export function libelleSemaineCourte(lundi) {
+  const debut = depuisIso(lundi)
+  const fin = depuisIso(decalerJours(lundi, 6))
+  const jour = (d) => (d.getDate() === 1 ? '1er' : String(d.getDate()))
+  const mois = (d) => new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(d)
+  return debut.getMonth() === fin.getMonth()
+    ? `${jour(debut)} – ${jour(fin)} ${mois(fin)}`
+    : `${jour(debut)} ${mois(debut)} – ${jour(fin)} ${mois(fin)}`
+}
+
 // Règles, dans l'ordre où on les assouplit si aucun plat ne convient
 const ASSOUPLISSEMENTS = [
   { id: 'pasSemainePrecedente', label: 'pas un plat de la semaine dernière' },
