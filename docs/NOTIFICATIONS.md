@@ -60,7 +60,8 @@ Quand un membre ajoute quelque chose à la liste, termine les courses, prend
 une charge ou prévoit un dîner, les autres membres reçoivent une
 notification : « Léa a ajouté lait, pain et œufs », « Léa a acheté… »,
 « Léa prend « Finances » », « Léa a prévu Garba », « Léa a passé la commande :
-Carrefour Drive · 12 articles · 45,20 € » (migration 0015). On ne reçoit jamais ses
+Carrefour Drive · 12 articles · 45,20 € » (migration 0015 ; les produits
+commandés ne sont pas annoncés une seconde fois comme achetés). On ne reçoit jamais ses
 propres actions. Chacun peut les couper (« Actions des autres »).
 
 - Des déclencheurs SQL (`0011_activite.sql`) notent chaque action dans

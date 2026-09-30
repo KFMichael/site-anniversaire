@@ -152,3 +152,20 @@ test('commande au drive : la dernière commande est annoncée', () => {
     url: '/courses',
   })
 })
+
+test('commande au drive : les produits commandés ne sont pas annoncés en plus comme achetés', () => {
+  const resumes = resumerActivite(
+    [
+      { auteur: 'u2', type: 'commande_drive', libelle: 'Carrefour Drive · 2 articles · 3,15 €' },
+      { auteur: 'u2', type: 'courses_faites', libelle: 'Lait' },
+      { auteur: 'u2', type: 'courses_faites', libelle: 'Bougies' },
+      { auteur: 'u3', type: 'courses_faites', libelle: 'Pain' },
+    ],
+    new Map([['u2', 'Léa'], ['u3', 'Zoé']])
+  )
+  assert.deepEqual(
+    resumes.map((r) => r.notification.titre),
+    ['🚗 Commande au drive', '✅ Courses faites']
+  )
+  assert.equal(resumes[1].notification.corps, 'Zoé a acheté Pain')
+})
