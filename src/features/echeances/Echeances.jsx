@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMembres } from '../espace/useMembres'
-import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
+import { Bouton, BoutonAjouter, ChampTexte, EtatErreur, Feuille, Page } from '../../components/ui'
+import { useMessages } from '../../components/messages-contexte'
 import Chargement from '../../components/Chargement'
 import { versIso } from '../menus/tirage'
 import {
@@ -24,20 +25,20 @@ export default function Echeances() {
   const e = useEcheances()
   const { membres } = useMembres()
   const [edition, setEdition] = useState(null) // null | 'nouvelle' | échéance
-  const [message, setMessage] = useState('')
+  const { annoncer } = useMessages()
   const aujourdhui = versIso(new Date())
   const groupes = regrouper(e.echeances, aujourdhui)
   const prenom = (id) => membres.find((m) => m.user_id === id)?.prenom
 
-  async function action(promesse, succes = '') {
-    setMessage('')
+  // Résultat d'une action en message temporaire ; `annuler` propose de revenir en arrière
+  async function action(promesse, succes = '', annuler) {
     const erreur = await promesse
-    setMessage(erreur ?? succes)
+    annoncer(erreur ?? succes, erreur ? {} : { annuler })
   }
 
   async function rappeler(echeance) {
-    setMessage('Envoi du rappel…')
-    setMessage((await e.rappeler(echeance)).message)
+    annoncer('Envoi du rappel…')
+    annoncer((await e.rappeler(echeance)).message)
   }
 
   if (e.chargement) return <Chargement plein />
@@ -62,10 +63,16 @@ export default function Echeances() {
               echeance={x}
               aujourdhui={aujourdhui}
               responsable={prenom(x.responsable)}
-              onFaite={() => action(e.faite(x), x.recurrence === 'aucune' ? `« ${x.titre} » est marquée faite ✓` : `« ${x.titre} » : prochaine échéance enregistrée ✓`)}
+              onFaite={() =>
+                action(
+                  e.faite(x),
+                  x.recurrence === 'aucune' ? `« ${x.titre} » est marquée faite ✓` : `« ${x.titre} » : prochaine échéance enregistrée ✓`,
+                  () => action(e.annulerFaite(x), 'Échéance remise comme avant')
+                )
+              }
               onRappeler={() => rappeler(x)}
               onModifier={() => setEdition(x)}
-              onSupprimer={() => action(e.supprimer(x), `« ${x.titre} » supprimée.`)}
+              onSupprimer={() => action(e.supprimer(x), `« ${x.titre} » supprimée`, () => action(e.restaurer(x), `« ${x.titre} » restaurée ✓`))}
             />
           ))}
         </ul>
@@ -73,9 +80,17 @@ export default function Echeances() {
     )
 
   return (
-    <Page retour={{ vers: '/plus', label: 'Plus' }} titre="Échéances" sousTitre="Impôts, assurances, rendez-vous… avec des rappels">
-
-      {edition ? (
+    <Page
+      retour={{ vers: '/plus', label: 'Plus' }}
+      titre="Échéances"
+      sousTitre="Impôts, assurances, rendez-vous… avec des rappels"
+      action={<BoutonAjouter label="Nouvelle échéance" onClick={() => setEdition('nouvelle')} />}
+    >
+      <Feuille
+        ouverte={Boolean(edition)}
+        titre={edition && edition !== 'nouvelle' ? 'Modifier l’échéance' : 'Nouvelle échéance'}
+        onFermer={() => setEdition(null)}
+      >
         <FormulaireEcheance
           echeance={edition === 'nouvelle' ? null : edition}
           membres={membres}
@@ -83,24 +98,22 @@ export default function Echeances() {
           onAnnuler={() => setEdition(null)}
           onEnregistrer={async (champs) => {
             const erreur = await e.enregistrer(edition === 'nouvelle' ? null : edition.id, champs)
-            if (!erreur) setEdition(null)
+            if (!erreur) {
+              annoncer(edition === 'nouvelle' ? 'Échéance ajoutée ✓' : 'Échéance modifiée ✓')
+              setEdition(null)
+            }
             return erreur
           }}
         />
-      ) : (
-        <Bouton onClick={() => setEdition('nouvelle')}>+ Nouvelle échéance</Bouton>
-      )}
+      </Feuille>
 
-      {message && (
-        <p role="status" className="font-sans text-sm text-text-secondary px-1">
-          {message}
-        </p>
-      )}
-
-      {e.echeances.length === 0 && !edition && (
-        <p className="font-sans text-center text-sm text-text-muted">
-          Aucune échéance. Commence par la déclaration des impôts ou l'assurance habitation.
-        </p>
+      {e.echeances.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-6 text-center">
+          <p className="font-sans text-sm text-text-muted">
+            Aucune échéance. Commence par la déclaration des impôts ou l'assurance habitation.
+          </p>
+          <Bouton onClick={() => setEdition('nouvelle')}>Ajouter une échéance</Bouton>
+        </div>
       )}
 
       {liste('⚠️ En retard', groupes.enRetard, 'titre-retard')}
@@ -167,7 +180,7 @@ function CarteEcheance({ echeance, aujourdhui, responsable, onFaite, onRappeler,
         <Bouton variante="discret" onClick={onModifier} className="!px-3 !py-2 min-h-11">
           Modifier
         </Bouton>
-        <Bouton variante="discret" onClick={onSupprimer} className="!px-3 !py-2 min-h-11">
+        <Bouton variante="danger" onClick={onSupprimer} className="!px-3 !py-2 min-h-11">
           Supprimer
         </Bouton>
       </div>
@@ -228,7 +241,7 @@ function FormulaireEcheance({ echeance, membres, aujourdhui, onAnnuler, onEnregi
   }
 
   return (
-    <Carte titre={echeance ? 'Modifier l’échéance' : 'Nouvelle échéance'}>
+    <>
       {!echeance && (
         <div className="flex flex-col gap-2">
           <p className="font-sans text-sm text-text-muted px-1">Idées :</p>
@@ -341,6 +354,6 @@ function FormulaireEcheance({ echeance, membres, aujourdhui, onAnnuler, onEnregi
           Annuler
         </Bouton>
       </form>
-    </Carte>
+    </>
   )
 }

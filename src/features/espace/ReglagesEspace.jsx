@@ -166,7 +166,7 @@ function Profil() {
           <Bouton type="submit" variante="secondaire" disabled={!prenom.trim()}>
             {enregistre ? 'Enregistré ✓' : 'Enregistrer'}
           </Bouton>
-          <Bouton type="button" variante="discret" onClick={deconnexion}>
+          <Bouton type="button" variante="danger" onClick={deconnexion}>
             Se déconnecter
           </Bouton>
         </div>
@@ -221,7 +221,7 @@ function Espaces() {
         <Bouton variante="secondaire" onClick={() => navigate('/bienvenue')}>
           Créer ou rejoindre un espace
         </Bouton>
-        <Bouton variante="discret" onClick={quitter}>
+        <Bouton variante="danger" onClick={quitter}>
           Quitter cet espace
         </Bouton>
       </div>

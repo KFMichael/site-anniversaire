@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
+import { Bouton, BoutonAjouter, Carte, ChampTexte, EtatErreur, Feuille, Page } from '../../components/ui'
+import { useMessages } from '../../components/messages-contexte'
 import Chargement from '../../components/Chargement'
 import { decalerMois, libelleMois, moisDe } from '../charge/calculs'
 import { formaterPrix } from '../courses/drive'
@@ -21,7 +22,7 @@ function libelleJour(jour) {
 export default function Finances() {
   const [mois, setMois] = useState(() => moisDe())
   const [edition, setEdition] = useState(null) // null | 'nouvelle' | dépense
-  const [message, setMessage] = useState('')
+  const { annoncer } = useMessages()
   const f = useFinances(mois)
   const courant = moisDe()
 
@@ -35,7 +36,6 @@ export default function Finances() {
   function changerMois(n) {
     setMois((m) => decalerMois(m, n))
     setEdition(null)
-    setMessage('')
   }
 
   const retour = { vers: '/plus', label: 'Plus' }
@@ -49,7 +49,12 @@ export default function Finances() {
   }
 
   return (
-    <Page titre="Finances" sousTitre="Où part l'argent du compte commun" retour={retour}>
+    <Page
+      titre="Finances"
+      sousTitre="Où part l'argent du compte commun"
+      retour={retour}
+      action={<BoutonAjouter label="Ajouter une dépense" onClick={() => setEdition('nouvelle')} />}
+    >
       <div className="flex items-center justify-between gap-2">
         <button
           onClick={() => changerMois(-1)}
@@ -85,13 +90,11 @@ export default function Finances() {
         {repartition.length > 0 && <Repartition repartition={repartition} />}
       </Carte>
 
-      {message && (
-        <p role="status" className="font-sans text-sm text-text-secondary px-1">
-          {message}
-        </p>
-      )}
-
-      {edition ? (
+      <Feuille
+        ouverte={Boolean(edition)}
+        titre={edition && edition !== 'nouvelle' ? 'Modifier la dépense' : 'Nouvelle dépense'}
+        onFermer={() => setEdition(null)}
+      >
         <FormulaireDepense
           depense={edition === 'nouvelle' ? null : edition}
           jourParDefaut={mois === courant ? aujourdhui() : `${mois.slice(0, 7)}-01`}
@@ -99,27 +102,22 @@ export default function Finances() {
           onEnregistrer={async (champs) => {
             const echec = await f.enregistrer(edition === 'nouvelle' ? null : edition, champs)
             if (echec) return echec
+            annoncer(edition === 'nouvelle' ? 'Dépense ajoutée ✓' : 'Dépense modifiée ✓')
             setEdition(null)
-            setMessage(edition === 'nouvelle' ? 'Dépense ajoutée ✓' : 'Dépense modifiée ✓')
             return null
           }}
         />
-      ) : (
-        <Bouton
-          onClick={() => {
-            setEdition('nouvelle')
-            setMessage('')
-          }}
-        >
-          + Ajouter une dépense
-        </Bouton>
-      )}
+      </Feuille>
 
       {duMois.length === 0 ? (
         <p className="font-sans text-center text-text-muted py-6">
           Aucune dépense en {libelleMois(mois).split(' ')[0].toLowerCase()}.
           <br />
           <span className="text-sm">Ajoute tes courses, restos, sorties… pour voir où part l'argent.</span>
+          <br />
+          <Bouton className="mt-4" onClick={() => setEdition('nouvelle')}>
+            Ajouter une dépense
+          </Bouton>
         </p>
       ) : (
         <section className="flex flex-col gap-1.5">
@@ -133,10 +131,7 @@ export default function Finances() {
                 <li key={d.id} className="flex items-center gap-1 pr-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setEdition(d)
-                      setMessage('')
-                    }}
+                    onClick={() => setEdition(d)}
                     aria-label={`Modifier ${d.libelle || p.label}, ${formaterPrix(d.montant_centimes)}, le ${libelleJour(d.jour)}`}
                     className="flex-1 min-w-0 min-h-11 flex items-center gap-3 pl-4 py-3 text-left active:bg-bg-base transition-colors"
                   >
@@ -157,9 +152,11 @@ export default function Finances() {
                   <button
                     type="button"
                     onClick={async () => {
-                      if (window.confirm(`Supprimer « ${d.libelle || p.label} » (${formaterPrix(d.montant_centimes)}) ?`)) {
-                        setMessage((await f.supprimer(d)) ?? 'Dépense supprimée ✓')
-                      }
+                      const echec = await f.supprimer(d)
+                      annoncer(
+                        echec ?? `« ${d.libelle || p.label} » supprimée`,
+                        echec ? {} : { annuler: async () => annoncer((await f.restaurer(d)) ?? 'Dépense restaurée ✓') }
+                      )
                     }}
                     aria-label={`Supprimer ${d.libelle || p.label}`}
                     className="cible-44 font-sans text-text-muted hover:text-text-primary w-8 h-8 shrink-0"
@@ -238,7 +235,7 @@ function FormulaireDepense({ depense, jourParDefaut, onAnnuler, onEnregistrer })
   }
 
   return (
-    <Carte titre={depense ? 'Modifier la dépense' : 'Nouvelle dépense'}>
+    <>
       <form onSubmit={soumettre} className="flex flex-col gap-4">
         <ChampTexte
           id="depense-montant"
@@ -295,6 +292,6 @@ function FormulaireDepense({ depense, jourParDefaut, onAnnuler, onEnregistrer })
           </Bouton>
         </div>
       </form>
-    </Carte>
+    </>
   )
 }

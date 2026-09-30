@@ -132,6 +132,8 @@ const STYLES_BOUTON = {
   principal: 'bg-accent text-white font-medium hover:opacity-90',
   secondaire: 'border border-separator bg-bg-elevated text-text-primary',
   discret: 'text-text-muted hover:text-text-primary',
+  // Action destructrice (supprimer, se déconnecter…) : rouge façon iOS
+  danger: 'text-danger font-medium',
 }
 
 export function Bouton({ variante = 'principal', className = '', ...props }) {
@@ -203,5 +205,88 @@ export function EtatErreur({ message }) {
         Réessayer
       </Bouton>
     </section>
+  )
+}
+
+// Contrôle segmenté façon iOS (onglets d'un écran) : le même partout
+// options : [{ id, label }]
+export function Segmente({ options, valeur, onChange, label = 'Affichage' }) {
+  return (
+    <div role="tablist" aria-label={label} className="flex p-1 rounded-full bg-bg-elevated shadow-soft">
+      {options.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          role="tab"
+          aria-selected={valeur === o.id}
+          onClick={() => onChange(o.id)}
+          className={`cible-44 font-sans flex-1 min-w-0 text-sm py-2 px-2 rounded-full transition-all duration-200 ease-spring ${
+            valeur === o.id ? 'bg-accent text-white font-medium' : 'text-text-muted'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// Bouton « + » rond à droite du grand titre (prop `action` de Page)
+export function BoutonAjouter({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="w-11 h-11 shrink-0 mt-0.5 rounded-full bg-accent text-white text-2xl leading-none flex items-center justify-center transition-transform duration-200 ease-spring active:scale-95"
+    >
+      <span aria-hidden="true">+</span>
+    </button>
+  )
+}
+
+// Feuille modale qui monte du bas de l'écran (formulaires) : <dialog> natif,
+// donc focus gardé dans la feuille et Échap pour fermer ; toucher le fond
+// ferme aussi. Le contenu n'est monté que feuille ouverte.
+export function Feuille({ ouverte, titre, onFermer, children }) {
+  const ref = useRef(null)
+  const idTitre = useRef(`feuille-${Math.random().toString(36).slice(2)}`).current
+
+  useEffect(() => {
+    const dialogue = ref.current
+    if (!dialogue) return
+    if (ouverte && !dialogue.open) dialogue.showModal?.()
+    if (!ouverte && dialogue.open) dialogue.close()
+  }, [ouverte])
+
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby={idTitre}
+      className="feuille"
+      onCancel={(e) => {
+        e.preventDefault()
+        onFermer()
+      }}
+      onClick={(e) => {
+        if (e.target === ref.current) onFermer()
+      }}
+    >
+      {ouverte && (
+        <div className="flex flex-col gap-4 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <div className="mx-auto w-10 h-1.5 rounded-full bg-separator" aria-hidden="true" />
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={idTitre} className="font-sans text-lg font-semibold text-text-primary">
+              {titre}
+            </h2>
+            <button type="button" onClick={onFermer} className="min-h-11 px-2 font-sans text-accent-text">
+              Fermer
+            </button>
+          </div>
+          {children}
+        </div>
+      )}
+    </dialog>
   )
 }

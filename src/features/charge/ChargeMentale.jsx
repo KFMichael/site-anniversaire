@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/contexte'
 import { useMembres } from '../espace/useMembres'
-import { Bouton, Carte, Page } from '../../components/ui'
+import { Bouton, Carte, Page, Segmente } from '../../components/ui'
 import Chargement from '../../components/Chargement'
 import {
   calculerRepartition,
@@ -176,24 +176,15 @@ export default function ChargeMentale() {
         </button>
       </div>
 
-      <div role="tablist" aria-label="Affichage" className="flex p-1 rounded-full bg-bg-elevated shadow-soft">
-        {[
+      <Segmente
+        label="Charges"
+        options={[
           { id: 'mes', label: `Mes charges (${miennes.length})` },
           { id: 'choisir', label: modifiable && libres.length ? `Choisir (${libres.length} libre${libres.length > 1 ? 's' : ''})` : 'Toutes' },
-        ].map((o) => (
-          <button
-            key={o.id}
-            role="tab"
-            aria-selected={vue === o.id}
-            onClick={() => setVue(o.id)}
-            className={`cible-44 font-sans flex-1 text-sm py-2 rounded-full transition-all duration-200 ease-spring ${
-              vue === o.id ? 'bg-accent text-white font-medium' : 'text-text-muted'
-            }`}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
+        ]}
+        valeur={vue}
+        onChange={setVue}
+      />
 
 
       {message && (

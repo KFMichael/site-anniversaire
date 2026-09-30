@@ -123,7 +123,7 @@ export default function EntreeCoffre({ entree }) {
             )}
             <button
               onClick={confirmerSuppression}
-              className="font-sans text-sm text-text-muted hover:text-text-primary underline"
+              className="font-sans text-sm text-danger underline"
             >
               Supprimer
             </button>

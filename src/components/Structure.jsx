@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { MessagesProvider } from './Messages'
 
 // Barre d'onglets façon iOS, fixée en bas de l'écran : 5 onglets au plus,
 // pour ce qui sert chaque jour. Les autres modules sont dans « Plus ».
@@ -33,7 +34,7 @@ export default function Structure() {
   }, [pathname])
 
   return (
-    <>
+    <MessagesProvider>
       <Outlet />
       <nav
         aria-label="Navigation principale"
@@ -56,7 +57,7 @@ export default function Structure() {
           ))}
         </ul>
       </nav>
-    </>
+    </MessagesProvider>
   )
 }
 
