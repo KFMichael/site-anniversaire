@@ -361,6 +361,24 @@ function ChoixEnseigne({ reglage, onChoisir, onAnnuler }) {
           ))}
         </div>
 
+        {enseigne === 'carrefour' && (
+          <div className="flex flex-col gap-1">
+            <p className="font-sans text-sm text-text-secondary px-1">
+              Sur carrefour.fr, choisis une fois ton drive (« Choisir un magasin ») : les recherches ouvertes depuis
+              Nido afficheront ses produits, ses prix et ses disponibilités.
+            </p>
+            <a
+              href="https://www.carrefour.fr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="self-start min-h-11 inline-flex items-center px-1 font-sans text-sm text-accent-text font-medium"
+            >
+              Ouvrir carrefour.fr<span aria-hidden="true">&nbsp;↗</span>
+              <span className="sr-only"> (nouvel onglet)</span>
+            </a>
+          </div>
+        )}
+
         {enseigne === 'leclerc' && (
           <div className="flex flex-col gap-2">
             <ChampTexte
