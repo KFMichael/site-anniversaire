@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Bouton, Carte, ChampTexte, EtatErreur, Page } from '../../components/ui'
 import Chargement from '../../components/Chargement'
 import { useCourses } from './useCourses'
@@ -63,7 +63,9 @@ export default function Drive() {
 }
 
 function Commande({ courses, drive, message, onMessage, onChanger }) {
+  const navigate = useNavigate()
   const [confirmation, setConfirmation] = useState(false)
+  const [envoi, setEnvoi] = useState(false)
   const liste = useMemo(() => construireListe(courses.produits, courses.articles), [courses.produits, courses.articles])
   const groupes = useMemo(() => grouperParRayon(liste), [liste])
   const compte = compterListe(liste)
@@ -72,10 +74,26 @@ function Commande({ courses, drive, message, onMessage, onChanger }) {
   const estimationPanier = estimerPanier(panier, drive.references)
   const enseigne = ENSEIGNES[drive.enseigne]
 
+  // Commande notée (les autres sont prévenus), puis les produits commandés
+  // sortent de la liste comme des courses faites ; retour à la liste de ce
+  // qui manque encore
   async function commandePassee() {
+    setEnvoi(true)
+    const echec = (await drive.noterCommande(panier.length, estimationPanier.total)) ?? (await courses.terminerCourses())
+    setEnvoi(false)
     setConfirmation(false)
-    const echec = await drive.noterCommande(panier.length, estimationPanier.total)
-    onMessage(echec ?? 'Commande notée ✓ Les autres sont prévenus. Au retour du drive, touche « Terminer les courses » dans la liste.')
+    if (echec) {
+      onMessage(echec)
+      return
+    }
+    const reste = liste.length - panier.length
+    navigate('/courses', {
+      state: {
+        message: `Commande notée ✓ ${panier.length} produit${panier.length > 1 ? 's' : ''} commandé${panier.length > 1 ? 's' : ''}, ${
+          reste ? `il reste ${reste} produit${reste > 1 ? 's' : ''} à acheter.` : 'plus rien à acheter 🎉'
+        }`,
+      },
+    })
   }
 
   return (
@@ -158,11 +176,13 @@ function Commande({ courses, drive, message, onMessage, onChanger }) {
             <p className="font-sans text-sm text-text-secondary">
               Commande de {panier.length} article{panier.length > 1 ? 's' : ''}
               {estimationPanier.total ? ` (≈ ${formaterPrix(estimationPanier.total)})` : ''} validée sur le site ? Les
-              autres membres seront prévenus.
+              produits commandés sortent de la liste, le stock est mis à jour et les autres membres sont prévenus.
             </p>
             <div className="flex gap-3">
-              <Bouton onClick={commandePassee}>Confirmer</Bouton>
-              <Bouton variante="discret" onClick={() => setConfirmation(false)}>
+              <Bouton onClick={commandePassee} disabled={envoi}>
+                {envoi ? 'Envoi…' : 'Confirmer'}
+              </Bouton>
+              <Bouton variante="discret" onClick={() => setConfirmation(false)} disabled={envoi}>
                 Annuler
               </Bouton>
             </div>

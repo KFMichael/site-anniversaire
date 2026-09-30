@@ -106,7 +106,7 @@ Le site anniversaire d'origine est archivé sur la branche
 ### Phase 9 — Commande au drive ✅
 - [x] Une enseigne pour l'espace : Carrefour Drive ou Leclerc Drive (adresse du drive du magasin)
 - [x] « Commander au drive » depuis la liste : chaque produit manquant ouvre la recherche du site, ou la fiche mémorisée (« Mon produit »)
-- [x] Prix constaté par produit et estimation du panier ; « Commande passée » notifie les autres membres
+- [x] Prix constaté par produit et estimation du panier ; « Commande passée » notifie les autres membres, sort les produits commandés de la liste (stock à jour) et ramène à la liste de ce qui manque encore
 - [ ] Panier rempli automatiquement : impossible sans API publique des enseignes (seulement par partenariat commercial)
 
 ### Phase 7 — Finitions

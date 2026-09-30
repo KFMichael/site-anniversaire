@@ -67,10 +67,14 @@ const TEXTES = {
   }),
 }
 
-// Une notification par auteur et par type, dans l'ordre des événements
+// Une notification par auteur et par type, dans l'ordre des événements.
+// Une commande au drive fait sortir les produits commandés de la liste :
+// l'auteur n'est alors annoncé qu'une fois (la commande, pas les achats)
 export function resumerActivite(evenements, prenoms) {
+  const commandes = new Set(evenements.filter((e) => e.type === 'commande_drive').map((e) => e.auteur))
   const groupes = new Map()
   for (const e of evenements) {
+    if (e.type === 'courses_faites' && commandes.has(e.auteur)) continue
     const cle = `${e.auteur}|${e.type}`
     if (!groupes.has(cle)) groupes.set(cle, { auteur: e.auteur, type: e.type, evenements: [] })
     groupes.get(cle).evenements.push(e)
