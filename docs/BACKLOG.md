@@ -129,4 +129,4 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Notifications push : dîner du soir, récap du dimanche, rappel du 1er ; par appareil, types désactivables, test (`docs/NOTIFICATIONS.md`)
 - [x] Notifications en temps réel des actions des autres (« Léa a ajouté lait à la liste », courses faites, charge prise, dîners prévus) : déclencheurs SQL + `api/activite.js`, sans webhook à configurer
 - [x] Statistiques d'équilibre de la charge sur plusieurs mois (Charge mentale › « Voir l'équilibre sur 6 mois »)
-- [ ] Voyages de la carte en base (aujourd'hui dans `src/features/activites/data/voyages.js`, commun à tous les espaces)
+- [x] Voyages de la carte en base, propres à chaque espace, ajoutés depuis l'appli (recherche de lieu OpenStreetMap)

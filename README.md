@@ -41,7 +41,7 @@ quitte jamais l'appareil.
 - React + Vite, React Router
 - Tailwind CSS v4 (identité iOS, thème clair / sombre / système : `design/DESIGN.md`)
 - Supabase : Auth, Postgres + RLS, Storage
-- Leaflet (carte des voyages)
+- Leaflet (carte des voyages) et recherche de lieux OpenStreetMap Nominatim
 
 ## Démarrer en local
 
