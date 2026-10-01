@@ -169,3 +169,18 @@ test('commande au drive : les produits commandés ne sont pas annoncés en plus 
   )
   assert.equal(resumes[1].notification.corps, 'Zoé a acheté Pain')
 })
+
+test('budget : alerte de dépassement transmise telle quelle', () => {
+  const [une] = resumerActivite(
+    [
+      { auteur: 'u2', type: 'budget', libelle: 'Restaurants : 85 % du budget (255,00 € / 300,00 €)' },
+      { auteur: 'u2', type: 'budget', libelle: 'Courses : budget dépassé (312,00 € / 300,00 €)' },
+    ],
+    new Map([['u2', 'Léa']])
+  )
+  assert.deepEqual(une.notification, {
+    titre: '⚠️ Budget',
+    corps: 'Restaurants : 85 % du budget (255,00 € / 300,00 €) · Courses : budget dépassé (312,00 € / 300,00 €)',
+    url: '/finances',
+  })
+})

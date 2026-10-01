@@ -61,7 +61,37 @@ test('poste deviné depuis le libellé', () => {
 })
 
 test('les postes correspondent à la contrainte de la migration', () => {
-  const sql = readFileSync(new URL('../../../supabase/migrations/0016_finances.sql', import.meta.url), 'utf8')
-  const liste = sql.match(/categorie in \(([^)]+)\)/)[1].match(/'([a-z]+)'/g).map((x) => x.slice(1, -1))
-  assert.deepEqual(liste, POSTES.map((p) => p.id))
+  for (const fichier of ['0016_finances.sql', '0017_budgets.sql']) {
+    const sql = readFileSync(new URL(`../../../supabase/migrations/${fichier}`, import.meta.url), 'utf8')
+    const liste = sql.match(/categorie in \(([^)]+)\)/)[1].match(/'([a-z]+)'/g).map((x) => x.slice(1, -1))
+    assert.deepEqual(liste, POSTES.map((p) => p.id), fichier)
+  }
+})
+
+test('budgets par poste : niveaux et alertes', async () => {
+  const { lignesAvecBudget, alertesBudget } = await import('./finances.js')
+  const depenses = [
+    { categorie: 'courses', montant_centimes: 31000, jour: '2026-09-03' },
+    { categorie: 'restaurant', montant_centimes: 8500, jour: '2026-09-05' },
+    { categorie: 'activites', montant_centimes: 2000, jour: '2026-09-06' },
+  ]
+  const budgets = [
+    { categorie: 'courses', montant_centimes: 30000 },
+    { categorie: 'restaurant', montant_centimes: 10000 },
+    { categorie: 'activites', montant_centimes: 10000 },
+    { categorie: 'vacances', montant_centimes: 50000 },
+  ]
+  const lignes = lignesAvecBudget(depenses, budgets)
+  const par = Object.fromEntries(lignes.map((l) => [l.poste.id, [l.montant, l.budget, l.ratio, l.niveau]]))
+  assert.deepEqual(par.courses, [31000, 30000, 103, 'depasse'])
+  assert.deepEqual(par.restaurant, [8500, 10000, 85, 'proche'])
+  assert.deepEqual(par.activites, [2000, 10000, 20, 'ok'])
+  assert.deepEqual(par.vacances, [0, 50000, 0, 'ok'])
+  assert.deepEqual(alertesBudget(lignes).map((l) => l.poste.id), ['courses', 'restaurant'])
+  const { texteAlerte } = await import('./finances.js')
+  assert.deepEqual(alertesBudget(lignes).map(texteAlerte), ['Courses : budget dépassé de 10,00 €', 'Restaurants : 85 % du budget atteint'])
+  // Sans budget : pas de niveau
+  assert.equal(lignesAvecBudget(depenses, [])[0].niveau, null)
+  // Pile au budget : presque atteint, pas dépassé
+  assert.equal(lignesAvecBudget([{ categorie: 'sante', montant_centimes: 5000, jour: '2026-09-01' }], [{ categorie: 'sante', montant_centimes: 5000 }])[0].niveau, 'proche')
 })
