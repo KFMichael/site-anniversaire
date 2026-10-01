@@ -21,6 +21,7 @@ Dans **Supabase > SQL Editor**, exécuter dans l'ordre le contenu de :
 15. `supabase/migrations/0015_drive.sql` — commande au drive : enseigne de l'espace (Carrefour ou Leclerc), lien et prix de « mon produit », commandes passées annoncées aux autres membres
 16. `supabase/migrations/0016_finances.sql` — finances : dépenses du compte commun par poste (courses, restaurants, activités…), montant des commandes au drive reporté automatiquement
 17. `supabase/migrations/0017_budgets.sql` — budgets mensuels par poste ; alerte (notification aux autres membres) quand une dépense fait atteindre 80 % du budget ou le dépasse
+18. `supabase/migrations/0018_voyages.sql` — voyages de la carte (Activités › Voyages), propres à chaque espace
 
 > **Vérifier les règles d'accès** : cette requête liste les tables dont la
 > sécurité (RLS) est activée mais sans aucune règle, donc inutilisables
