@@ -60,6 +60,12 @@ const TEXTES = {
     corps: `${prenom} a passé la commande : ${libelles.at(-1)}`,
     url: '/courses',
   }),
+  // libellés « Restaurants : budget dépassé (312,00 € / 300,00 €) »
+  budget: (prenom, libelles) => ({
+    titre: '⚠️ Budget',
+    corps: libelles.join(' · '),
+    url: '/finances',
+  }),
   diner: (prenom, noms) => ({
     titre: '🍽️ Menus',
     corps: `${prenom} a prévu ${enumerer(noms)}`,

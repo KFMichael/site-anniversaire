@@ -4,7 +4,18 @@ import { useMessages } from '../../components/messages-contexte'
 import Chargement from '../../components/Chargement'
 import { decalerMois, libelleMois, moisDe } from '../charge/calculs'
 import { formaterPrix } from '../courses/drive'
-import { POSTES, depensesDuMois, devinerPoste, evolution, lireMontant, poste, repartitionParPoste, total } from './finances'
+import {
+  POSTES,
+  alertesBudget,
+  depensesDuMois,
+  devinerPoste,
+  evolution,
+  lignesAvecBudget,
+  lireMontant,
+  poste,
+  texteAlerte,
+  total,
+} from './finances'
 import { useFinances } from './useFinances'
 
 function aujourdhui() {
@@ -22,13 +33,15 @@ function libelleJour(jour) {
 export default function Finances() {
   const [mois, setMois] = useState(() => moisDe())
   const [edition, setEdition] = useState(null) // null | 'nouvelle' | dépense
+  const [budgetsOuverts, setBudgetsOuverts] = useState(false)
   const { annoncer } = useMessages()
   const f = useFinances(mois)
   const courant = moisDe()
 
   const duMois = useMemo(() => depensesDuMois(f.depenses, mois), [f.depenses, mois])
   const precedent = useMemo(() => depensesDuMois(f.depenses, decalerMois(mois, -1)), [f.depenses, mois])
-  const repartition = useMemo(() => repartitionParPoste(duMois), [duMois])
+  const lignes = useMemo(() => lignesAvecBudget(duMois, f.budgets), [duMois, f.budgets])
+  const alertes = alertesBudget(lignes)
   const totalMois = total(duMois)
   const variation = evolution(totalMois, total(precedent))
   const nomMoisPrecedent = libelleMois(decalerMois(mois, -1)).split(' ')[0].toLowerCase()
@@ -74,6 +87,8 @@ export default function Finances() {
         </button>
       </div>
 
+      {alertes.length > 0 && <AlertesBudget alertes={alertes} />}
+
       <Carte>
         <div className="flex flex-col gap-1">
           <h2 className="font-sans text-sm text-text-muted">Dépensé en {libelleMois(mois).split(' ')[0].toLowerCase()}</h2>
@@ -87,8 +102,28 @@ export default function Finances() {
             </p>
           )}
         </div>
-        {repartition.length > 0 && <Repartition repartition={repartition} />}
+        {lignes.length > 0 ? (
+          <Repartition lignes={lignes} onBudgets={() => setBudgetsOuverts(true)} />
+        ) : (
+          <Bouton variante="secondaire" onClick={() => setBudgetsOuverts(true)}>
+            🎯 Définir des budgets
+          </Bouton>
+        )}
       </Carte>
+
+      <Feuille ouverte={budgetsOuverts} titre="Budgets par mois" onFermer={() => setBudgetsOuverts(false)}>
+        <FormulaireBudgets
+          budgets={f.budgets}
+          onAnnuler={() => setBudgetsOuverts(false)}
+          onEnregistrer={async (valeurs) => {
+            const echec = await f.enregistrerBudgets(valeurs)
+            if (echec) return echec
+            annoncer('Budgets enregistrés ✓')
+            setBudgetsOuverts(false)
+            return null
+          }}
+        />
+      </Feuille>
 
       <Feuille
         ouverte={Boolean(edition)}
@@ -175,30 +210,146 @@ export default function Finances() {
 
 // Barres horizontales, une seule couleur (la longueur porte la valeur) ;
 // montant et part toujours écrits en texte
-function Repartition({ repartition }) {
-  const max = repartition[0].montant
+function AlertesBudget({ alertes }) {
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="font-sans text-sm font-semibold text-text-primary">Par poste</h3>
-      <ul className="flex flex-col gap-3">
-        {repartition.map((r) => (
-          <li key={r.poste.id} className="flex flex-col gap-1.5" title={`${r.poste.label} : ${formaterPrix(r.montant)} (${r.part} %)`}>
-            <div className="flex items-baseline gap-2 font-sans text-sm">
-              <span aria-hidden="true">{r.poste.emoji}</span>
-              <span className="flex-1 min-w-0 text-text-primary truncate">{r.poste.label}</span>
-              <span className="text-text-primary font-medium tabular-nums">{formaterPrix(r.montant)}</span>
-              <span className="w-10 text-right text-text-muted tabular-nums">{r.part} %</span>
-            </div>
-            <div className="h-2 rounded-full bg-separator" aria-hidden="true">
-              <div
-                className="h-full rounded-full bg-accent transition-all duration-500 ease-spring"
-                style={{ width: `${Math.max((r.montant / max) * 100, 2)}%` }}
-              />
-            </div>
+    <section aria-labelledby="titre-alertes" className="p-4 rounded-3xl bg-bg-elevated shadow-soft border-l-4 border-danger flex flex-col gap-2">
+      <h2 id="titre-alertes" className="font-sans text-sm font-semibold text-text-primary">
+        <span aria-hidden="true">⚠️ </span>À surveiller
+      </h2>
+      <ul className="flex flex-col gap-1">
+        {alertes.map((l) => (
+          <li key={l.poste.id} className={`font-sans text-sm ${l.niveau === 'depasse' ? 'text-danger font-medium' : 'text-text-secondary'}`}>
+            <span aria-hidden="true">{l.poste.emoji} </span>
+            {texteAlerte(l)}
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+// Barres horizontales d'une seule couleur, montants toujours écrits en
+// texte. Avec un budget, la barre mesure la part du budget consommée
+// (rouge et « dépassé » écrit au-delà) ; sans budget, la part des dépenses.
+function Repartition({ lignes, onBudgets }) {
+  const max = Math.max(...lignes.map((l) => l.montant), 1)
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-sans text-sm font-semibold text-text-primary">Par poste</h3>
+        <button type="button" onClick={onBudgets} className="min-h-11 px-1 font-sans text-sm text-accent-text font-medium">
+          🎯 Budgets
+        </button>
+      </div>
+      <ul className="flex flex-col gap-3">
+        {lignes.map((l) => {
+          const largeur = l.budget ? Math.min(l.ratio, 100) : (l.montant / max) * 100
+          return (
+            <li key={l.poste.id} className="flex flex-col gap-1.5">
+              <div className="flex items-baseline gap-2 font-sans text-sm">
+                <span aria-hidden="true">{l.poste.emoji}</span>
+                <span className="flex-1 min-w-0 text-text-primary truncate">{l.poste.label}</span>
+                <span className="text-text-primary font-medium tabular-nums">
+                  {formaterPrix(l.montant)}
+                  {l.budget && <span className="text-text-muted font-normal"> / {formaterPrix(l.budget)}</span>}
+                </span>
+                {!l.budget && <span className="w-10 text-right text-text-muted tabular-nums">{l.part} %</span>}
+              </div>
+              <div className="h-2 rounded-full bg-separator" aria-hidden="true">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ease-spring ${l.niveau === 'depasse' ? 'bg-danger' : 'bg-accent'}`}
+                  style={{ width: `${l.montant ? Math.max(largeur, 2) : 0}%` }}
+                />
+              </div>
+              {(l.niveau === 'depasse' || l.niveau === 'proche') && (
+                <p className={`font-sans text-xs ${l.niveau === 'depasse' ? 'text-danger font-medium' : 'text-text-secondary'}`}>
+                  <span aria-hidden="true">⚠️ </span>
+                  {l.niveau === 'depasse' ? `Dépassé de ${formaterPrix(l.montant - l.budget)}` : `${l.ratio} % du budget`}
+                </p>
+              )}
+            </li>
+          )
+        })}
+      </ul>
     </div>
+  )
+}
+
+// Budget mensuel de chaque poste (vide = pas de budget)
+function FormulaireBudgets({ budgets, onAnnuler, onEnregistrer }) {
+  const [valeurs, setValeurs] = useState(() =>
+    Object.fromEntries(
+      POSTES.map((p) => {
+        const b = budgets.find((x) => x.categorie === p.id)
+        return [p.id, b ? String(b.montant_centimes / 100).replace('.', ',') : '']
+      })
+    )
+  )
+  const [erreur, setErreur] = useState('')
+  const [envoi, setEnvoi] = useState(false)
+
+  async function soumettre(e) {
+    e.preventDefault()
+    const resultat = {}
+    for (const p of POSTES) {
+      const centimes = lireMontant(valeurs[p.id])
+      if (Number.isNaN(centimes)) {
+        setErreur(`Budget « ${p.label} » : écris un montant en euros, par exemple 300.`)
+        return
+      }
+      resultat[p.id] = centimes
+    }
+    setErreur('')
+    setEnvoi(true)
+    const echec = await onEnregistrer(resultat)
+    setEnvoi(false)
+    if (echec) setErreur(echec)
+  }
+
+  return (
+    <form onSubmit={soumettre} className="flex flex-col gap-4">
+      <p className="font-sans text-sm text-text-secondary">
+        Montant à ne pas dépasser chaque mois. Une alerte s'affiche à 80 % et les autres membres sont prévenus. Laisse vide
+        pour ne pas suivre un poste.
+      </p>
+      <ul className="flex flex-col divide-y divide-separator">
+        {POSTES.map((p) => (
+          <li key={p.id} className="flex items-center gap-3 py-2">
+            <label htmlFor={`budget-${p.id}`} className="flex-1 min-w-0 font-sans text-text-primary">
+              <span aria-hidden="true">{p.emoji} </span>
+              {p.label}
+            </label>
+            <input
+              id={`budget-${p.id}`}
+              inputMode="decimal"
+              autoComplete="off"
+              placeholder="—"
+              aria-describedby="budget-unite"
+              value={valeurs[p.id]}
+              maxLength={10}
+              onChange={(e) => setValeurs((v) => ({ ...v, [p.id]: e.target.value }))}
+              className="font-sans w-28 min-h-11 px-3 py-2 rounded-2xl border border-separator bg-bg-base text-text-primary text-right focus:outline-none focus:border-accent"
+            />
+          </li>
+        ))}
+      </ul>
+      <p id="budget-unite" className="font-sans text-xs text-text-muted px-1">
+        Montants en euros par mois.
+      </p>
+      {erreur && (
+        <p role="alert" className="font-sans text-sm text-text-primary">
+          {erreur}
+        </p>
+      )}
+      <div className="flex flex-wrap gap-3">
+        <Bouton type="submit" disabled={envoi}>
+          {envoi ? 'Enregistrement…' : 'Enregistrer'}
+        </Bouton>
+        <Bouton type="button" variante="discret" onClick={onAnnuler}>
+          Annuler
+        </Bouton>
+      </div>
+    </form>
   )
 }
 

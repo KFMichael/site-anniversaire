@@ -1,6 +1,7 @@
 // Finances : dépenses du compte commun rangées par poste, pour voir où part
 // l'argent. Logique pure, testée par finances.test.js.
 import { normaliser } from '../courses/liste.js'
+import { formaterPrix } from '../courses/drive.js'
 
 // Même liste que la contrainte de la table `depenses` (migration 0016)
 export const POSTES = [
@@ -81,4 +82,40 @@ export function devinerPoste(libelle) {
   const texte = ` ${normaliser(libelle).replace(/[^a-z0-9]+/g, ' ')} `
   for (const [id, mots] of MOTS) if (mots.some((m) => texte.includes(` ${m} `))) return id
   return null
+}
+
+// Seuil d'alerte : à partir de 80 % du budget, le poste est « presque atteint »
+export const SEUIL_ALERTE = 80
+
+// Lignes « par poste » du mois avec leur budget : les postes dépensés et
+// ceux qui ont un budget (même sans dépense). budgets : [{ categorie,
+// montant_centimes }]. niveau : null (pas de budget), 'ok', 'proche'
+// (≥ 80 %) ou 'depasse' (> 100 %) ; ratio en % du budget.
+export function lignesAvecBudget(depenses, budgets) {
+  const parBudget = new Map(budgets.map((b) => [b.categorie, b.montant_centimes]))
+  const lignes = repartitionParPoste(depenses)
+  const presents = new Set(lignes.map((l) => l.poste.id))
+  for (const b of budgets) {
+    if (!presents.has(b.categorie)) lignes.push({ poste: poste(b.categorie), montant: 0, part: 0 })
+  }
+  return lignes.map((l) => {
+    const budget = parBudget.get(l.poste.id) ?? null
+    if (!budget) return { ...l, budget: null, ratio: null, niveau: null }
+    const ratio = Math.round((l.montant / budget) * 100)
+    return { ...l, budget, ratio, niveau: l.montant > budget ? 'depasse' : ratio >= SEUIL_ALERTE ? 'proche' : 'ok' }
+  })
+}
+
+// Postes en alerte, les dépassements d'abord
+export function alertesBudget(lignes) {
+  return lignes
+    .filter((l) => l.niveau === 'depasse' || l.niveau === 'proche')
+    .sort((a, b) => (a.niveau === b.niveau ? b.ratio - a.ratio : a.niveau === 'depasse' ? -1 : 1))
+}
+
+// Une phrase par poste en alerte : « Restaurants : budget dépassé de 15,00 € »
+export function texteAlerte(l) {
+  return l.niveau === 'depasse'
+    ? `${l.poste.label} : budget dépassé de ${formaterPrix(l.montant - l.budget)}`
+    : `${l.poste.label} : ${l.ratio} % du budget atteint`
 }

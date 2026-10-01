@@ -121,7 +121,7 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Dépenses du compte commun par poste (courses, restaurants, activités et sorties, maison, transport, santé, abonnements, vacances, cadeaux, autre), poste deviné depuis le libellé
 - [x] Total du mois, comparaison avec le mois précédent, répartition par poste, historique mois par mois
 - [x] Montant estimé d'une commande au drive ajouté automatiquement (modifiable)
-- [ ] Budget par poste avec alerte en cas de dépassement
+- [x] Budget par poste avec alerte : à 80 % et au dépassement (Finances, Aujourd'hui, notification aux autres membres)
 - [ ] Dépenses partagées (qui doit combien à qui) : inutile avec un compte commun, à revoir pour une colocation
 
 ### Phase 7 — Finitions
