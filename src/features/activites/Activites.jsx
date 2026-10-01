@@ -2,14 +2,13 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { GroupeListe, LigneListe, Page, Segmente } from '../../components/ui'
 
 // Ex-site anniversaire, conservé comme « boîte à idées » de l'espace :
-// quiz pour trouver une activité, carnet des activités faites, carte des
-// voyages et mur de messages. Même gabarit que les autres écrans : grand
+// quiz pour trouver une activité, carnet des activités faites et carte des
+// voyages. Même gabarit que les autres écrans : grand
 // titre, retour vers « Plus », contrôle segmenté pour les rubriques.
 const RUBRIQUES = [
   { id: 'idees', label: 'Idées' },
   { id: 'carnet', label: 'Carnet' },
   { id: 'voyages', label: 'Voyages' },
-  { id: 'messages', label: 'Messages' },
 ]
 
 export default function Activites() {
@@ -27,7 +26,7 @@ export default function Activites() {
   }
 
   return (
-    <Page titre="Activités" sousTitre="Idées de sorties, carnet, voyages, messages" retour={{ vers: '/plus', label: 'Plus' }}>
+    <Page titre="Activités" sousTitre="Idées de sorties, carnet, voyages" retour={{ vers: '/plus', label: 'Plus' }}>
       <Segmente label="Rubriques" options={RUBRIQUES} valeur={rubrique} onChange={(id) => navigate(`/activites/${id}`)} />
       {/* key : rejoue le quiz depuis le début quand on revient du mode surprise */}
       <Outlet key={location.key} />
