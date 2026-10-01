@@ -114,7 +114,7 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Lot 2 — Gestes iOS : grand titre qui se replie en barre compacte, glisser depuis le bord pour revenir, transitions de page
 - [x] Lot 3 — Cohérence : composant d'onglets unique, « + » en haut à droite, feuilles modales pour les formulaires, messages temporaires avec « Annuler », rouge pour les actions destructrices
 - [x] Lot 4 — Écrans : Menus compact (une ligne par soir, feuille pour choisir), dates courtes, rayon deviné, pastilles sur les onglets
-- [ ] Réglages de l'espace en listes groupées façon Réglages iOS
+- [x] Réglages de l'espace en listes groupées façon Réglages iOS (une page par section)
 - [ ] Activités : même gabarit que les autres écrans (grand titre, contrôle segmenté)
 
 ### Phase 10 — Finances ✅

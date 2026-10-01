@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Carte } from '../../components/ui'
 import { choisirTheme, lireTheme, THEMES } from '../../lib/theme'
 
-export default function Apparence() {
+export default function Apparence({ titre = 'Apparence' }) {
   const [theme, setTheme] = useState(lireTheme)
 
   function changer(id) {
@@ -11,7 +11,7 @@ export default function Apparence() {
   }
 
   return (
-    <Carte titre="Apparence">
+    <Carte titre={titre}>
       <div role="radiogroup" aria-label="Thème" className="flex p-1 rounded-full bg-bg-base">
         {THEMES.map((t) => (
           <button

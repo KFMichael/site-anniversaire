@@ -117,7 +117,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/rejoindre/:code` | Accepter une invitation |
 | `/` | Aujourd'hui : dîner du soir, prochaine échéance, charges, courses, dépenses du mois ; avatar vers les réglages |
 | `/plus` | Onglet « Plus » : Finances, Échéances, Listes, Sport, Activités, Mots de passe, Réglages |
-| `/espace` | Membres, invitation, profil, changement d'espace |
+| `/espace` | Réglages façon iOS : profil, membres, espaces, notifications, emails, apparence (une page par section, `/espace/<section>`) |
 | `/courses` | Liste de courses et stock de la maison |
 | `/finances` | Dépenses du mois par poste, comparaison avec le mois précédent |
 | `/charge/equilibre` | Équilibre de la charge mentale sur 6 mois |

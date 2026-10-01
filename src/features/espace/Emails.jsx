@@ -6,7 +6,7 @@ import { Bouton, Carte, Interrupteur } from '../../components/ui'
 
 // Préférences du récap par email (sans ligne en base : tout est activé)
 // et envoi d'un aperçu à soi-même
-export default function Emails() {
+export default function Emails({ titre = 'Emails' }) {
   const { session, utilisateur } = useAuth()
   const { espace } = useEspace()
   const [preferences, setPreferences] = useState({ recap_hebdo: true, rappel_mensuel: true })
@@ -58,7 +58,7 @@ export default function Emails() {
   }
 
   return (
-    <Carte titre="Emails">
+    <Carte titre={titre}>
       <Interrupteur
         label="Récap du dimanche soir"
         detail="Tes charges du mois, les dîners et la liste de courses de la semaine à venir"
