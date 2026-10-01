@@ -19,7 +19,7 @@ const TYPES = [
   { champ: 'push_activite', label: 'Actions des autres', detail: '« Léa a ajouté lait à la liste », charges prises, dîners prévus' },
 ]
 
-export default function Notifications() {
+export default function Notifications({ titre = 'Notifications' }) {
   const { session, utilisateur } = useAuth()
   const [etat, setEtat] = useState(null)
   const [preferences, setPreferences] = useState({ push_diner: true, push_hebdo: true, push_mensuel: true, push_activite: true, push_sport: true, push_echeances: true })
@@ -40,7 +40,14 @@ export default function Notifications() {
   }, [utilisateur.id])
 
   // Serveur sans clés VAPID : rien à proposer
-  if (!pushConfigure || etat === null) return null
+  if (!pushConfigure) {
+    return (
+      <Carte titre={titre}>
+        <p className="font-sans text-sm text-text-secondary">Les notifications ne sont pas disponibles pour le moment.</p>
+      </Carte>
+    )
+  }
+  if (etat === null) return null
 
   async function basculer(activer) {
     setEnCours(true)
@@ -77,7 +84,7 @@ export default function Notifications() {
   }
 
   return (
-    <Carte titre="Notifications">
+    <Carte titre={titre}>
       {etat === 'a-installer' && (
         <div className="flex flex-col gap-2 font-sans text-sm text-text-secondary">
           <p>Sur iPhone, les notifications demandent d'installer Nido sur l'écran d'accueil :</p>

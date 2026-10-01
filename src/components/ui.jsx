@@ -48,10 +48,12 @@ export function Page({ titre, sousTitre, retour, action, children }) {
 
   const vers = retour?.vers
   const onClick = retour?.onClick
+  // État transmis à l'écran de retour (ex. { depuis: 'plus' } pour l'onglet)
+  const retourEtat = retour?.etat
   const revenir = useCallback(() => {
-    if (vers) navigate(vers, { state: { sens: 'retour' } })
+    if (vers) navigate(vers, { state: { ...retourEtat, sens: 'retour' } })
     else onClick?.()
-  }, [vers, onClick, navigate])
+  }, [vers, onClick, navigate, retourEtat])
   useGesteRetour(pageRef, retour ? revenir : null)
 
   const classesRetour =
@@ -91,7 +93,7 @@ export function Page({ titre, sousTitre, retour, action, children }) {
         <div className={`max-w-2xl mx-auto flex flex-col gap-6 ${entree}`}>
           {retour &&
             (retour.vers ? (
-              <Link to={retour.vers} state={{ sens: 'retour' }} className={classesRetour}>
+              <Link to={retour.vers} state={{ ...retour.etat, sens: 'retour' }} className={classesRetour}>
                 {chevron}
                 {retour.label}
               </Link>
@@ -288,5 +290,65 @@ export function Feuille({ ouverte, titre, onFermer, children }) {
         </div>
       )}
     </dialog>
+  )
+}
+
+// Liste groupée façon Réglages d'iOS : titre de groupe au-dessus, lignes
+// dans un bloc arrondi, note facultative en dessous
+export function GroupeListe({ titre, note, children }) {
+  return (
+    <section className="flex flex-col gap-1.5">
+      {titre && <h2 className="font-sans text-xs uppercase tracking-wide text-text-muted px-4">{titre}</h2>}
+      <ul className="rounded-3xl bg-bg-elevated shadow-soft overflow-hidden">{children}</ul>
+      {note && <p className="font-sans text-xs text-text-muted px-4">{note}</p>}
+    </section>
+  )
+}
+
+// Ligne de liste iOS : pastille (emoji ou contenu), titre et détail, valeur
+// à droite, chevron. vers (+ etat) pour un lien, onClick pour une action ;
+// danger : action destructrice, en rouge et centrée. Le séparateur commence
+// après la pastille.
+export function LigneListe({ vers, etat, onClick, emoji, pastille, titre, detail, valeur, danger = false }) {
+  const contenu = danger ? (
+    <span className="flex-1 min-h-12 flex items-center justify-center px-4 py-3 font-sans text-danger font-medium border-b border-separator group-last:border-b-0">
+      {titre}
+    </span>
+  ) : (
+    <>
+      {(emoji || pastille) && (
+        <span className="w-9 h-9 shrink-0 rounded-xl bg-bg-base flex items-center justify-center text-xl" aria-hidden={emoji ? 'true' : undefined}>
+          {pastille ?? emoji}
+        </span>
+      )}
+      <span className="flex-1 min-w-0 flex items-center gap-2 pr-4 py-3 border-b border-separator group-last:border-b-0">
+        <span className="flex-1 min-w-0 flex flex-col">
+          <span className="font-sans text-text-primary">{titre}</span>
+          {detail && <span className="font-sans text-sm text-text-muted truncate">{detail}</span>}
+        </span>
+        {valeur && <span className="font-sans text-text-muted shrink-0">{valeur}</span>}
+        {(vers || onClick) && (
+          <span className="font-sans text-xl text-text-muted" aria-hidden="true">
+            ›
+          </span>
+        )}
+      </span>
+    </>
+  )
+  const classes = `w-full flex items-center gap-3 min-h-14 text-left transition-colors duration-200 active:bg-bg-base ${danger ? '' : 'pl-4'}`
+  return (
+    <li className="group">
+      {vers ? (
+        <Link to={vers} state={etat} className={classes}>
+          {contenu}
+        </Link>
+      ) : onClick ? (
+        <button type="button" onClick={onClick} className={classes}>
+          {contenu}
+        </button>
+      ) : (
+        <div className={classes}>{contenu}</div>
+      )}
+    </li>
   )
 }

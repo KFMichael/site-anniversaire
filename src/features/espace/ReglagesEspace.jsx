@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../auth/contexte'
 import { useEspace } from './contexte'
@@ -7,38 +7,121 @@ import { useMembres } from './useMembres'
 import Apparence from './Apparence'
 import Emails from './Emails'
 import Notifications from './Notifications'
-import { Bouton, Carte, ChampTexte, Page } from '../../components/ui'
+import { Bouton, Carte, ChampTexte, GroupeListe, LigneListe, Page } from '../../components/ui'
+import { PageIntrouvable } from '../../components/Erreurs'
+import { lireTheme, THEMES } from '../../lib/theme'
 
+// Réglages façon Réglages d'iOS : la page principale liste les sections en
+// groupes, chacune s'ouvre sur sa propre page (/espace/<section>). La
+// provenance (Aujourd'hui ou Plus) suit la navigation pour l'onglet allumé
+// et le bouton retour.
 export default function ReglagesEspace() {
   const location = useLocation()
-  const { espace } = useEspace()
+  const { espace, espaces, profil } = useEspace()
+  const { utilisateur, deconnexion } = useAuth()
+  const { membres } = useMembres()
   const nouvelEspace = location.state?.nouvelEspace
+  const depuis = location.state?.depuis
+  const etat = { depuis }
+  const theme = THEMES.find((t) => t.id === lireTheme())?.label
+  const nom = profil?.prenom || utilisateur.email
 
   return (
     <Page
-      titre={espace.nom}
-      sousTitre="Réglages de l'espace"
-      retour={location.state?.depuis === 'plus' ? { vers: '/plus', label: 'Plus' } : { vers: '/', label: "Aujourd'hui" }}
+      titre="Réglages"
+      sousTitre={espace.nom}
+      retour={depuis === 'plus' ? { vers: '/plus', label: 'Plus' } : { vers: '/', label: "Aujourd'hui" }}
     >
       {nouvelEspace && (
         <Carte>
           <p className="font-sans text-text-secondary">
-            🎉 Espace créé ! Invite ton ou ta partenaire (ou tes amis) avec un lien
-            ci-dessous.
+            🎉 Espace créé ! Invite ton ou ta partenaire (ou tes amis) depuis « Membres ».
           </p>
         </Carte>
       )}
-      <Membres />
-      <Profil />
-      <Notifications />
-      <Emails />
-      <Apparence />
-      <Espaces />
+
+      <GroupeListe>
+        <LigneListe
+          vers="/espace/profil"
+          etat={etat}
+          pastille={
+            <span className="w-9 h-9 rounded-full bg-accent text-white font-semibold flex items-center justify-center" aria-hidden="true">
+              {nom.trim().charAt(0).toUpperCase()}
+            </span>
+          }
+          titre={profil?.prenom || 'Mon profil'}
+          detail={utilisateur.email}
+        />
+      </GroupeListe>
+
+      <GroupeListe titre="Espace">
+        <LigneListe vers="/espace/membres" etat={etat} emoji="👥" titre="Membres" detail="Inviter quelqu’un" valeur={membres.length || undefined} />
+        <LigneListe
+          vers="/espace/espaces"
+          etat={etat}
+          emoji="🏠"
+          titre="Mes espaces"
+          valeur={espaces.length > 1 ? String(espaces.length) : undefined}
+          detail={espaces.length > 1 ? undefined : 'Créer ou rejoindre un espace'}
+        />
+      </GroupeListe>
+
+      <GroupeListe titre="Préférences">
+        <LigneListe vers="/espace/notifications" etat={etat} emoji="🔔" titre="Notifications" />
+        <LigneListe vers="/espace/emails" etat={etat} emoji="✉️" titre="Emails" detail="Récap du dimanche, rappel du 1er" />
+        <LigneListe vers="/espace/apparence" etat={etat} emoji="🌗" titre="Apparence" valeur={theme} />
+      </GroupeListe>
+
+      <GroupeListe>
+        <LigneListe danger titre="Se déconnecter" onClick={deconnexion} />
+        <QuitterEspace />
+      </GroupeListe>
     </Page>
   )
 }
 
-function Membres() {
+const SECTIONS = {
+  profil: { titre: 'Mon profil', Contenu: Profil },
+  membres: { titre: 'Membres', Contenu: Membres },
+  espaces: { titre: 'Mes espaces', Contenu: Espaces },
+  notifications: { titre: 'Notifications', Contenu: Notifications },
+  emails: { titre: 'Emails', Contenu: Emails },
+  apparence: { titre: 'Apparence', Contenu: Apparence },
+}
+
+// Une section des réglages, sur sa propre page
+export function SectionReglages() {
+  const { section } = useParams()
+  const location = useLocation()
+  const s = SECTIONS[section]
+  if (!s) return <PageIntrouvable />
+  const { Contenu } = s
+  return (
+    <Page titre={s.titre} retour={{ vers: '/espace', label: 'Réglages', etat: { depuis: location.state?.depuis } }}>
+      <Contenu titre={null} />
+    </Page>
+  )
+}
+
+function QuitterEspace() {
+  const navigate = useNavigate()
+  const { utilisateur } = useAuth()
+  const { espace, recharger } = useEspace()
+
+  async function quitter() {
+    const confirme = window.confirm(`Quitter « ${espace.nom} » ? Tu n'auras plus accès à ses données.`)
+    if (!confirme) return
+    const { error } = await supabase.from('membres_espace').delete().eq('espace_id', espace.id).eq('user_id', utilisateur.id)
+    if (!error) {
+      await recharger()
+      navigate('/', { replace: true })
+    }
+  }
+
+  return <LigneListe danger titre="Quitter cet espace" onClick={quitter} />
+}
+
+function Membres({ titre = 'Membres' }) {
   const { utilisateur } = useAuth()
   const { espace } = useEspace()
   const { membres } = useMembres()
@@ -85,7 +168,7 @@ function Membres() {
   }
 
   return (
-    <Carte titre="Membres">
+    <Carte titre={titre}>
       <ul className="flex flex-col divide-y divide-separator">
         {membres.map((m) => (
           <li key={m.user_id} className="py-2.5 flex items-center justify-between gap-3">
@@ -127,8 +210,8 @@ function Membres() {
   )
 }
 
-function Profil() {
-  const { utilisateur, deconnexion } = useAuth()
+function Profil({ titre = 'Mon profil' }) {
+  const { utilisateur } = useAuth()
   const { profil, recharger } = useEspace()
   const [prenom, setPrenom] = useState(profil?.prenom ?? '')
   const [enregistre, setEnregistre] = useState(false)
@@ -146,7 +229,7 @@ function Profil() {
   }
 
   return (
-    <Carte titre="Mon profil">
+    <Carte titre={titre}>
       <form onSubmit={enregistrer} className="flex flex-col gap-3">
         <ChampTexte
           id="prenom"
@@ -166,38 +249,18 @@ function Profil() {
           <Bouton type="submit" variante="secondaire" disabled={!prenom.trim()}>
             {enregistre ? 'Enregistré ✓' : 'Enregistrer'}
           </Bouton>
-          <Bouton type="button" variante="danger" onClick={deconnexion}>
-            Se déconnecter
-          </Bouton>
         </div>
       </form>
     </Carte>
   )
 }
 
-function Espaces() {
+function Espaces({ titre = 'Mes espaces' }) {
   const navigate = useNavigate()
-  const { utilisateur } = useAuth()
-  const { espaces, espace, choisirEspace, recharger } = useEspace()
-
-  async function quitter() {
-    const confirme = window.confirm(
-      `Quitter « ${espace.nom} » ? Tu n'auras plus accès à ses données.`
-    )
-    if (!confirme) return
-    const { error } = await supabase
-      .from('membres_espace')
-      .delete()
-      .eq('espace_id', espace.id)
-      .eq('user_id', utilisateur.id)
-    if (!error) {
-      await recharger()
-      navigate('/', { replace: true })
-    }
-  }
+  const { espaces, espace, choisirEspace } = useEspace()
 
   return (
-    <Carte titre="Mes espaces">
+    <Carte titre={titre}>
       {espaces.length > 1 && (
         <ul className="flex flex-col gap-2">
           {espaces.map((e) => (
@@ -205,26 +268,20 @@ function Espaces() {
               <button
                 onClick={() => choisirEspace(e.id)}
                 aria-pressed={e.id === espace.id}
-                className={`font-sans w-full text-left px-4 py-3 rounded-2xl border transition-all duration-200 ease-spring active:scale-[0.98] ${
-                  e.id === espace.id
-                    ? 'border-accent text-text-primary font-medium'
-                    : 'border-separator text-text-secondary'
+                className={`font-sans w-full min-h-11 text-left px-4 py-3 rounded-2xl border transition-all duration-200 ease-spring active:scale-[0.98] ${
+                  e.id === espace.id ? 'border-accent text-text-primary font-medium' : 'border-separator text-text-secondary'
                 }`}
               >
                 {e.nom}
+                {e.id === espace.id && <span className="text-accent-text"> ✓</span>}
               </button>
             </li>
           ))}
         </ul>
       )}
-      <div className="flex gap-3 flex-wrap">
-        <Bouton variante="secondaire" onClick={() => navigate('/bienvenue')}>
-          Créer ou rejoindre un espace
-        </Bouton>
-        <Bouton variante="danger" onClick={quitter}>
-          Quitter cet espace
-        </Bouton>
-      </div>
+      <Bouton variante="secondaire" onClick={() => navigate('/bienvenue')}>
+        Créer ou rejoindre un espace
+      </Bouton>
     </Carte>
   )
 }

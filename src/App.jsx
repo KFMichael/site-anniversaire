@@ -9,7 +9,7 @@ import EspaceProvider from './features/espace/EspaceProvider'
 import RequiertEspace from './features/espace/RequiertEspace'
 import Bienvenue from './features/espace/Bienvenue'
 import Rejoindre from './features/espace/Rejoindre'
-import ReglagesEspace from './features/espace/ReglagesEspace'
+import ReglagesEspace, { SectionReglages } from './features/espace/ReglagesEspace'
 import TableauDeBord from './features/tableau-de-bord/TableauDeBord'
 import Structure from './components/Structure'
 import Chargement from './components/Chargement'
@@ -89,6 +89,7 @@ function App() {
                       <Route element={<Structure />}>
                         <Route index element={<TableauDeBord />} />
                         <Route path="/espace" element={<ReglagesEspace />} />
+                        <Route path="/espace/:section" element={<SectionReglages />} />
                         <Route path="/charge" element={<ChargeMentale />} />
                         <Route path="/charge/equilibre" element={<Equilibre />} />
                         <Route path="/courses" element={<Courses />} />
