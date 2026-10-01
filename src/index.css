@@ -270,3 +270,11 @@ dialog.feuille::backdrop {
 .animate-message {
   animation: message-apparait 200ms ease-out;
 }
+
+/* Carte des voyages (Leaflet) : boutons de zoom de 44 pt au toucher */
+/* (sélecteur plus précis que leaflet.css, chargé après) */
+.leaflet-container .leaflet-bar.leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+}

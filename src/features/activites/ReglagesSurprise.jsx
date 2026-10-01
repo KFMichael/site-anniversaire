@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useEspace } from '../espace/contexte'
 
@@ -58,15 +57,9 @@ export default function ReglagesSurprise() {
   }
 
   return (
-    <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <div className="max-w-lg mx-auto">
-        <Link to="/activites" className="font-sans text-sm text-text-muted hover:text-text-primary">
-          ‹ Activités
-        </Link>
-        <h1 className="font-sans text-2xl font-semibold text-text-primary mt-4 mb-2">
-          Mode surprise
-        </h1>
-        <p className="font-sans text-sm text-text-muted mb-8">
+    <section>
+      <div>
+        <p className="font-sans text-sm text-text-muted mb-6 px-1">
           Le mode surprise demande un mot de passe avant d'afficher la salutation
           associée, puis enchaîne sur le quiz d'activités.
         </p>

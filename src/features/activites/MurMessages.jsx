@@ -22,8 +22,8 @@ export default function MurMessages() {
   }, [espace.id])
 
   return (
-    <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <h2 className="font-sans text-3xl font-semibold text-center text-text-primary mb-8">
+    <section className="flex flex-col">
+      <h2 className="font-sans text-xl font-semibold text-text-primary px-1 mb-4">
         Ils pensent à toi
       </h2>
 

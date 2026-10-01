@@ -115,7 +115,7 @@ Le site anniversaire d'origine est archivé sur la branche
 - [x] Lot 3 — Cohérence : composant d'onglets unique, « + » en haut à droite, feuilles modales pour les formulaires, messages temporaires avec « Annuler », rouge pour les actions destructrices
 - [x] Lot 4 — Écrans : Menus compact (une ligne par soir, feuille pour choisir), dates courtes, rayon deviné, pastilles sur les onglets
 - [x] Réglages de l'espace en listes groupées façon Réglages iOS (une page par section)
-- [ ] Activités : même gabarit que les autres écrans (grand titre, contrôle segmenté)
+- [x] Activités : même gabarit que les autres écrans (grand titre, contrôle segmenté)
 
 ### Phase 10 — Finances ✅
 - [x] Dépenses du compte commun par poste (courses, restaurants, activités et sorties, maison, transport, santé, abonnements, vacances, cadeaux, autre), poste deviné depuis le libellé

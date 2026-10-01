@@ -255,7 +255,7 @@ export default function Quiz() {
   const enRevelation = termine && etapeResultat === 'resultat'
 
   return (
-    <section className="min-h-screen relative flex flex-col items-center justify-center px-6 py-16 bg-bg-base overflow-hidden">
+    <section className="min-h-[60vh] relative flex flex-col items-center justify-center py-6 overflow-hidden">
       {!termine && (
         <div className="max-w-md w-full flex flex-col items-center gap-8">
           <div className="w-full">

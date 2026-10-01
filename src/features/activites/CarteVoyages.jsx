@@ -6,8 +6,8 @@ export default function CarteVoyages() {
   const centreDefaut = [48.8566, 2.3522]
 
   return (
-    <section className="min-h-screen px-6 py-16 bg-bg-base">
-      <h2 className="font-sans text-3xl font-semibold text-center text-text-primary mb-8">
+    <section className="flex flex-col">
+      <h2 className="font-sans text-xl font-semibold text-text-primary px-1 mb-4">
         Nos voyages
       </h2>
       <div className="max-w-4xl mx-auto h-[500px] rounded-3xl overflow-hidden shadow-soft">
