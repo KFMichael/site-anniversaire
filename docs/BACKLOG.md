@@ -6,7 +6,7 @@ sport, mots de passe partagés, récap hebdomadaire.
 
 Le site anniversaire d'origine est archivé sur la branche
 `archive/site-anniversaire`. Ses écrans sont conservés dans la partie
-**Activités** (quiz d'idées, carnet, voyages, messages, mode surprise).
+**Activités** (quiz d'idées, carnet, voyages, mode surprise).
 
 ## Décisions prises
 

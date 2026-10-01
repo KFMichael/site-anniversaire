@@ -92,7 +92,6 @@ src/
         ├── Quiz.jsx         # Idées d'activités (5 questions)
         ├── CarnetActivites.jsx
         ├── CarteVoyages.jsx
-        ├── MurMessages.jsx
         ├── ModeSurprise.jsx # Ex-écran d'accueil animé (mot de passe → quiz)
         ├── ReglagesSurprise.jsx
         └── data/
@@ -125,7 +124,7 @@ supabase/migrations/         # Schéma SQL, à exécuter dans l'ordre
 | `/menus` | Dîners de la semaine et bibliothèque de plats |
 | `/charge` | Charge mentale du mois |
 | `/coffre` | Coffre à mots de passe |
-| `/activites/idees` · `carnet` · `voyages` · `messages` | Partie Activités |
+| `/activites/idees` · `carnet` · `voyages` | Partie Activités |
 | `/activites/surprise` | Mots de passe du mode surprise |
 | `/surprise` | Mode surprise (plein écran, enchaîne sur le quiz) |
 

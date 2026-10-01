@@ -34,7 +34,6 @@ const Activites = lazy(() => import('./features/activites/Activites'))
 const Quiz = lazy(() => import('./features/activites/Quiz'))
 const CarnetActivites = lazy(() => import('./features/activites/CarnetActivites'))
 const CarteVoyages = lazy(() => import('./features/activites/CarteVoyages'))
-const MurMessages = lazy(() => import('./features/activites/MurMessages'))
 const ModeSurprise = lazy(() => import('./features/activites/ModeSurprise'))
 const ReglagesSurprise = lazy(() => import('./features/activites/ReglagesSurprise'))
 
@@ -106,7 +105,6 @@ function App() {
                           <Route path="idees" element={<Quiz />} />
                           <Route path="carnet" element={<CarnetActivites />} />
                           <Route path="voyages" element={<CarteVoyages />} />
-                          <Route path="messages" element={<MurMessages />} />
                           <Route path="surprise" element={<ReglagesSurprise />} />
                         </Route>
                       </Route>
