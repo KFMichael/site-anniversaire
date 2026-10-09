@@ -136,6 +136,39 @@ textarea {
   font-size: max(16px, 1em);
 }
 
+/* Champs date / heure / mois : sur iPhone, Safari leur impose une largeur
+   et une hauteur natives qui ignorent w-full (le champ déborde de sa carte
+   et n'a pas la même hauteur que ses voisins). Apparence neutralisée, texte
+   aligné à gauche comme les autres champs. */
+input[type='date'],
+input[type='time'],
+input[type='month'],
+input[type='datetime-local'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 2.75rem;
+}
+input::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+
+/* Listes déroulantes : même hauteur que les champs voisins (Safari iOS
+   ignore le padding d'un select natif), chevron dessiné à la place */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238E8E93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
 /* Focus clavier cohérent avec l'identité visuelle, sur tous les éléments
    interactifs natifs (boutons, liens, champs). N'apparaît qu'en navigation
    clavier grâce à :focus-visible (pas de ring parasite au clic souris). */
