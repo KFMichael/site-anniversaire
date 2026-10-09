@@ -306,19 +306,19 @@ function Proposition({ element, onFermer, onEnvoyer, onAnnulerInvitation }) {
         Proposer « {element.texte} » : chaque membre reçoit une invitation à ajouter à son agenda.
       </p>
       <div className="grid grid-cols-2 gap-2">
-        <div className="flex flex-col gap-1.5 col-span-2 min-[430px]:col-span-1">
+        <div className="flex flex-col gap-1.5 min-w-0 col-span-2 min-[430px]:col-span-1">
           <label htmlFor={`${prefixe}-jour`} className="font-sans text-sm text-text-muted px-1">
             Jour
           </label>
           <input id={`${prefixe}-jour`} type="date" min={versIso(new Date())} value={jour} onChange={(e) => setJour(e.target.value)} required className={CLASSE_CHAMP} />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 min-w-0">
           <label htmlFor={`${prefixe}-heure`} className="font-sans text-sm text-text-muted px-1">
             Heure
           </label>
           <input id={`${prefixe}-heure`} type="time" value={heure} onChange={(e) => setHeure(e.target.value)} required className={CLASSE_CHAMP} />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5 min-w-0">
           <label htmlFor={`${prefixe}-duree`} className="font-sans text-sm text-text-muted px-1">
             Durée
           </label>
