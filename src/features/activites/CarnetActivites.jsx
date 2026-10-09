@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useEspace } from '../espace/contexte'
+import { EtatErreur } from '../../components/ui'
 import { HUMEURS, emojiHumeur } from './data/humeurs'
 
 function formatDateActivite(iso) {
@@ -29,12 +30,10 @@ export default function CarnetActivites() {
   const [photo, setPhoto] = useState(null)
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [photoOuverte, setPhotoOuverte] = useState(null)
+  const [erreurChargement, setErreurChargement] = useState(false)
 
-  useEffect(() => {
-    charger()
-  }, [])
-
-  async function charger() {
+  // Rechargé aussi quand on change d'espace
+  const charger = useCallback(async () => {
     setChargement(true)
     const { data, error } = await supabase
       .from('activites_carnet')
@@ -42,9 +41,14 @@ export default function CarnetActivites() {
       .eq('espace_id', espace.id)
       .order('date', { ascending: false })
 
+    setErreurChargement(Boolean(error))
     if (!error && data) setActivites(data)
     setChargement(false)
-  }
+  }, [espace.id])
+
+  useEffect(() => {
+    charger()
+  }, [charger])
 
   async function ajouterActivite(e) {
     e.preventDefault()
@@ -166,7 +170,9 @@ export default function CarnetActivites() {
         <p className="font-sans text-center text-text-muted text-sm">Chargement…</p>
       )}
 
-      {!chargement && activites.length === 0 && (
+      {!chargement && erreurChargement && <EtatErreur message="Le carnet n'a pas pu être chargé. Vérifie ta connexion." />}
+
+      {!chargement && !erreurChargement && activites.length === 0 && (
         <p className="font-sans text-center text-text-muted text-sm">
           Aucune activité enregistrée pour le moment. Trouve une idée dans
           l'onglet Idées !
