@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useEspace } from '../espace/contexte'
+import { EtatErreur } from '../../components/ui'
 
 // Mots de passe acceptés par le mode surprise, et la salutation affichée en
 // grand pour chacun (ex. « chaton » -> « Mon amour »). Propres à l'espace.
@@ -12,12 +13,10 @@ export default function ReglagesSurprise() {
   const [salutation, setSalutation] = useState('')
   const [envoiEnCours, setEnvoiEnCours] = useState(false)
   const [erreur, setErreur] = useState('')
+  const [erreurChargement, setErreurChargement] = useState(false)
 
-  useEffect(() => {
-    charger()
-  }, [])
-
-  async function charger() {
+  // Rechargé aussi quand on change d'espace
+  const charger = useCallback(async () => {
     setChargement(true)
     const { data, error } = await supabase
       .from('mots_passe_accueil')
@@ -25,9 +24,14 @@ export default function ReglagesSurprise() {
       .eq('espace_id', espace.id)
       .order('id', { ascending: true })
 
+    setErreurChargement(Boolean(error))
     if (!error && data) setLignes(data)
     setChargement(false)
-  }
+  }, [espace.id])
+
+  useEffect(() => {
+    charger()
+  }, [charger])
 
   async function ajouter(e) {
     e.preventDefault()
@@ -53,7 +57,8 @@ export default function ReglagesSurprise() {
 
   async function supprimer(id) {
     const { error } = await supabase.from('mots_passe_accueil').delete().eq('id', id)
-    if (!error) charger()
+    if (error) setErreur("Le mot de passe n'a pas pu être supprimé.")
+    else charger()
   }
 
   return (
@@ -96,7 +101,9 @@ export default function ReglagesSurprise() {
           <p className="font-sans text-text-muted text-sm">Chargement…</p>
         )}
 
-        {!chargement && lignes.length === 0 && (
+        {!chargement && erreurChargement && <EtatErreur message="Les mots de passe n'ont pas pu être chargés. Vérifie ta connexion." />}
+
+        {!chargement && !erreurChargement && lignes.length === 0 && (
           <p className="font-sans text-text-muted text-sm">
             Aucun mot de passe enregistré.
           </p>
@@ -115,7 +122,8 @@ export default function ReglagesSurprise() {
               </div>
               <button
                 onClick={() => supprimer(l.id)}
-                className="font-sans text-xs text-text-muted hover:text-text-secondary underline transition-colors duration-200 ease-spring active:scale-95 shrink-0"
+                aria-label={`Supprimer le mot de passe ${l.mot_de_passe}`}
+                className="cible-44 font-sans text-sm text-danger underline transition-colors duration-200 ease-spring active:scale-95 shrink-0"
               >
                 Supprimer
               </button>
