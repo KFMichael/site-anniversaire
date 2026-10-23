@@ -10,8 +10,8 @@
 //   SUPABASE_SERVICE_ROLE_KEY  clé service_role (Supabase > Settings > API)
 //   RESEND_API_KEY             clé d'API Resend
 //   CRON_SECRET                chaîne aléatoire, protège la tâche planifiée
-//   RECAP_EXPEDITEUR           ex. « Nido <recap@nido.4sept.com> »
-//   APP_URL                    ex. « https://nido.4sept.com »
+//   RECAP_EXPEDITEUR           ex. « Nido <recap@nido.fmichael.cloud> »
+//   APP_URL                    ex. « https://nido.fmichael.cloud »
 //   RECAP_FUSEAU               fuseau du foyer (défaut Europe/Paris)
 //   VITE_VAPID_CLE_PUBLIQUE    notifications sur le téléphone (facultatif,
 //   VAPID_CLE_PRIVEE           voir docs/NOTIFICATIONS.md)

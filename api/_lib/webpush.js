@@ -18,5 +18,5 @@ export function configurationPush() {
   const clePublique = process.env.VITE_VAPID_CLE_PUBLIQUE
   const clePrivee = process.env.VAPID_CLE_PRIVEE
   if (!clePublique || !clePrivee) return null
-  return creerEnvoiPush({ clePublique, clePrivee, sujet: process.env.APP_URL || 'mailto:recap@nido.4sept.com' })
+  return creerEnvoiPush({ clePublique, clePrivee, sujet: process.env.APP_URL || 'https://nido.fmichael.cloud' })
 }

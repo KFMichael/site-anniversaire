@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const echeanceId = req.body?.echeance_id
   if (typeof echeanceId !== 'string') return res.status(400).json({ erreur: 'echeance_id manquant' })
 
-  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.4sept.com'}`
+  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.fmichael.cloud'}`
   try {
     const resultat = await envoyerRappelEcheance({
       admin,

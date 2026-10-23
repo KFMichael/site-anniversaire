@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { fauxSupabase } from '../../test/faux-supabase.js'
 import { envoyerInvitationsSport, libelleSeance, seancesAEnvoyer } from './sport.js'
 
-const CONFIG = { fuseau: 'Europe/Paris', lienApp: 'https://nido.4sept.com', domaine: 'nido.4sept.com' }
+const CONFIG = { fuseau: 'Europe/Paris', lienApp: 'https://nido.fmichael.cloud', domaine: 'nido.4sept.com' }
 const MAINTENANT = new Date('2026-09-26T10:00:00Z')
 
 function donnees() {

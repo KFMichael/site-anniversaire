@@ -6,7 +6,7 @@ import { executerAction } from './actions.js'
 import { cleActions, lireJeton } from './jetons.js'
 
 const CLE = cleActions('secret-de-test')
-const CONFIG = { nomApp: 'Nido', lienApp: 'https://nido.4sept.com', fuseau: 'Europe/Paris', cleActions: CLE }
+const CONFIG = { nomApp: 'Nido', lienApp: 'https://nido.fmichael.cloud', fuseau: 'Europe/Paris', cleActions: CLE }
 const DIMANCHE = new Date('2026-09-27T17:00:00Z')
 
 function donnees() {

@@ -36,7 +36,7 @@ function jeuDeDonnees() {
   }
 }
 
-const CONFIG = { nomApp: 'Nido', lienApp: 'https://nido.4sept.com', fuseau: 'Europe/Paris' }
+const CONFIG = { nomApp: 'Nido', lienApp: 'https://nido.fmichael.cloud', fuseau: 'Europe/Paris' }
 const DIMANCHE = new Date('2026-09-27T17:00:00Z')
 
 test('dimanche : un récap par membre, avec les données de la semaine à venir', async () => {
@@ -156,7 +156,7 @@ test('récap : séances de sport de la semaine, jour local du foyer', async () =
   const vide = []
   await executerRecapQuotidien({ admin: fauxSupabase(jeuDeDonnees()), envoyer: async (e) => vide.push(e), maintenant: DIMANCHE, config: CONFIG })
   assert.match(vide[0].texte, /Sport \(0 séance\) :\nAucune séance prévue/)
-  assert.match(vide[0].html, /href="https:\/\/nido.4sept.com\/sport"[^>]*>Planifier</)
+  assert.match(vide[0].html, /href="https:\/\/nido.fmichael.cloud\/sport"[^>]*>Planifier</)
 })
 
 test('récap : échéances en retard et dans les 30 jours, les faites et lointaines exclues', async () => {

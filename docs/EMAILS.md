@@ -1,31 +1,47 @@
-# Domaine et emails — nido.4sept.com
+# Domaine et emails — nido.fmichael.cloud
 
 | Usage | Adresse |
 |---|---|
-| Application | `https://nido.4sept.com` |
-| Récap hebdo / rappel mensuel | `Nido <recap@nido.4sept.com>` |
-| Liens magiques de connexion | `Nido <connexion@nido.4sept.com>` |
+| Application | `https://nido.fmichael.cloud` |
+| Récap hebdo / rappel mensuel | `Nido <recap@nido.fmichael.cloud>` |
+| Liens magiques de connexion | `Nido <connexion@nido.fmichael.cloud>` |
 
-Tout passe par le sous-domaine `nido` : le reste de `4sept.com` n'est pas
+Tout passe par le sous-domaine `nido` : le reste de `fmichael.cloud` n'est pas
 touché. Les enregistrements DNS de Resend (`send.nido`, `resend._domainkey.nido`)
 ne gênent pas le CNAME de l'application (`nido`).
 
-## 1. L'application sur nido.4sept.com (Vercel)
+## 1. L'application sur nido.fmichael.cloud (Vercel)
 
-1. Vercel > projet > **Settings > Domains** > ajouter `nido.4sept.com`.
-2. Chez le registrar de `4sept.com`, créer l'enregistrement indiqué par
+1. Vercel > projet > **Settings > Domains** > ajouter `nido.fmichael.cloud`.
+2. Chez le registrar de `fmichael.cloud`, créer l'enregistrement indiqué par
    Vercel (en général `CNAME nido → cname.vercel-dns.com`).
 3. Supabase > **Authentication > URL Configuration** :
-   - *Site URL* : `https://nido.4sept.com`
-   - *Redirect URLs* : ajouter `https://nido.4sept.com/**`
+   - *Site URL* : `https://nido.fmichael.cloud`
+   - *Redirect URLs* : ajouter `https://nido.fmichael.cloud/**`
 
 > Face ID (coffre) : les passkeys sont liées au domaine. Activer Face ID
-> sur `nido.4sept.com`, une fois le domaine en place.
+> sur `nido.fmichael.cloud`, une fois le domaine en place.
+
+### Ancien domaine nido.4sept.com (octobre 2026)
+
+L'appli est passée de `nido.4sept.com` à `nido.fmichael.cloud`.
+
+- Vercel > **Settings > Domains** : garder `nido.4sept.com`, en
+  *Redirect to* `nido.fmichael.cloud` (308), pour que les anciens liens
+  (emails déjà reçus, favoris) mènent toujours à l'appli.
+- Tout ce que le navigateur garde est propre à chaque domaine : sur chaque
+  appareil, se reconnecter sur le nouveau domaine, **réinstaller l'icône**
+  sur l'écran d'accueil (supprimer l'ancienne), réactiver **Face ID** dans
+  le coffre (déverrouillage par le mot de passe maître d'abord) et les
+  **notifications** (Réglages › Notifications).
+- Les invitations d'agenda déjà envoyées depuis l'ancien domaine ne sont
+  plus mises à jour (identifiants différents) : les supprimer à la main de
+  l'agenda si besoin.
 
 ## 2. Resend (envoi des emails)
 
 1. Créer un compte sur [resend.com](https://resend.com).
-2. **Domains > Add domain** : `nido.4sept.com`, région au choix (UE).
+2. **Domains > Add domain** : `nido.fmichael.cloud`, région au choix (UE).
 3. Ajouter chez le registrar les enregistrements affichés par Resend
    (MX et TXT sur `send.nido`, TXT DKIM sur `resend._domainkey.nido`),
    puis **Verify**. Compter de quelques minutes à quelques heures.
@@ -41,8 +57,8 @@ Vercel > projet > **Settings > Environment Variables** (environnement
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase > Project Settings > API > clé `service_role` (secrète, jamais dans le code) |
 | `RESEND_API_KEY` | la clé créée à l'étape 2 |
 | `CRON_SECRET` | une longue chaîne aléatoire (ex. générée par un gestionnaire de mots de passe) |
-| `RECAP_EXPEDITEUR` | `Nido <recap@nido.4sept.com>` |
-| `APP_URL` | `https://nido.4sept.com` |
+| `RECAP_EXPEDITEUR` | `Nido <recap@nido.fmichael.cloud>` |
+| `APP_URL` | `https://nido.fmichael.cloud` |
 | `RECAP_FUSEAU` | `Europe/Paris` (ou `Africa/Abidjan`…) |
 
 La tâche planifiée (`vercel.json`) appelle `/api/recap` tous les jours à
@@ -85,7 +101,7 @@ L'envoi intégré à Supabase est limité à quelques emails par heure. Supabase
 
 | Champ | Valeur |
 |---|---|
-| Sender email | `connexion@nido.4sept.com` |
+| Sender email | `connexion@nido.fmichael.cloud` |
 | Sender name | `Nido` |
 | Host | `smtp.resend.com` |
 | Port | `465` |
