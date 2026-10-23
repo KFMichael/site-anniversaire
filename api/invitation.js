@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ erreur: 'Requête incomplète' })
   }
 
-  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.4sept.com'}`
+  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.fmichael.cloud'}`
   try {
     const resultat = await envoyerInvitationElement({
       admin,

@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   const espaceId = req.body?.espace_id
   if (typeof espaceId !== 'string') return res.status(400).json({ erreur: 'espace_id manquant' })
 
-  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.4sept.com'}`
+  const lienApp = process.env.APP_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL ?? 'nido.fmichael.cloud'}`
   try {
     const resultat = await envoyerInvitationsSport({
       admin,

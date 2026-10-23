@@ -4,7 +4,7 @@ import { fauxSupabase } from '../../test/faux-supabase.js'
 import { envoyerRappelEcheance } from './echeances.js'
 import { executerPushQuotidien } from './notifications.js'
 
-const CONFIG = { fuseau: 'Europe/Paris', lienApp: 'https://nido.4sept.com' }
+const CONFIG = { fuseau: 'Europe/Paris', lienApp: 'https://nido.fmichael.cloud' }
 const MAINTENANT = new Date('2026-09-29T17:00:00Z') // mardi 29 septembre
 
 function donnees() {

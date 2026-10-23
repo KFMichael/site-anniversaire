@@ -51,9 +51,9 @@ membres de l'espace.
 ## 2. Authentification
 
 **Authentication > URL Configuration** (indispensable)
-- *Site URL* : `https://nido.4sept.com` (par défaut `http://localhost:3000` :
+- *Site URL* : `https://nido.fmichael.cloud` (par défaut `http://localhost:3000` :
   les liens des emails de connexion renverraient vers localhost)
-- *Redirect URLs* : ajouter `https://nido.4sept.com/**`,
+- *Redirect URLs* : ajouter `https://nido.fmichael.cloud/**`,
   `https://*-km-d526.vercel.app/**` (aperçus Vercel) et
   `http://localhost:5173/**`. Le lien magique ramène sur la page demandée
   (ex. `/rejoindre/<code>`) ; une adresse absente de cette liste est

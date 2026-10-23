@@ -53,7 +53,7 @@ npm test        # tests unitaires (node --test)
 ```
 
 Configuration de Supabase (migrations, lien magique, Google) :
-[`docs/SUPABASE.md`](docs/SUPABASE.md). Domaine `nido.4sept.com` et emails
+[`docs/SUPABASE.md`](docs/SUPABASE.md). Domaine `nido.fmichael.cloud` et emails
 (Resend, récap hebdo) : [`docs/EMAILS.md`](docs/EMAILS.md). Notifications sur le
 téléphone : [`docs/NOTIFICATIONS.md`](docs/NOTIFICATIONS.md).
 
